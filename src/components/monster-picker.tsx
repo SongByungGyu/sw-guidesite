@@ -21,6 +21,13 @@ const elements: Array<{ value: "ALL" | Element; label: string }> = [
   { value: "DARK", label: "어둠" },
 ];
 
+const grades: Array<{ value: "ALL" | 3 | 4 | 5; label: string }> = [
+  { value: "ALL", label: "등급 전체" },
+  { value: 3, label: "태생 3성" },
+  { value: 4, label: "태생 4성" },
+  { value: 5, label: "태생 5성" },
+];
+
 export function MonsterPicker({
   open,
   initialSelection,
@@ -31,6 +38,7 @@ export function MonsterPicker({
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
   const [element, setElement] = useState<"ALL" | Element>("ALL");
+  const [grade, setGrade] = useState<"ALL" | 3 | 4 | 5>("ALL");
   const [selected, setSelected] = useState<string[]>(initialSelection);
 
   useEffect(() => {
@@ -46,7 +54,8 @@ export function MonsterPicker({
   const filtered = monsters.filter((monster) => {
     const matchesQuery = monster.displayName.toLowerCase().includes(deferredQuery);
     const matchesElement = element === "ALL" || monster.element === element;
-    return matchesQuery && matchesElement;
+    const matchesGrade = grade === "ALL" || monster.grade === grade;
+    return matchesQuery && matchesElement && matchesGrade;
   });
 
   function toggleMonster(id: string) {
@@ -107,6 +116,19 @@ export function MonsterPicker({
               </button>
             ))}
           </div>
+          <div className="grade-filters" aria-label="태생 등급 필터">
+            {grades.map((item) => (
+              <button
+                aria-pressed={grade === item.value}
+                className="filter-chip"
+                key={item.value}
+                onClick={() => setGrade(item.value)}
+                type="button"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="monster-grid" aria-live="polite">
@@ -147,4 +169,3 @@ export function MonsterPicker({
     </dialog>
   );
 }
-

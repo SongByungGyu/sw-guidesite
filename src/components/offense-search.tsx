@@ -1,41 +1,41 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { DeckCard } from "@/components/deck-card";
 import { Icon } from "@/components/icon";
 import { MonsterPicker } from "@/components/monster-picker";
 import { MonsterPortrait } from "@/components/monster-portrait";
+import { searchDecks, type DeckSort } from "@/lib/deck-search";
 import { decks, defaultDefenseIds, getMonster } from "@/lib/mock-data";
 
-type Sort = "recommended" | "rate" | "uses" | "latest";
-
-const sortOptions: Array<{ value: Sort; label: string }> = [
+const sortOptions: Array<{ value: DeckSort; label: string }> = [
   { value: "recommended", label: "추천순" },
   { value: "rate", label: "승률순" },
   { value: "uses", label: "사용횟수순" },
   { value: "latest", label: "최신순" },
 ];
 
+const authors = Array.from(new Set(decks.map((deck) => deck.author)));
+
 export function OffenseSearch() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [defenseIds, setDefenseIds] = useState<string[]>([...defaultDefenseIds]);
-  const [sort, setSort] = useState<Sort>("recommended");
+  const [sort, setSort] = useState<DeckSort>("recommended");
   const [officialOnly, setOfficialOnly] = useState(false);
+  const [author, setAuthor] = useState("all");
 
   const defense = defenseIds.map(getMonster);
-  const visibleDecks = useMemo(() => {
-    const filtered = officialOnly ? decks.filter((deck) => deck.isOfficial) : [...decks];
-    return filtered.sort((a, b) => {
-      if (sort === "rate") return b.wins / b.battles - a.wins / a.battles;
-      if (sort === "uses") return b.battles - a.battles;
-      if (sort === "recommended") return Number(b.isOfficial) - Number(a.isOfficial);
-      return a.recent.localeCompare(b.recent);
-    });
-  }, [officialOnly, sort]);
+  const results = searchDecks(decks, defenseIds, { sort, officialOnly, author });
 
-  const exact = visibleDecks.filter((deck) => deck.match === "exact");
-  const partial = visibleDecks.filter((deck) => deck.match === "partial");
+  const exact = results.filter((result) => result.match === "exact").map((result) => result.deck);
+  const partial = results.filter((result) => result.match === "partial").map((result) => result.deck);
+  const filtersActive = officialOnly || author !== "all";
+
+  function resetFilters() {
+    setOfficialOnly(false);
+    setAuthor("all");
+  }
 
   return (
     <AppShell>
@@ -81,11 +81,21 @@ export function OffenseSearch() {
             </button>
           ))}
         </div>
-        <label className="check-filter">
-          <input checked={officialOnly} onChange={(event) => setOfficialOnly(event.target.checked)} type="checkbox" />
-          <span>길드 공식만</span>
-          <small>P1</small>
-        </label>
+        <div className="result-filters">
+          <label className="select-filter">
+            <span>작성자</span>
+            <select value={author} onChange={(event) => setAuthor(event.target.value)}>
+              <option value="all">전체</option>
+              {authors.map((name) => <option key={name} value={name}>{name}</option>)}
+            </select>
+          </label>
+          <label className="check-filter">
+            <input checked={officialOnly} onChange={(event) => setOfficialOnly(event.target.checked)} type="checkbox" />
+            <span>길드 공식만</span>
+            <small>P1</small>
+          </label>
+          {filtersActive ? <button className="text-button" type="button" onClick={resetFilters}>필터 초기화</button> : null}
+        </div>
       </section>
 
       <section className="result-section" aria-labelledby="exact-title">
@@ -93,7 +103,7 @@ export function OffenseSearch() {
           <div><span className="status-dot success" /><div><h2 id="exact-title">정확히 일치하는 공덱</h2><p>선택한 방어덱 3마리와 완전히 같은 결과입니다.</p></div></div>
           <strong>{exact.length}개</strong>
         </header>
-        {exact.length ? <div className="deck-list">{exact.map((deck) => <DeckCard deck={deck} key={deck.id} />)}</div> : <EmptyResult />}
+        {exact.length ? <div className="deck-list">{exact.map((deck) => <DeckCard deck={deck} key={deck.id} />)}</div> : <EmptyResult filtersActive={filtersActive} onReset={resetFilters} />}
       </section>
 
       <section className="result-section partial" aria-labelledby="partial-title">
@@ -101,7 +111,7 @@ export function OffenseSearch() {
           <div><span className="status-dot partial" /><div><h2 id="partial-title">2마리 이상 부분 일치</h2><p>정확한 결과가 부족할 때 참고할 수 있는 유사 방어덱입니다.</p></div></div>
           <strong>{partial.length}개</strong>
         </header>
-        {partial.length ? <div className="deck-list">{partial.map((deck) => <DeckCard deck={deck} key={deck.id} />)}</div> : <EmptyResult />}
+        {partial.length ? <div className="deck-list">{partial.map((deck) => <DeckCard deck={deck} key={deck.id} />)}</div> : <EmptyResult filtersActive={filtersActive} onReset={resetFilters} />}
       </section>
 
       <button className="mobile-fab" type="button" aria-label="새 공덱 등록">
@@ -118,12 +128,12 @@ export function OffenseSearch() {
   );
 }
 
-function EmptyResult() {
+function EmptyResult({ filtersActive, onReset }: { filtersActive: boolean; onReset: () => void }) {
   return (
     <div className="empty-result">
       <Icon name="search" />
       <div><strong>조건에 맞는 공덱이 없습니다.</strong><p>필터를 해제하거나 첫 공덱을 등록해 보세요.</p></div>
+      {filtersActive ? <button className="button secondary" type="button" onClick={onReset}>필터 초기화</button> : null}
     </div>
   );
 }
-
