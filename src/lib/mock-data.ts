@@ -1,27 +1,5 @@
-export type Element = "FIRE" | "WATER" | "WIND" | "LIGHT" | "DARK";
-
-export type Monster = {
-  id: string;
-  displayName: string;
-  element: Element;
-  grade: 3 | 4 | 5;
-  initials: string;
-};
-
-export const monsters: Monster[] = [
-  { id: "water-inugami", displayName: "물 이누가미", element: "WATER", grade: 3, initials: "이" },
-  { id: "fire-oracle", displayName: "불 오라클", element: "FIRE", grade: 5, initials: "오" },
-  { id: "wind-griffon", displayName: "바람 그리폰", element: "WIND", grade: 3, initials: "그" },
-  { id: "light-fairy", displayName: "빛 페어리", element: "LIGHT", grade: 3, initials: "페" },
-  { id: "dark-werewolf", displayName: "어둠 늑대인간", element: "DARK", grade: 3, initials: "늑" },
-  { id: "fire-bounty", displayName: "불 바운티헌터", element: "FIRE", grade: 3, initials: "바" },
-  { id: "water-paladin", displayName: "물 팔라딘", element: "WATER", grade: 5, initials: "팔" },
-  { id: "wind-panda", displayName: "바람 웅묘무사", element: "WIND", grade: 5, initials: "웅" },
-  { id: "light-cowgirl", displayName: "빛 카우걸", element: "LIGHT", grade: 3, initials: "카" },
-  { id: "dark-vampire", displayName: "어둠 뱀파이어", element: "DARK", grade: 4, initials: "뱀" },
-  { id: "fire-sylph", displayName: "불 실프", element: "FIRE", grade: 4, initials: "실" },
-  { id: "water-pierret", displayName: "물 피에레트", element: "WATER", grade: 4, initials: "피" },
-];
+export { getMonster, monsters } from "@/lib/monster-data";
+export type { Element, Monster } from "@/lib/monster-data";
 
 export type Deck = {
   id: string;
@@ -43,8 +21,8 @@ export const decks: Deck[] = [
     id: "safe-control",
     title: "안정형 선턴 제어 공덱",
     summary: "속도 리더와 해제 이후 단일 대상을 집중하는 조합입니다.",
-    defenseIds: ["water-inugami", "fire-oracle", "wind-griffon"],
-    offenseIds: ["water-paladin", "fire-sylph", "wind-panda"],
+    defenseIds: ["2013", "1105", "3012"],
+    offenseIds: ["2120", "1303", "3118"],
     leaderSlot: 1,
     wins: 12,
     battles: 15,
@@ -57,8 +35,8 @@ export const decks: Deck[] = [
     id: "turn-two",
     title: "후턴 안정 공덱",
     summary: "첫 공격을 버틴 뒤 회복과 반격으로 흐름을 되찾습니다.",
-    defenseIds: ["wind-griffon", "water-inugami", "fire-oracle"],
-    offenseIds: ["dark-vampire", "water-pierret", "light-cowgirl"],
+    defenseIds: ["3012", "2013", "1105"],
+    offenseIds: ["5106", "2308", "4519"],
     leaderSlot: 0,
     wins: 8,
     battles: 11,
@@ -71,8 +49,8 @@ export const decks: Deck[] = [
     id: "fast-focus",
     title: "빠른 단일 점사 공덱",
     summary: "방어덱 두 자리가 같은 경우 우선 검토할 수 있는 부분 일치 조합입니다.",
-    defenseIds: ["water-inugami", "wind-griffon", "light-fairy"],
-    offenseIds: ["fire-bounty", "wind-griffon", "light-fairy"],
+    defenseIds: ["2013", "3012", "4017"],
+    offenseIds: ["1509", "3012", "4017"],
     leaderSlot: 1,
     wins: 5,
     battles: 8,
@@ -84,13 +62,7 @@ export const decks: Deck[] = [
 ];
 
 export const defaultDefenseIds = [
-  "water-inugami",
-  "fire-oracle",
-  "wind-griffon",
+  "2013",
+  "1105",
+  "3012",
 ] as const;
-
-export function getMonster(id: string) {
-  const monster = monsters.find((item) => item.id === id);
-  if (!monster) throw new Error(`Monster not found: ${id}`);
-  return monster;
-}

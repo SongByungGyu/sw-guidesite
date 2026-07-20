@@ -2,17 +2,18 @@ import { Icon } from "@/components/icon";
 
 type AppShellProps = {
   children: React.ReactNode;
+  activeSection?: "offense" | "monsters";
 };
 
 const navItems = [
-  { label: "길드 홈", icon: "home" as const, href: "#" },
-  { label: "공덱 검색", icon: "swords" as const, href: "#", active: true },
-  { label: "방덱 관리", icon: "shield" as const, href: "#" },
-  { label: "몬스터 도감", icon: "book" as const, href: "#" },
-  { label: "길드 관리", icon: "users" as const, href: "/requests" },
+  { label: "길드 홈", icon: "home" as const, href: "#", section: undefined },
+  { label: "공덱 검색", icon: "swords" as const, href: "/", section: "offense" },
+  { label: "방덱 관리", icon: "shield" as const, href: "#", section: undefined },
+  { label: "몬스터 도감", icon: "book" as const, href: "/monsters", section: "monsters" },
+  { label: "길드 관리", icon: "users" as const, href: "/requests", section: undefined },
 ];
 
-export function AppShell({ children }: AppShellProps) {
+export function AppShell({ children, activeSection = "offense" }: AppShellProps) {
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -22,7 +23,7 @@ export function AppShell({ children }: AppShellProps) {
         </div>
         <nav aria-label="주 메뉴" className="sidebar-nav">
           {navItems.map((item) => (
-            <a className={item.active ? "active" : ""} href={item.href} key={item.label}>
+            <a className={item.section === activeSection ? "active" : ""} href={item.href} key={item.label}>
               <Icon name={item.icon} />
               {item.label}
             </a>
@@ -30,7 +31,7 @@ export function AppShell({ children }: AppShellProps) {
         </nav>
         <div className="sidebar-note">
           <Icon name="sparkles" size={16} />
-          <span>실제 게임 이미지는 권리 확인 후 연결됩니다.</span>
+          <span>몬스터 데이터: ryhlab 기준</span>
         </div>
       </aside>
 
@@ -52,7 +53,7 @@ export function AppShell({ children }: AppShellProps) {
         <main className="main-content">{children}</main>
         <nav className="mobile-tabs" aria-label="모바일 주 메뉴">
           {navItems.slice(0, 4).map((item) => (
-            <a className={item.active ? "active" : ""} href={item.href} key={item.label}>
+            <a className={item.section === activeSection ? "active" : ""} href={item.href} key={item.label}>
               <Icon name={item.icon} size={19} />
               <span>{item.label.replace(" 검색", "").replace(" 관리", "")}</span>
             </a>

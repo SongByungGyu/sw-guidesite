@@ -22,6 +22,13 @@ npm run build
 
 로그인 대신 `닉네임 + 길드 코드`로 접근을 요청하고 관리자가 `/requests`에서 승인하는 브라우저 기반 프로토타입이 포함되어 있습니다. 현재 승인은 `localStorage`에만 저장되므로 운영 전에는 서버 DB, 서명된 세션 쿠키, OFFICER/OWNER 권한 검사와 감사 로그를 연결해야 합니다.
 
+## 몬스터 데이터
+
+- `https://www.ryhlab.com/speed`의 한국어 약칭·속성·태생 등급·몬스터 PK 체계를 기준으로 845마리를 가져옵니다.
+- 이미지는 `public/monsters`에 로컬 보관해 원본 사이트 장애가 서비스 화면에 영향을 주지 않게 했습니다.
+- `npm run data:monsters`로 최신 목록과 이미지를 다시 동기화할 수 있습니다.
+- 몬스터 및 게임 이미지의 권리는 Com2uS에 있으며, 서비스 공개 전 사용 범위와 표기 정책을 최종 확인해야 합니다.
+
 Windows에서 Next.js 하위 프로세스 실행이 제한되는 환경이라면 WSL에서 프로젝트를 실행하거나 빌드하세요. 이 프로젝트는 WSL2의 Node.js 22 환경에서 lint, typecheck, unit test, production build를 검증했습니다.
 
 색상, 간격, 반응형 규칙과 컴포넌트 상태는 [DESIGN_GUIDE.md](./DESIGN_GUIDE.md)를 참고하세요.

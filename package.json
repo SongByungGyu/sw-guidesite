@@ -12,6 +12,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "data:monsters": "node scripts/import-ryhlab-monsters.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "next typegen && tsc --noEmit",

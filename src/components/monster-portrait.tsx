@@ -1,5 +1,9 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
 import { Icon } from "@/components/icon";
-import type { Monster } from "@/lib/mock-data";
+import type { Monster } from "@/lib/monster-data";
 
 type MonsterPortraitProps = {
   monster: Monster;
@@ -16,6 +20,9 @@ export function MonsterPortrait({
   leader = false,
   compact = false,
 }: MonsterPortraitProps) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const fallback = monster.displayName.slice(-2);
+
   return (
     <div className={`monster-portrait${compact ? " is-compact" : ""}`}>
       <div
@@ -23,10 +30,22 @@ export function MonsterPortrait({
           selected ? " is-selected" : ""
         }`}
         role="img"
-        aria-label={`${monster.displayName} 최종 각성 이미지 placeholder`}
+        aria-label={`${monster.displayName} 몬스터 이미지`}
       >
-        <span>{monster.initials}</span>
-        <span className="placeholder-mark">PLACEHOLDER</span>
+        {imageFailed ? (
+          <span className="portrait-fallback">{fallback}</span>
+        ) : (
+          <Image
+            alt=""
+            className="monster-image"
+            height={120}
+            loading="lazy"
+            onError={() => setImageFailed(true)}
+            src={monster.imageUrl}
+            unoptimized
+            width={120}
+          />
+        )}
       </div>
       {selectionOrder ? <span className="selection-order">{selectionOrder}</span> : null}
       {leader ? (
@@ -41,4 +60,3 @@ export function MonsterPortrait({
     </div>
   );
 }
-

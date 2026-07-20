@@ -8,12 +8,12 @@ describe("deck search", () => {
   });
 
   it("중복 ID를 한 번만 세고 두 마리 이상을 부분 일치로 분류한다", () => {
-    expect(countDefenseOverlap(defaultDefenseIds, ["water-inugami", "water-inugami", "wind-griffon"])).toBe(2);
-    expect(getDeckMatch(defaultDefenseIds, ["water-inugami", "wind-griffon", "light-fairy"])).toBe("partial");
+    expect(countDefenseOverlap(defaultDefenseIds, ["2013", "2013", "3012"])).toBe(2);
+    expect(getDeckMatch(defaultDefenseIds, ["2013", "3012", "4017"])).toBe("partial");
   });
 
   it("한 마리 이하가 같으면 검색 결과에서 제외한다", () => {
-    expect(getDeckMatch(defaultDefenseIds, ["light-fairy", "dark-werewolf", "fire-bounty"])).toBe("none");
+    expect(getDeckMatch(defaultDefenseIds, ["4017", "5007", "1509"])).toBe("none");
   });
 
   it("공식 추천과 작성자 필터를 함께 적용한다", () => {

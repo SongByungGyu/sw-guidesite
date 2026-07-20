@@ -1,5 +1,5 @@
 import { MonsterPortrait } from "@/components/monster-portrait";
-import type { Monster } from "@/lib/mock-data";
+import type { Monster } from "@/lib/monster-data";
 
 type TeamCompositionProps = {
   monsters: Monster[];
@@ -27,4 +27,3 @@ export function TeamComposition({
     </div>
   );
 }
-

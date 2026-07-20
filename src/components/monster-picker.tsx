@@ -3,7 +3,7 @@
 import { useDeferredValue, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/icon";
 import { MonsterPortrait } from "@/components/monster-portrait";
-import { monsters, type Element } from "@/lib/mock-data";
+import { monsters, type Element } from "@/lib/monster-data";
 
 type MonsterPickerProps = {
   open: boolean;
@@ -21,8 +21,9 @@ const elements: Array<{ value: "ALL" | Element; label: string }> = [
   { value: "DARK", label: "어둠" },
 ];
 
-const grades: Array<{ value: "ALL" | 3 | 4 | 5; label: string }> = [
+const grades: Array<{ value: "ALL" | 2 | 3 | 4 | 5; label: string }> = [
   { value: "ALL", label: "등급 전체" },
+  { value: 2, label: "태생 2성" },
   { value: 3, label: "태생 3성" },
   { value: 4, label: "태생 4성" },
   { value: 5, label: "태생 5성" },
@@ -38,7 +39,7 @@ export function MonsterPicker({
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
   const [element, setElement] = useState<"ALL" | Element>("ALL");
-  const [grade, setGrade] = useState<"ALL" | 3 | 4 | 5>("ALL");
+  const [grade, setGrade] = useState<"ALL" | 2 | 3 | 4 | 5>("ALL");
   const [selected, setSelected] = useState<string[]>(initialSelection);
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export function MonsterPicker({
   }, [initialSelection, open]);
 
   const filtered = monsters.filter((monster) => {
-    const matchesQuery = monster.displayName.toLowerCase().includes(deferredQuery);
+    const matchesQuery = `${monster.displayName} ${monster.englishName}`.toLowerCase().includes(deferredQuery);
     const matchesElement = element === "ALL" || monster.element === element;
     const matchesGrade = grade === "ALL" || monster.grade === grade;
     return matchesQuery && matchesElement && matchesGrade;
@@ -129,6 +130,7 @@ export function MonsterPicker({
               </button>
             ))}
           </div>
+          <p className="picker-count">{filtered.length.toLocaleString("ko-KR")} / {monsters.length.toLocaleString("ko-KR")}마리</p>
         </div>
 
         <div className="monster-grid" aria-live="polite">
@@ -153,6 +155,13 @@ export function MonsterPicker({
               </button>
             );
           })}
+          {!filtered.length ? (
+            <div className="monster-empty">
+              <Icon name="search" />
+              <strong>검색 결과가 없습니다.</strong>
+              <span>한국어 약칭이나 영문 각성명으로 다시 검색해 주세요.</span>
+            </div>
+          ) : null}
         </div>
 
         <footer className="dialog-footer">

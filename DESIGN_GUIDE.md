@@ -46,6 +46,7 @@
 - `AppShell`: 길드 전환, 주요 탐색, 알림, 프로필, 모바일 하단 탭
 - `MonsterPortrait`: 속성 링, 등급, 선택 순서, 리더 표시를 조합
 - `MonsterPicker`: 이름 검색, 속성 필터, 정확히 3마리 선택, 확인/취소
+- `MonsterArchive`: ryhlab 기준 845마리 도감, 한국어 약칭·영문 각성명 검색, 속성·태생 등급 필터
 - `DeckCard`: 방어덱과 공격덱 비교, 승률·사용 횟수·최근 사용, 공식 공덱 상태
 - `AccessGate`: 닉네임·길드 코드 접근 요청, 승인 대기, 반려 후 재요청 상태
 - `RequestInbox`: OFFICER/OWNER용 요청 검토, 승인·반려, 최근 처리 내역
