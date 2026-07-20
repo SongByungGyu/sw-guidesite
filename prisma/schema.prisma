@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MemberRole {
+  OWNER
+  OFFICER
+  MEMBER
+}
+
+enum AccessRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Guild {
+  id             String          @id @default(cuid())
+  slug           String          @unique
+  name           String
+  accessCodeHash String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  members        GuildMember[]
+  accessRequests AccessRequest[]
+  auditLogs      AuditLog[]
+}
+
+model GuildMember {
+  id               String          @id @default(cuid())
+  guildId          String
+  nickname         String
+  role             MemberRole      @default(MEMBER)
+  active           Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  guild            Guild           @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  deviceSessions   DeviceSession[]
+  reviewedRequests AccessRequest[] @relation("AccessRequestReviewer")
+  auditLogs        AuditLog[]
+
+  @@unique([guildId, nickname])
+  @@index([guildId, role])
+}
+
+model AccessRequest {
+  id                 String              @id @default(cuid())
+  guildId            String
+  nickname           String
+  message            String              @default("")
+  status             AccessRequestStatus @default(PENDING)
+  deviceTokenHash    String              @unique
+  requestedAt        DateTime            @default(now())
+  reviewedAt         DateTime?
+  reviewedByMemberId String?
+  guild              Guild               @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  reviewedBy         GuildMember?        @relation("AccessRequestReviewer", fields: [reviewedByMemberId], references: [id], onDelete: SetNull)
+
+  @@index([guildId, status, requestedAt])
+}
+
+model DeviceSession {
+  id        String      @id @default(cuid())
+  memberId  String
+  tokenHash String      @unique
+  expiresAt DateTime
+  createdAt DateTime    @default(now())
+  lastSeenAt DateTime   @default(now())
+  revokedAt DateTime?
+  member    GuildMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId, expiresAt])
+}
+
+model AuditLog {
+  id            String       @id @default(cuid())
+  guildId       String
+  actorMemberId String?
+  action        String
+  entityType    String
+  entityId      String
+  metadata      Json?
+  createdAt     DateTime     @default(now())
+  guild         Guild        @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  actor         GuildMember? @relation(fields: [actorMemberId], references: [id], onDelete: SetNull)
+
+  @@index([guildId, createdAt])
+}

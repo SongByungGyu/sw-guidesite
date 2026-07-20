@@ -1,41 +1,69 @@
 "use client";
 
 import type { FormEvent, ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/icon";
-import { createAccessRequest } from "@/lib/access-request";
-import {
-  clearAccessSession,
-  saveAccessRequests,
-  setAccessSession,
-  useAccessRequests,
-  useAccessSessionId,
-} from "@/lib/access-request-store";
+import type { AccessSessionResponse } from "@/lib/access-api";
+
+const initialSession: AccessSessionResponse = { status: "none" };
 
 export function AccessGate({ children }: { children: ReactNode }) {
-  const requests = useAccessRequests();
-  const sessionId = useAccessSessionId();
-  const currentRequest = requests.find((request) => request.id === sessionId);
+  const [session, setSession] = useState<AccessSessionResponse | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  if (currentRequest?.status === "approved") return children;
+  const refreshSession = useCallback(async () => {
+    try {
+      const response = await fetch("/api/access/session", { cache: "no-store" });
+      if (!response.ok) throw new Error();
+      setSession(await response.json() as AccessSessionResponse);
+    } catch {
+      setSession(initialSession);
+      setError("서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+    }
+  }, []);
 
-  function submitRequest(event: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    const timer = window.setTimeout(() => void refreshSession(), 0);
+    return () => window.clearTimeout(timer);
+  }, [refreshSession]);
+
+  useEffect(() => {
+    if (session?.status !== "pending") return;
+    const timer = window.setInterval(() => void refreshSession(), 3000);
+    return () => window.clearInterval(timer);
+  }, [refreshSession, session?.status]);
+
+  if (session?.status === "approved") return children;
+
+  async function submitRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setSubmitting(true);
+    setError("");
     const form = new FormData(event.currentTarget);
-    const request = createAccessRequest(
-      {
+    const response = await fetch("/api/access/requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         nickname: String(form.get("nickname") ?? ""),
         guildCode: String(form.get("guildCode") ?? ""),
         message: String(form.get("message") ?? ""),
-      },
-      { id: crypto.randomUUID(), now: new Date().toISOString() },
-    );
-    saveAccessRequests([request, ...requests]);
-    setAccessSession(request.id);
+      }),
+    });
+    const result = await response.json() as AccessSessionResponse & { error?: string };
+    setSubmitting(false);
+    if (!response.ok) {
+      setError(result.error ?? "접근 요청을 보내지 못했습니다.");
+      return;
+    }
+    setSession(result);
   }
 
-  function requestAgain() {
-    clearAccessSession();
+  async function requestAgain() {
+    setError("");
+    await fetch("/api/access/requests", { method: "DELETE" });
+    setSession(initialSession);
   }
 
   return (
@@ -46,15 +74,20 @@ export function AccessGate({ children }: { children: ReactNode }) {
           <div><strong>길드 아카이브</strong><span>승인된 길드원 전용</span></div>
         </div>
 
-        {currentRequest?.status === "pending" ? (
+        {!session ? (
+          <section className="access-card access-loading" aria-live="polite">
+            <span className="loading-spinner" />
+            <h1>접근 권한을 확인하고 있습니다.</h1>
+          </section>
+        ) : session.status === "pending" ? (
           <section className="access-card" aria-labelledby="pending-title">
             <span className="access-status pending"><span /> 승인 대기</span>
             <h1 id="pending-title">길드 관리자가 요청을 확인 중입니다.</h1>
-            <p>승인되면 이 브라우저에서 별도 로그인 없이 바로 이용할 수 있습니다.</p>
+            <p>승인되면 이 화면이 자동으로 열립니다. 별도 로그인은 필요하지 않습니다.</p>
             <dl className="request-summary">
-              <div><dt>닉네임</dt><dd>{currentRequest.nickname}</dd></div>
-              <div><dt>길드 코드</dt><dd>{currentRequest.guildCode}</dd></div>
-              <div><dt>요청 번호</dt><dd>{currentRequest.id.slice(0, 8).toUpperCase()}</dd></div>
+              <div><dt>닉네임</dt><dd>{session.request?.nickname}</dd></div>
+              <div><dt>길드 코드</dt><dd>확인 완료</dd></div>
+              <div><dt>요청 번호</dt><dd>{session.request?.id.slice(0, 8).toUpperCase()}</dd></div>
             </dl>
             <div className="access-actions">
               <Link className="button primary" href="/requests" target="_blank" rel="noreferrer">
@@ -62,9 +95,9 @@ export function AccessGate({ children }: { children: ReactNode }) {
               </Link>
               <button className="button secondary" type="button" onClick={requestAgain}>요청 취소</button>
             </div>
-            <p className="prototype-note"><Icon name="sparkles" size={15} /> 현재는 같은 브라우저에서 승인 흐름을 확인하는 프로토타입입니다.</p>
+            <p className="prototype-note"><Icon name="sparkles" size={15} /> 요청과 승인은 서버에 안전하게 저장됩니다.</p>
           </section>
-        ) : currentRequest?.status === "rejected" ? (
+        ) : session.status === "rejected" ? (
           <section className="access-card" aria-labelledby="rejected-title">
             <span className="access-status rejected"><span /> 요청 반려</span>
             <h1 id="rejected-title">접근 요청이 반려됐습니다.</h1>
@@ -75,7 +108,7 @@ export function AccessGate({ children }: { children: ReactNode }) {
           <section className="access-card" aria-labelledby="request-title">
             <p className="eyebrow">로그인 없는 접근</p>
             <h1 id="request-title">길드 접근을 요청하세요</h1>
-            <p>계정 생성 없이 길드 관리자의 승인을 받은 브라우저만 이용할 수 있습니다.</p>
+            <p>계정 생성 없이 길드 관리자의 승인을 받은 기기만 이용할 수 있습니다.</p>
             <form className="access-form" onSubmit={submitRequest}>
               <label>
                 <span>게임 닉네임</span>
@@ -89,9 +122,12 @@ export function AccessGate({ children }: { children: ReactNode }) {
                 <span>요청 메시지 <small>선택</small></span>
                 <textarea name="message" maxLength={120} placeholder="길드에서 사용하는 이름 등을 적어주세요." />
               </label>
-              <button className="button primary" type="submit">접근 요청 보내기 <Icon name="chevron" size={18} /></button>
+              {error ? <p className="form-error" role="alert">{error}</p> : null}
+              <button className="button primary" type="submit" disabled={submitting}>
+                {submitting ? "요청 보내는 중…" : "접근 요청 보내기"} <Icon name="chevron" size={18} />
+              </button>
             </form>
-            <p className="access-footnote">승인 정보는 현재 브라우저에 저장됩니다. 새 기기에서는 다시 요청해야 합니다.</p>
+            <p className="access-footnote">승인된 기기는 90일간 유지되며, 새 기기에서는 다시 요청해야 합니다.</p>
           </section>
         )}
       </div>

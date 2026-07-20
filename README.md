@@ -6,6 +6,9 @@
 
 ```bash
 npm install
+npm run db:up
+npm run db:migrate
+npm run db:seed
 npm run dev
 ```
 
@@ -18,9 +21,11 @@ npm run test:run
 npm run build
 ```
 
-현재 단계는 디자인 시스템과 공덱 검색 핵심 화면을 구현한 프런트엔드 기반입니다. 실제 게임 이미지 대신 권리 확인 전용 placeholder를 사용합니다.
+최초 실행 전 `.env.example`을 `.env`로 복사하고 길드 코드, 관리자 키, 세션 비밀값을 변경하세요. 로컬 PostgreSQL은 기존 5432 포트와의 충돌을 피하도록 `localhost:5433`을 사용합니다.
 
-로그인 대신 `닉네임 + 길드 코드`로 접근을 요청하고 관리자가 `/requests`에서 승인하는 브라우저 기반 프로토타입이 포함되어 있습니다. 현재 승인은 `localStorage`에만 저장되므로 운영 전에는 서버 DB, 서명된 세션 쿠키, OFFICER/OWNER 권한 검사와 감사 로그를 연결해야 합니다.
+로그인 대신 `닉네임 + 길드 코드`로 접근을 요청하고 관리자가 `/requests`에서 승인합니다. 요청·길드원·기기 세션·감사 로그는 PostgreSQL에 저장하며, 기기 토큰은 원문이 아닌 SHA-256 해시로 보관합니다. `/requests`는 `ADMIN_ACCESS_KEY` 확인 뒤 12시간 동안만 열리고, 승인된 기기 세션은 기본 90일 유지됩니다.
+
+로컬 개발용 기본값은 길드 코드 `CONAN-01`, 관리자 키 `CONAN-ADMIN-01`입니다. 배포 환경에서는 반드시 `.env.example`의 값을 교체하고 HTTPS를 사용하세요.
 
 ## 몬스터 데이터
 

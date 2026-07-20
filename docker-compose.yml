@@ -1,0 +1,22 @@
+name: guild-archive
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: guild_archive
+      POSTGRES_USER: guild_archive
+      POSTGRES_PASSWORD: guild_archive_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - guild_archive_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U guild_archive -d guild_archive"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  guild_archive_postgres:
