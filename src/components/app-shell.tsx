@@ -5,11 +5,11 @@ type AppShellProps = {
 };
 
 const navItems = [
-  { label: "길드 홈", icon: "home" as const },
-  { label: "공덱 검색", icon: "swords" as const, active: true },
-  { label: "방덱 관리", icon: "shield" as const },
-  { label: "몬스터 도감", icon: "book" as const },
-  { label: "길드 관리", icon: "users" as const },
+  { label: "길드 홈", icon: "home" as const, href: "#" },
+  { label: "공덱 검색", icon: "swords" as const, href: "#", active: true },
+  { label: "방덱 관리", icon: "shield" as const, href: "#" },
+  { label: "몬스터 도감", icon: "book" as const, href: "#" },
+  { label: "길드 관리", icon: "users" as const, href: "/requests" },
 ];
 
 export function AppShell({ children }: AppShellProps) {
@@ -22,7 +22,7 @@ export function AppShell({ children }: AppShellProps) {
         </div>
         <nav aria-label="주 메뉴" className="sidebar-nav">
           {navItems.map((item) => (
-            <a className={item.active ? "active" : ""} href="#" key={item.label}>
+            <a className={item.active ? "active" : ""} href={item.href} key={item.label}>
               <Icon name={item.icon} />
               {item.label}
             </a>
@@ -52,7 +52,7 @@ export function AppShell({ children }: AppShellProps) {
         <main className="main-content">{children}</main>
         <nav className="mobile-tabs" aria-label="모바일 주 메뉴">
           {navItems.slice(0, 4).map((item) => (
-            <a className={item.active ? "active" : ""} href="#" key={item.label}>
+            <a className={item.active ? "active" : ""} href={item.href} key={item.label}>
               <Icon name={item.icon} size={19} />
               <span>{item.label.replace(" 검색", "").replace(" 관리", "")}</span>
             </a>
@@ -63,4 +63,3 @@ export function AppShell({ children }: AppShellProps) {
     </div>
   );
 }
-

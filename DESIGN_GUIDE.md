@@ -47,6 +47,8 @@
 - `MonsterPortrait`: 속성 링, 등급, 선택 순서, 리더 표시를 조합
 - `MonsterPicker`: 이름 검색, 속성 필터, 정확히 3마리 선택, 확인/취소
 - `DeckCard`: 방어덱과 공격덱 비교, 승률·사용 횟수·최근 사용, 공식 공덱 상태
+- `AccessGate`: 닉네임·길드 코드 접근 요청, 승인 대기, 반려 후 재요청 상태
+- `RequestInbox`: OFFICER/OWNER용 요청 검토, 승인·반려, 최근 처리 내역
 - 버튼: Primary는 파란색, Secondary는 표면색, 위험 행동은 빨간색을 사용
 
 ## 상태와 접근성
