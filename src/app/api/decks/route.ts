@@ -67,8 +67,8 @@ export async function POST(request: NextRequest) {
   const input = parsed.data;
   const combinationKey = createCombinationKey(input.defenseIds);
   const created = await db.$transaction(async (transaction) => {
-    let defense = await transaction.deck.findUnique({
-      where: { guildId_combinationKey: { guildId: member.guildId, combinationKey } },
+    let defense = await transaction.deck.findFirst({
+      where: { guildId: member.guildId, combinationKey, type: "SIEGE_DEFENSE", deletedAt: null },
     });
     if (!defense) {
       defense = await transaction.deck.create({

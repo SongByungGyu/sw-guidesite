@@ -29,32 +29,48 @@ enum DeckStatus {
   PUBLISHED
 }
 
+enum HomeworkStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
 model Guild {
-  id             String          @id @default(cuid())
-  slug           String          @unique
-  name           String
-  accessCodeHash String
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  members        GuildMember[]
-  accessRequests AccessRequest[]
-  auditLogs      AuditLog[]
-  decks          Deck[]
+  id                  String               @id @default(cuid())
+  slug                String               @unique
+  name                String
+  accessCodeHash      String
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  members             GuildMember[]
+  accessRequests      AccessRequest[]
+  auditLogs           AuditLog[]
+  decks               Deck[]
+  announcements       Announcement[]
+  schedules           GuildSchedule[]
+  dungeonGuides       DungeonGuide[]
+  homeworks           Homework[]
+  homeworkCompletions HomeworkCompletion[]
 }
 
 model GuildMember {
-  id               String          @id @default(cuid())
-  guildId          String
-  nickname         String
-  role             MemberRole      @default(MEMBER)
-  active           Boolean         @default(true)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  guild            Guild           @relation(fields: [guildId], references: [id], onDelete: Cascade)
-  deviceSessions   DeviceSession[]
-  reviewedRequests AccessRequest[] @relation("AccessRequestReviewer")
-  auditLogs        AuditLog[]
-  decks            Deck[]
+  id                  String               @id @default(cuid())
+  guildId             String
+  nickname            String
+  role                MemberRole           @default(MEMBER)
+  active              Boolean              @default(true)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  guild               Guild                @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  deviceSessions      DeviceSession[]
+  reviewedRequests    AccessRequest[]      @relation("AccessRequestReviewer")
+  auditLogs           AuditLog[]
+  decks               Deck[]
+  announcements       Announcement[]
+  schedules           GuildSchedule[]
+  dungeonGuides       DungeonGuide[]
+  homeworks           Homework[]
+  homeworkCompletions HomeworkCompletion[]
 
   @@unique([guildId, nickname])
   @@index([guildId, role])
@@ -77,14 +93,14 @@ model AccessRequest {
 }
 
 model DeviceSession {
-  id        String      @id @default(cuid())
-  memberId  String
-  tokenHash String      @unique
-  expiresAt DateTime
-  createdAt DateTime    @default(now())
-  lastSeenAt DateTime   @default(now())
-  revokedAt DateTime?
-  member    GuildMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  id         String      @id @default(cuid())
+  memberId   String
+  tokenHash  String      @unique
+  expiresAt  DateTime
+  createdAt  DateTime    @default(now())
+  lastSeenAt DateTime    @default(now())
+  revokedAt  DateTime?
+  member     GuildMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@index([memberId, expiresAt])
 }
@@ -105,41 +121,175 @@ model AuditLog {
 }
 
 model Deck {
-  id                    String        @id @default(cuid())
-  guildId               String
-  authorId              String
-  type                  DeckType
-  status                DeckStatus    @default(DRAFT)
-  title                 String
-  strategy              String        @default("")
-  minimumRequirements   String        @default("")
-  caution               String        @default("")
-  combinationKey        String?
-  targetDefenseId       String?
-  isOfficial            Boolean       @default(false)
-  version               Int           @default(1)
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
-  deletedAt             DateTime?
-  guild                 Guild         @relation(fields: [guildId], references: [id], onDelete: Cascade)
-  author                GuildMember   @relation(fields: [authorId], references: [id], onDelete: Restrict)
-  targetDefense         Deck?         @relation("DefenseOffenses", fields: [targetDefenseId], references: [id], onDelete: Restrict)
-  offenseRecommendations Deck[]       @relation("DefenseOffenses")
-  monsters              DeckMonster[]
+  id                     String        @id @default(cuid())
+  guildId                String
+  authorId               String
+  type                   DeckType
+  status                 DeckStatus    @default(DRAFT)
+  title                  String
+  strategy               String        @default("")
+  minimumRequirements    String        @default("")
+  caution                String        @default("")
+  combinationKey         String?
+  targetDefenseId        String?
+  isOfficial             Boolean       @default(false)
+  version                Int           @default(1)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+  deletedAt              DateTime?
+  guild                  Guild         @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  author                 GuildMember   @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  targetDefense          Deck?         @relation("DefenseOffenses", fields: [targetDefenseId], references: [id], onDelete: Restrict)
+  offenseRecommendations Deck[]        @relation("DefenseOffenses")
+  monsters               DeckMonster[]
 
-  @@unique([guildId, combinationKey])
+  @@index([guildId, combinationKey])
   @@index([guildId, type, status, updatedAt])
   @@index([targetDefenseId, status])
 }
 
 model DeckMonster {
-  id        String @id @default(cuid())
-  deckId    String
-  monsterId String
-  position  Int
-  isLeader  Boolean @default(false)
-  deck      Deck   @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  id         String  @id @default(cuid())
+  deckId     String
+  monsterId  String
+  position   Int
+  isLeader   Boolean @default(false)
+  runeSets   String  @default("")
+  hp         Int?
+  attack     Int?
+  defense    Int?
+  speed      Int?
+  critRate   Int?
+  critDamage Int?
+  resistance Int?
+  accuracy   Int?
+  note       String  @default("")
+  deck       Deck    @relation(fields: [deckId], references: [id], onDelete: Cascade)
 
   @@unique([deckId, position])
   @@index([monsterId])
+}
+
+model Announcement {
+  id        String      @id @default(cuid())
+  guildId   String
+  authorId  String
+  title     String
+  content   String
+  pinned    Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  guild     Guild       @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  author    GuildMember @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([guildId, pinned, createdAt])
+}
+
+model GuildSchedule {
+  id        String      @id @default(cuid())
+  guildId   String
+  authorId  String
+  title     String
+  category  String
+  startsAt  DateTime
+  endsAt    DateTime?
+  createdAt DateTime    @default(now())
+  guild     Guild       @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  author    GuildMember @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([guildId, startsAt])
+}
+
+model DungeonGuide {
+  id         String                @id @default(cuid())
+  guildId    String
+  authorId   String
+  dungeonKey String
+  title      String
+  summary    String
+  strategy   String
+  difficulty String                @default("")
+  clearTime  String                @default("")
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+  guild      Guild                 @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  author     GuildMember           @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  monsters   DungeonGuideMonster[]
+
+  @@index([guildId, dungeonKey, updatedAt])
+}
+
+model DungeonGuideMonster {
+  id         String       @id @default(cuid())
+  guideId    String
+  monsterId  String
+  position   Int
+  isLeader   Boolean      @default(false)
+  runeSets   String       @default("")
+  hp         Int?
+  attack     Int?
+  defense    Int?
+  speed      Int?
+  critRate   Int?
+  critDamage Int?
+  resistance Int?
+  accuracy   Int?
+  note       String       @default("")
+  guide      DungeonGuide @relation(fields: [guideId], references: [id], onDelete: Cascade)
+
+  @@unique([guideId, position])
+}
+
+model Homework {
+  id          String               @id @default(cuid())
+  guildId     String
+  authorId    String
+  title       String
+  target      String
+  strategy    String
+  dueAt       DateTime?
+  status      HomeworkStatus       @default(ACTIVE)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  guild       Guild                @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  author      GuildMember          @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  monsters    HomeworkMonster[]
+  completions HomeworkCompletion[]
+
+  @@index([guildId, status, dueAt])
+}
+
+model HomeworkMonster {
+  id         String   @id @default(cuid())
+  homeworkId String
+  monsterId  String
+  position   Int
+  isLeader   Boolean  @default(false)
+  runeSets   String   @default("")
+  hp         Int?
+  attack     Int?
+  defense    Int?
+  speed      Int?
+  critRate   Int?
+  critDamage Int?
+  resistance Int?
+  accuracy   Int?
+  note       String   @default("")
+  homework   Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+
+  @@unique([homeworkId, position])
+}
+
+model HomeworkCompletion {
+  id          String      @id @default(cuid())
+  guildId     String
+  homeworkId  String
+  memberId    String
+  completedAt DateTime    @default(now())
+  guild       Guild       @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  homework    Homework    @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  member      GuildMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([homeworkId, memberId])
+  @@index([guildId, memberId, completedAt])
 }
