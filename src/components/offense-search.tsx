@@ -20,6 +20,7 @@ const authors = Array.from(new Set(decks.map((deck) => deck.author)));
 
 export function OffenseSearch() {
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [replaceSlot, setReplaceSlot] = useState<number | null>(null);
   const [defenseIds, setDefenseIds] = useState<string[]>([...defaultDefenseIds]);
   const [sort, setSort] = useState<DeckSort>("recommended");
   const [officialOnly, setOfficialOnly] = useState(false);
@@ -35,6 +36,21 @@ export function OffenseSearch() {
   function resetFilters() {
     setOfficialOnly(false);
     setAuthor("all");
+  }
+
+  function openTeamPicker() {
+    setReplaceSlot(null);
+    setPickerOpen(true);
+  }
+
+  function openSlotPicker(index: number) {
+    setReplaceSlot(index);
+    setPickerOpen(true);
+  }
+
+  function closePicker() {
+    setPickerOpen(false);
+    setReplaceSlot(null);
   }
 
   return (
@@ -56,13 +72,22 @@ export function OffenseSearch() {
             <span className="step-badge">1</span>
             <div><h2 id="defense-title">상대 방어덱</h2><p>순서와 관계없이 3마리를 선택합니다.</p></div>
           </div>
-          <button className="button primary" onClick={() => setPickerOpen(true)} type="button">
+          <button className="button primary" onClick={openTeamPicker} type="button">
             <Icon name="search" size={18} /> 몬스터 변경
           </button>
         </div>
         <div className="defense-team">
           {defense.map((monster, index) => (
-            <MonsterPortrait key={monster.id} monster={monster} selected selectionOrder={index + 1} />
+            <button
+              aria-label={`${index + 1}번 ${monster.displayName} 변경`}
+              className="defense-monster-button"
+              key={monster.id}
+              onClick={() => openSlotPicker(index)}
+              type="button"
+            >
+              <MonsterPortrait monster={monster} selected selectionOrder={index + 1} />
+              <span>클릭하여 변경</span>
+            </button>
           ))}
         </div>
       </section>
@@ -120,9 +145,10 @@ export function OffenseSearch() {
 
       <MonsterPicker
         initialSelection={defenseIds}
-        onClose={() => setPickerOpen(false)}
+        onClose={closePicker}
         onConfirm={setDefenseIds}
         open={pickerOpen}
+        replaceSlot={replaceSlot}
       />
     </AppShell>
   );

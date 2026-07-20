@@ -368,6 +368,40 @@ h3 {
   gap: clamp(10px, 3vw, 28px);
 }
 
+.defense-monster-button {
+  min-width: 0;
+  padding: 5px;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  color: inherit;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+}
+
+.defense-monster-button > span {
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  transition: color 160ms ease;
+}
+
+.defense-monster-button:hover .portrait-placeholder,
+.defense-monster-button:focus-visible .portrait-placeholder {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgb(78 139 255 / 16%);
+}
+
+.defense-monster-button:hover > span,
+.defense-monster-button:focus-visible > span {
+  color: var(--accent-blue);
+}
+
+.defense-monster-button:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
 .monster-portrait {
   position: relative;
   width: clamp(76px, 10vw, 104px);
@@ -770,6 +804,11 @@ h3 {
 .monster-option[aria-pressed="true"] {
   border-color: var(--border);
   background: var(--surface);
+}
+
+.monster-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
 }
 
 .monster-option .monster-portrait {

@@ -10,6 +10,7 @@ type MonsterPickerProps = {
   initialSelection: string[];
   onClose: () => void;
   onConfirm: (ids: string[]) => void;
+  replaceSlot?: number | null;
 };
 
 const elements: Array<{ value: "ALL" | Element; label: string }> = [
@@ -34,6 +35,7 @@ export function MonsterPicker({
   initialSelection,
   onClose,
   onConfirm,
+  replaceSlot = null,
 }: MonsterPickerProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [query, setQuery] = useState("");
@@ -60,6 +62,18 @@ export function MonsterPicker({
   });
 
   function toggleMonster(id: string) {
+    if (replaceSlot !== null) {
+      const usedByAnotherSlot = initialSelection.some(
+        (selectedId, index) => index !== replaceSlot && selectedId === id,
+      );
+      if (usedByAnotherSlot) return;
+      const nextSelection = [...initialSelection];
+      nextSelection[replaceSlot] = id;
+      onConfirm(nextSelection);
+      onClose();
+      return;
+    }
+
     setSelected((current) => {
       if (current.includes(id)) return current.filter((item) => item !== id);
       if (current.length === 3) return current;
@@ -84,8 +98,10 @@ export function MonsterPicker({
       <div className="dialog-shell">
         <header className="dialog-header">
           <div>
-            <p className="eyebrow">상대 방어덱</p>
-            <h2 id="monster-picker-title">몬스터 3마리를 선택하세요</h2>
+            <p className="eyebrow">{replaceSlot === null ? "상대 방어덱" : `${replaceSlot + 1}번 슬롯 즉시 교체`}</p>
+            <h2 id="monster-picker-title">
+              {replaceSlot === null ? "몬스터 3마리를 선택하세요" : "변경할 몬스터를 선택하세요"}
+            </h2>
           </div>
           <button className="icon-button" type="button" aria-label="몬스터 선택 닫기" onClick={onClose}>
             <Icon name="x" />
@@ -137,11 +153,16 @@ export function MonsterPicker({
           {filtered.map((monster) => {
             const index = selected.indexOf(monster.id);
             const isSelected = index >= 0;
+            const usedByAnotherSlot = replaceSlot !== null
+              && initialSelection.some(
+                (selectedId, slotIndex) => slotIndex !== replaceSlot && selectedId === monster.id,
+              );
             return (
               <button
-                aria-label={`${monster.displayName}${isSelected ? `, ${index + 1}번째 선택됨` : " 선택"}`}
+                aria-label={`${monster.displayName}${usedByAnotherSlot ? ", 다른 슬롯에서 선택됨" : isSelected ? `, ${index + 1}번째 선택됨` : " 선택"}`}
                 aria-pressed={isSelected}
                 className="monster-option"
+                disabled={usedByAnotherSlot}
                 key={monster.id}
                 onClick={() => toggleMonster(monster.id)}
                 type="button"
@@ -166,13 +187,17 @@ export function MonsterPicker({
 
         <footer className="dialog-footer">
           <div className="selection-preview">
-            <strong>{selected.length}/3 선택</strong>
-            <span>{selected.map((id) => monsters.find((item) => item.id === id)?.displayName).join(" · ")}</span>
+            <strong>{replaceSlot === null ? `${selected.length}/3 선택` : `${replaceSlot + 1}번 몬스터 선택`}</strong>
+            <span>{replaceSlot === null
+              ? selected.map((id) => monsters.find((item) => item.id === id)?.displayName).join(" · ")
+              : "몬스터를 누르면 바로 교체됩니다."}</span>
           </div>
           <button className="button secondary" onClick={onClose} type="button">취소</button>
-          <button className="button primary" disabled={selected.length !== 3} onClick={confirmSelection} type="button">
-            이 방덱으로 검색
-          </button>
+          {replaceSlot === null ? (
+            <button className="button primary" disabled={selected.length !== 3} onClick={confirmSelection} type="button">
+              이 방덱으로 검색
+            </button>
+          ) : null}
         </footer>
       </div>
     </dialog>
