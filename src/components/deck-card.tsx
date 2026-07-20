@@ -8,7 +8,7 @@ type DeckCardProps = {
 
 export function DeckCard({ deck }: DeckCardProps) {
   const offense = deck.offenseIds.map(getMonster);
-  const winRate = Math.round((deck.wins / deck.battles) * 100);
+  const winRate = deck.battles ? Math.round((deck.wins / deck.battles) * 100) : null;
 
   return (
     <article className="deck-card">
@@ -37,9 +37,9 @@ export function DeckCard({ deck }: DeckCardProps) {
           leaderSlot={deck.leaderSlot}
           monsters={offense}
         />
-        <div className="battle-stat" aria-label={`승률 ${winRate}퍼센트, ${deck.wins}승 ${deck.battles}전`}>
-          <strong>{winRate}%</strong>
-          <span>{deck.wins}승 / {deck.battles}전</span>
+        <div className={`battle-stat${winRate === null ? " is-new" : ""}`} aria-label={winRate === null ? "아직 전투 기록 없음" : `승률 ${winRate}퍼센트, ${deck.wins}승 ${deck.battles}전`}>
+          <strong>{winRate === null ? "신규" : `${winRate}%`}</strong>
+          <span>{winRate === null ? "전투 기록 없음" : `${deck.wins}승 / ${deck.battles}전`}</span>
         </div>
       </div>
 
@@ -50,4 +50,3 @@ export function DeckCard({ deck }: DeckCardProps) {
     </article>
   );
 }
-

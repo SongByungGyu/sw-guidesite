@@ -19,6 +19,16 @@ enum AccessRequestStatus {
   REJECTED
 }
 
+enum DeckType {
+  SIEGE_OFFENSE
+  SIEGE_DEFENSE
+}
+
+enum DeckStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model Guild {
   id             String          @id @default(cuid())
   slug           String          @unique
@@ -29,6 +39,7 @@ model Guild {
   members        GuildMember[]
   accessRequests AccessRequest[]
   auditLogs      AuditLog[]
+  decks          Deck[]
 }
 
 model GuildMember {
@@ -43,6 +54,7 @@ model GuildMember {
   deviceSessions   DeviceSession[]
   reviewedRequests AccessRequest[] @relation("AccessRequestReviewer")
   auditLogs        AuditLog[]
+  decks            Deck[]
 
   @@unique([guildId, nickname])
   @@index([guildId, role])
@@ -90,4 +102,44 @@ model AuditLog {
   actor         GuildMember? @relation(fields: [actorMemberId], references: [id], onDelete: SetNull)
 
   @@index([guildId, createdAt])
+}
+
+model Deck {
+  id                    String        @id @default(cuid())
+  guildId               String
+  authorId              String
+  type                  DeckType
+  status                DeckStatus    @default(DRAFT)
+  title                 String
+  strategy              String        @default("")
+  minimumRequirements   String        @default("")
+  caution               String        @default("")
+  combinationKey        String?
+  targetDefenseId       String?
+  isOfficial            Boolean       @default(false)
+  version               Int           @default(1)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  deletedAt             DateTime?
+  guild                 Guild         @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  author                GuildMember   @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  targetDefense         Deck?         @relation("DefenseOffenses", fields: [targetDefenseId], references: [id], onDelete: Restrict)
+  offenseRecommendations Deck[]       @relation("DefenseOffenses")
+  monsters              DeckMonster[]
+
+  @@unique([guildId, combinationKey])
+  @@index([guildId, type, status, updatedAt])
+  @@index([targetDefenseId, status])
+}
+
+model DeckMonster {
+  id        String @id @default(cuid())
+  deckId    String
+  monsterId String
+  position  Int
+  isLeader  Boolean @default(false)
+  deck      Deck   @relation(fields: [deckId], references: [id], onDelete: Cascade)
+
+  @@unique([deckId, position])
+  @@index([monsterId])
 }

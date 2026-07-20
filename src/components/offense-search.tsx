@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { DeckCard } from "@/components/deck-card";
 import { Icon } from "@/components/icon";
 import { MonsterPicker } from "@/components/monster-picker";
 import { MonsterPortrait } from "@/components/monster-portrait";
 import { searchDecks, type DeckSort } from "@/lib/deck-search";
-import { decks, defaultDefenseIds, getMonster } from "@/lib/mock-data";
+import { decks as mockDecks, getMonster, type Deck } from "@/lib/mock-data";
 
 const sortOptions: Array<{ value: DeckSort; label: string }> = [
   { value: "recommended", label: "추천순" },
@@ -16,18 +17,31 @@ const sortOptions: Array<{ value: DeckSort; label: string }> = [
   { value: "latest", label: "최신순" },
 ];
 
-const authors = Array.from(new Set(decks.map((deck) => deck.author)));
-
-export function OffenseSearch() {
+export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string[] }) {
+  const router = useRouter();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [replaceSlot, setReplaceSlot] = useState<number | null>(null);
-  const [defenseIds, setDefenseIds] = useState<string[]>([...defaultDefenseIds]);
+  const [defenseIds, setDefenseIds] = useState<string[]>(initialDefenseIds);
+  const [savedDecks, setSavedDecks] = useState<Deck[]>([]);
   const [sort, setSort] = useState<DeckSort>("recommended");
   const [officialOnly, setOfficialOnly] = useState(false);
   const [author, setAuthor] = useState("all");
 
+  const defenseKey = defenseIds.join(",");
+  useEffect(() => {
+    let cancelled = false;
+    void fetch(`/api/decks?defense=${encodeURIComponent(defenseKey)}`, { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : { decks: [] })
+      .then((result: { decks: Deck[] }) => {
+        if (!cancelled) setSavedDecks(result.decks);
+      });
+    return () => { cancelled = true; };
+  }, [defenseKey]);
+
+  const allDecks = useMemo(() => [...savedDecks, ...mockDecks], [savedDecks]);
+  const authors = useMemo(() => Array.from(new Set(allDecks.map((deck) => deck.author))), [allDecks]);
   const defense = defenseIds.map(getMonster);
-  const results = searchDecks(decks, defenseIds, { sort, officialOnly, author });
+  const results = searchDecks(allDecks, defenseIds, { sort, officialOnly, author });
 
   const exact = results.filter((result) => result.match === "exact").map((result) => result.deck);
   const partial = results.filter((result) => result.match === "partial").map((result) => result.deck);
@@ -53,6 +67,10 @@ export function OffenseSearch() {
     setReplaceSlot(null);
   }
 
+  function openRegistration() {
+    router.push(`/decks/new?defense=${encodeURIComponent(defenseKey)}`);
+  }
+
   return (
     <AppShell>
       <div className="page-heading">
@@ -61,7 +79,7 @@ export function OffenseSearch() {
           <h1>공덱 검색</h1>
           <p>상대 방어덱 3마리를 선택하면 길드가 검증한 공격 조합을 찾아드립니다.</p>
         </div>
-        <button className="button secondary desktop-create" type="button">
+        <button className="button secondary desktop-create" onClick={openRegistration} type="button">
           <Icon name="plus" size={18} /> 공덱 등록
         </button>
       </div>
@@ -128,7 +146,7 @@ export function OffenseSearch() {
           <div><span className="status-dot success" /><div><h2 id="exact-title">정확히 일치하는 공덱</h2><p>선택한 방어덱 3마리와 완전히 같은 결과입니다.</p></div></div>
           <strong>{exact.length}개</strong>
         </header>
-        {exact.length ? <div className="deck-list">{exact.map((deck) => <DeckCard deck={deck} key={deck.id} />)}</div> : <EmptyResult filtersActive={filtersActive} onReset={resetFilters} />}
+        {exact.length ? <div className="deck-list">{exact.map((deck) => <DeckCard deck={deck} key={deck.id} />)}</div> : <EmptyResult filtersActive={filtersActive} onRegister={openRegistration} onReset={resetFilters} />}
       </section>
 
       <section className="result-section partial" aria-labelledby="partial-title">
@@ -136,10 +154,10 @@ export function OffenseSearch() {
           <div><span className="status-dot partial" /><div><h2 id="partial-title">2마리 이상 부분 일치</h2><p>정확한 결과가 부족할 때 참고할 수 있는 유사 방어덱입니다.</p></div></div>
           <strong>{partial.length}개</strong>
         </header>
-        {partial.length ? <div className="deck-list">{partial.map((deck) => <DeckCard deck={deck} key={deck.id} />)}</div> : <EmptyResult filtersActive={filtersActive} onReset={resetFilters} />}
+        {partial.length ? <div className="deck-list">{partial.map((deck) => <DeckCard deck={deck} key={deck.id} />)}</div> : <EmptyResult filtersActive={filtersActive} onRegister={openRegistration} onReset={resetFilters} />}
       </section>
 
-      <button className="mobile-fab" type="button" aria-label="새 공덱 등록">
+      <button className="mobile-fab" onClick={openRegistration} type="button" aria-label="새 공덱 등록">
         <Icon name="plus" />
       </button>
 
@@ -154,12 +172,12 @@ export function OffenseSearch() {
   );
 }
 
-function EmptyResult({ filtersActive, onReset }: { filtersActive: boolean; onReset: () => void }) {
+function EmptyResult({ filtersActive, onRegister, onReset }: { filtersActive: boolean; onRegister: () => void; onReset: () => void }) {
   return (
     <div className="empty-result">
       <Icon name="search" />
       <div><strong>조건에 맞는 공덱이 없습니다.</strong><p>필터를 해제하거나 첫 공덱을 등록해 보세요.</p></div>
-      {filtersActive ? <button className="button secondary" type="button" onClick={onReset}>필터 초기화</button> : null}
+      {filtersActive ? <button className="button secondary" type="button" onClick={onReset}>필터 초기화</button> : <button className="button secondary" type="button" onClick={onRegister}>첫 공덱 등록</button>}
     </div>
   );
 }

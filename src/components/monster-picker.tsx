@@ -11,6 +11,7 @@ type MonsterPickerProps = {
   onClose: () => void;
   onConfirm: (ids: string[]) => void;
   replaceSlot?: number | null;
+  selectionKind?: "defense" | "offense";
 };
 
 const elements: Array<{ value: "ALL" | Element; label: string }> = [
@@ -36,6 +37,7 @@ export function MonsterPicker({
   onClose,
   onConfirm,
   replaceSlot = null,
+  selectionKind = "defense",
 }: MonsterPickerProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [query, setQuery] = useState("");
@@ -98,7 +100,7 @@ export function MonsterPicker({
       <div className="dialog-shell">
         <header className="dialog-header">
           <div>
-            <p className="eyebrow">{replaceSlot === null ? "상대 방어덱" : `${replaceSlot + 1}번 슬롯 즉시 교체`}</p>
+            <p className="eyebrow">{replaceSlot === null ? (selectionKind === "defense" ? "상대 방어덱" : "사용할 공격덱") : `${replaceSlot + 1}번 슬롯 즉시 교체`}</p>
             <h2 id="monster-picker-title">
               {replaceSlot === null ? "몬스터 3마리를 선택하세요" : "변경할 몬스터를 선택하세요"}
             </h2>
@@ -195,7 +197,7 @@ export function MonsterPicker({
           <button className="button secondary" onClick={onClose} type="button">취소</button>
           {replaceSlot === null ? (
             <button className="button primary" disabled={selected.length !== 3} onClick={confirmSelection} type="button">
-              이 방덱으로 검색
+              {selectionKind === "defense" ? "이 방덱 선택" : "이 공덱 선택"}
             </button>
           ) : null}
         </footer>

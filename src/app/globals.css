@@ -54,7 +54,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -1330,6 +1331,244 @@ h3 {
   font-size: 0.78rem;
 }
 
+.deck-register-heading {
+  align-items: center;
+}
+
+.deck-register-form {
+  display: grid;
+  gap: 18px;
+}
+
+.registration-section {
+  padding: clamp(18px, 3vw, 26px);
+  display: grid;
+  gap: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--background-elevated);
+}
+
+.registration-section-heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.registration-section-heading p,
+.deck-save-success > p:not(.eyebrow) {
+  color: var(--text-secondary);
+}
+
+.registration-team {
+  display: flex;
+  justify-content: center;
+  gap: clamp(12px, 4vw, 34px);
+}
+
+.registration-team > button {
+  padding: 6px;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  color: inherit;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.registration-team > button:hover {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.registration-team > button > span {
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+}
+
+.empty-team-selector {
+  min-height: 190px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--background-base);
+  cursor: pointer;
+}
+
+.empty-team-selector > span {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  color: var(--background-base);
+  border-radius: 50%;
+  background: var(--accent-gold);
+}
+
+.empty-team-selector strong {
+  color: var(--text-primary);
+}
+
+.empty-team-selector small {
+  font-size: 0.75rem;
+}
+
+.leader-selector {
+  width: fit-content;
+  margin: 0 auto;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+}
+
+.leader-selector legend {
+  margin: 0 auto 9px;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  text-align: center;
+}
+
+.leader-selector label {
+  min-height: 38px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.leader-selector label.selected {
+  color: var(--text-primary);
+  border-color: var(--accent-gold);
+  background: rgb(231 184 92 / 9%);
+}
+
+.leader-selector input {
+  accent-color: var(--accent-gold);
+}
+
+.deck-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.deck-fields label {
+  display: grid;
+  gap: 7px;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.deck-fields label > span small {
+  margin-left: 4px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.deck-fields .field-full {
+  grid-column: 1 / -1;
+}
+
+.deck-fields input,
+.deck-fields textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 11px 12px;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  outline: 0;
+  background: var(--background-base);
+  resize: vertical;
+}
+
+.deck-fields textarea {
+  min-height: 110px;
+}
+
+.deck-fields .field-full textarea {
+  min-height: 150px;
+}
+
+.deck-fields input:focus,
+.deck-fields textarea:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgb(78 139 255 / 16%);
+}
+
+.registration-actions {
+  position: sticky;
+  bottom: 12px;
+  z-index: 10;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgb(19 26 43 / 96%);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(14px);
+}
+
+.registration-actions > div {
+  min-width: 0;
+  margin-right: auto;
+  display: grid;
+}
+
+.registration-actions > div span {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.registration-actions .form-error {
+  max-width: 280px;
+}
+
+.deck-save-success {
+  min-height: min(680px, calc(100vh - 150px));
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.success-mark {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  color: var(--background-base);
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 10px rgb(56 199 139 / 10%);
+}
+
+.deck-save-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+.battle-stat.is-new strong {
+  color: var(--accent-blue);
+}
+
 @media (max-width: 1199px) {
   .app-shell {
     grid-template-columns: 208px minmax(0, 1fr);
@@ -1429,6 +1668,10 @@ h3 {
     grid-column: 1 / -1;
     justify-content: flex-end;
   }
+
+  .registration-actions {
+    bottom: 78px;
+  }
 }
 
 @media (max-width: 767px) {
@@ -1458,6 +1701,57 @@ h3 {
 
   .page-heading {
     align-items: flex-start;
+  }
+
+  .deck-register-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .registration-section-heading {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .registration-section-heading .button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .registration-team {
+    justify-content: space-between;
+    gap: 4px;
+  }
+
+  .leader-selector {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .deck-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .deck-fields .field-full {
+    grid-column: auto;
+  }
+
+  .registration-actions {
+    padding: 12px;
+    flex-wrap: wrap;
+  }
+
+  .registration-actions > div,
+  .registration-actions .form-error {
+    width: 100%;
+    max-width: none;
+  }
+
+  .registration-actions .button {
+    flex: 1;
+    padding-right: 10px;
+    padding-left: 10px;
   }
 
   .desktop-create {
