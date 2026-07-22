@@ -30,6 +30,66 @@ export const createOffenseDeckSchema = z.object({
   }
 });
 
+export const recordMetaDefenseSchema = z.object({
+  towerGrade: z.union([z.literal(4), z.literal(5)]),
+  monsterIds: teamSchema,
+}).superRefine((input, context) => {
+  if (input.towerGrade === 4 && input.monsterIds.some((id) => monsters.find((monster) => monster.id === id)?.grade === 5)) {
+    context.addIssue({
+      code: "custom",
+      path: ["monsterIds"],
+      message: "4성 거점에는 태생 5성 몬스터를 기록할 수 없습니다.",
+    });
+  }
+});
+
+export type MetaDefenseAggregate = {
+  towerGrade: 4 | 5;
+  combinationKey: string;
+  monsterIds: [string, string, string];
+  recordCount: number;
+  lastRecordedOn: string;
+};
+
+export function buildMetaDefenseTop(records: Array<{
+  towerGrade: number;
+  combinationKey: string;
+  monsterIds: string[];
+  recordedOn: Date;
+}>, limit = 5) {
+  const grouped = new Map<string, MetaDefenseAggregate>();
+  for (const record of records) {
+    if (record.towerGrade !== 4 && record.towerGrade !== 5) continue;
+    if (record.monsterIds.length !== 3) continue;
+    const key = `${record.towerGrade}:${record.combinationKey}`;
+    const recordedOn = record.recordedOn.toISOString();
+    const current = grouped.get(key);
+    if (current) {
+      current.recordCount += 1;
+      if (recordedOn > current.lastRecordedOn) current.lastRecordedOn = recordedOn;
+    } else {
+      grouped.set(key, {
+        towerGrade: record.towerGrade,
+        combinationKey: record.combinationKey,
+        monsterIds: record.monsterIds as [string, string, string],
+        recordCount: 1,
+        lastRecordedOn: recordedOn,
+      });
+    }
+  }
+
+  const sortRows = (left: MetaDefenseAggregate, right: MetaDefenseAggregate) => (
+    right.recordCount - left.recordCount
+    || right.lastRecordedOn.localeCompare(left.lastRecordedOn)
+    || left.combinationKey.localeCompare(right.combinationKey)
+  );
+
+  return {
+    fiveStar: [...grouped.values()].filter((row) => row.towerGrade === 5).sort(sortRows).slice(0, limit),
+    fourStar: [...grouped.values()].filter((row) => row.towerGrade === 4).sort(sortRows).slice(0, limit),
+  };
+}
+
 export function createCombinationKey(ids: readonly string[]) {
   return [...ids].sort((left, right) => left.localeCompare(right)).join(":");
 }

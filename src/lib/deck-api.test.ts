@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCombinationKey, createOffenseDeckSchema } from "@/lib/deck-api";
+import { buildMetaDefenseTop, createCombinationKey, createOffenseDeckSchema, recordMetaDefenseSchema } from "@/lib/deck-api";
 
 const validInput = {
   defenseIds: ["2013", "1105", "3012"],
@@ -47,5 +47,22 @@ describe("deck API validation", () => {
       status: "draft",
     });
     expect(result.success).toBe(true);
+  });
+
+  it("validates 4-star and 5-star meta defense records", () => {
+    expect(recordMetaDefenseSchema.safeParse({ towerGrade: 4, monsterIds: ["1301", "1302", "1303"] }).success).toBe(true);
+    expect(recordMetaDefenseSchema.safeParse({ towerGrade: 4, monsterIds: ["1101", "1302", "1303"] }).success).toBe(false);
+    expect(recordMetaDefenseSchema.safeParse({ towerGrade: 5, monsterIds: ["1101", "1302", "1303"] }).success).toBe(true);
+  });
+
+  it("ranks meta defenses by record count and recency", () => {
+    const rows = buildMetaDefenseTop([
+      { towerGrade: 5, combinationKey: "a:b:c", monsterIds: ["a", "b", "c"], recordedOn: new Date("2026-07-20") },
+      { towerGrade: 5, combinationKey: "a:b:c", monsterIds: ["a", "b", "c"], recordedOn: new Date("2026-07-21") },
+      { towerGrade: 5, combinationKey: "d:e:f", monsterIds: ["d", "e", "f"], recordedOn: new Date("2026-07-22") },
+      { towerGrade: 4, combinationKey: "g:h:i", monsterIds: ["g", "h", "i"], recordedOn: new Date("2026-07-22") },
+    ]);
+    expect(rows.fiveStar.map((row) => [row.combinationKey, row.recordCount])).toEqual([["a:b:c", 2], ["d:e:f", 1]]);
+    expect(rows.fourStar[0]?.combinationKey).toBe("g:h:i");
   });
 });

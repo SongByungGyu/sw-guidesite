@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { DeckCard } from "@/components/deck-card";
 import { Icon } from "@/components/icon";
+import { MetaDefenseBoard, type MetaDefenseItem } from "@/components/meta-defense-board";
 import { MonsterPicker } from "@/components/monster-picker";
 import { MonsterPortrait } from "@/components/monster-portrait";
 import { searchDecks, type DeckSort } from "@/lib/deck-search";
 import { decks as mockDecks, getMonster, type Deck } from "@/lib/mock-data";
+import { createCombinationKey } from "@/lib/deck-api";
 
 const sortOptions: Array<{ value: DeckSort; label: string }> = [
   { value: "recommended", label: "추천순" },
@@ -26,6 +28,12 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
   const [sort, setSort] = useState<DeckSort>("recommended");
   const [officialOnly, setOfficialOnly] = useState(false);
   const [author, setAuthor] = useState("all");
+  const [metaFiveStar, setMetaFiveStar] = useState<MetaDefenseItem[]>([]);
+  const [metaFourStar, setMetaFourStar] = useState<MetaDefenseItem[]>([]);
+  const [metaLoading, setMetaLoading] = useState(true);
+  const [recordGrade, setRecordGrade] = useState<4 | 5>(5);
+  const [recording, setRecording] = useState(false);
+  const [recordMessage, setRecordMessage] = useState("");
 
   const defenseKey = defenseIds.join(",");
   useEffect(() => {
@@ -38,6 +46,31 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
     return () => { cancelled = true; };
   }, [defenseKey]);
 
+  async function loadMetaDefenses() {
+    const response = await fetch("/api/meta-defenses", { cache: "no-store" });
+    const result = await response.json().catch(() => ({ fiveStar: [], fourStar: [] }));
+    if (response.ok) {
+      setMetaFiveStar(result.fiveStar ?? []);
+      setMetaFourStar(result.fourStar ?? []);
+    }
+    setMetaLoading(false);
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/meta-defenses", { cache: "no-store" })
+      .then(async (response) => ({ response, result: await response.json().catch(() => ({ fiveStar: [], fourStar: [] })) }))
+      .then(({ response, result }) => {
+        if (cancelled) return;
+        if (response.ok) {
+          setMetaFiveStar(result.fiveStar ?? []);
+          setMetaFourStar(result.fourStar ?? []);
+        }
+        setMetaLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
   const allDecks = useMemo(() => [...savedDecks, ...mockDecks], [savedDecks]);
   const authors = useMemo(() => Array.from(new Set(allDecks.map((deck) => deck.author))), [allDecks]);
   const defense = defenseIds.map(getMonster);
@@ -45,6 +78,11 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
 
   const exact = results.filter((result) => result.match === "exact").map((result) => result.deck);
   const partial = results.filter((result) => result.match === "partial").map((result) => result.deck);
+  const selectedOffenses = searchDecks(allDecks, defenseIds, { sort: "recommended", officialOnly: false, author: "all" })
+    .filter((result) => result.match === "exact")
+    .map((result) => result.deck);
+  const selectedKey = createCombinationKey(defenseIds);
+  const canRecordFourStar = defense.every((monster) => monster.grade <= 4);
   const filtersActive = officialOnly || author !== "all";
 
   function resetFilters() {
@@ -71,6 +109,28 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
     router.push(`/decks/new?defense=${encodeURIComponent(defenseKey)}`);
   }
 
+  function selectMetaDefense(ids: [string, string, string]) {
+    setDefenseIds([...ids]);
+    setSort("recommended");
+    resetFilters();
+    setRecordMessage("");
+  }
+
+  async function recordCurrentDefense() {
+    if (recordGrade === 4 && !canRecordFourStar) return;
+    setRecording(true);
+    setRecordMessage("");
+    const response = await fetch("/api/meta-defenses", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ towerGrade: recordGrade, monsterIds: defenseIds }),
+    });
+    const result = await response.json().catch(() => ({ error: "기록을 저장하지 못했습니다." }));
+    setRecordMessage(response.ok ? result.message : result.error ?? "기록을 저장하지 못했습니다.");
+    setRecording(false);
+    if (response.ok) await loadMetaDefenses();
+  }
+
   return (
     <AppShell>
       <div className="page-heading">
@@ -83,6 +143,23 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
           <Icon name="plus" size={18} /> 공덱 등록
         </button>
       </div>
+
+      <MetaDefenseBoard
+        canRecordFourStar={canRecordFourStar}
+        fiveStar={metaFiveStar}
+        fourStar={metaFourStar}
+        loading={metaLoading}
+        onGradeChange={setRecordGrade}
+        onRecord={recordCurrentDefense}
+        onRegisterOffense={openRegistration}
+        onSelect={selectMetaDefense}
+        recordGrade={recordGrade}
+        recording={recording}
+        recordMessage={recordMessage}
+        selectedDefenseIds={defenseIds}
+        selectedKey={selectedKey}
+        selectedOffenses={selectedOffenses}
+      />
 
       <section className="defense-selector" aria-labelledby="defense-title">
         <div className="section-heading">
