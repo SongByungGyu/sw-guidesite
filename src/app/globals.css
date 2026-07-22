@@ -1728,6 +1728,19 @@ h3 {
 
 .home-panel > header > span,
 .home-panel > header > a { color: var(--accent-blue); font-size: 0.78rem; }
+.home-panel-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.home-panel-actions > span { color: var(--accent-blue); font-size: 0.78rem; }
+.home-action-button { min-height: 36px; padding: 7px 10px; font-size: 0.72rem; }
+.home-management-error { margin-bottom: 16px; }
+.home-manage-form { padding: 18px 20px; display: grid; gap: 14px; border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--accent-blue) 5%, var(--background-base)); }
+.home-manage-form footer { display: flex; justify-content: flex-end; gap: 8px; }
+.home-manage-form .simple-fields { gap: 10px; }
+.simple-fields select { width: 100%; min-height: 44px; padding: 10px 12px; color: var(--text-primary); border: 1px solid var(--border); border-radius: 9px; outline: 0; background: var(--background-base); }
+.simple-fields select:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgb(78 139 255 / 14%); }
+.pin-option { padding: 11px 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; border: 1px solid var(--border); border-radius: 9px; background: var(--background-elevated); }
+.pin-option input { width: 17px; height: 17px; accent-color: var(--accent-gold); }
+.pin-option > span { display: grid; }
+.pin-option small { color: var(--text-secondary); font-size: 0.68rem; }
 .announcement-list { display: grid; }
 .announcement-list article { padding: 17px 20px; display: grid; gap: 7px; border-bottom: 1px solid var(--border); }
 .announcement-list article:last-child { border-bottom: 0; }
@@ -1737,13 +1750,19 @@ h3 {
 .pin-badge, .status-pill, .permission-badge { width: fit-content; padding: 3px 8px; color: var(--accent-gold); font-size: 0.68rem; font-weight: 700; border: 1px solid rgb(231 184 92 / 38%); border-radius: 999px; background: rgb(231 184 92 / 8%); }
 
 .schedule-list { padding: 6px 18px; display: grid; }
-.schedule-list article { padding: 14px 0; display: grid; grid-template-columns: 52px 1fr; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.schedule-list article { padding: 14px 0; display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
 .schedule-list article:last-child { border-bottom: 0; }
 .schedule-list time { height: 52px; display: grid; place-items: center; align-content: center; color: var(--background-base); border-radius: 10px; background: var(--accent-gold); }
 .schedule-list time strong { font-size: 1.15rem; line-height: 1; }
 .schedule-list time span { font-size: 0.65rem; }
 .schedule-list article > div > span { color: var(--accent-blue); font-size: 0.68rem; }
 .schedule-list p { color: var(--text-secondary); font-size: 0.75rem; }
+.schedule-copy { min-width: 0; }
+.schedule-copy h3 { overflow-wrap: anywhere; }
+.schedule-delete-button { width: 36px; height: 36px; display: grid; place-items: center; color: var(--text-secondary); border: 1px solid transparent; border-radius: 9px; background: transparent; cursor: pointer; }
+.schedule-delete-button:hover { color: var(--danger); border-color: rgb(240 100 106 / 35%); background: rgb(240 100 106 / 7%); }
+.schedule-delete-button:disabled { cursor: not-allowed; opacity: 0.4; }
+.home-empty { min-height: 110px; padding: 24px; display: grid; place-items: center; align-content: center; gap: 7px; color: var(--text-secondary); text-align: center; }
 
 .home-homework { grid-column: 1 / -1; }
 .homework-preview { padding: 20px; display: grid; grid-template-columns: minmax(220px, 0.7fr) 1.3fr; align-items: center; gap: 24px; }

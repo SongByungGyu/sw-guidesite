@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getRequestMember } from "@/lib/member-session";
-import { serializeBuild } from "@/lib/content-api";
+import { canManageGuildContent, serializeBuild } from "@/lib/content-api";
 
 export async function GET(request: NextRequest) {
   const member = await getRequestMember(request);
@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     member: { nickname: member.nickname, role: member.role },
+    canManage: canManageGuildContent(member.role),
     announcements: announcements.map((item) => ({ ...item, createdAt: item.createdAt.toISOString(), updatedAt: item.updatedAt.toISOString(), author: item.author.nickname })),
     schedules: schedules.map((item) => ({ ...item, startsAt: item.startsAt.toISOString(), endsAt: item.endsAt?.toISOString(), createdAt: item.createdAt.toISOString() })),
     homeworks: homeworks.map((item) => ({ ...item, completedByMe: item.completions.length > 0, completions: undefined, dueAt: item.dueAt?.toISOString(), createdAt: item.createdAt.toISOString(), updatedAt: item.updatedAt.toISOString(), author: item.author.nickname, monsters: item.monsters.map(serializeBuild) })),

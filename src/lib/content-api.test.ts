@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildHomeworkProgress, canManageGuildContent, createDefenseSchema, createDungeonGuideSchema, createHomeworkSchema } from "@/lib/content-api";
+import { buildHomeworkProgress, canManageGuildContent, createAnnouncementSchema, createDefenseSchema, createDungeonGuideSchema, createHomeworkSchema, createScheduleSchema } from "@/lib/content-api";
 
 const monsterIds = ["1001", "1002", "1003", "1004", "1005"];
 const builds = monsterIds.map((monsterId, position) => ({
@@ -60,5 +60,12 @@ describe("guild content validation", () => {
     expect(progress.total).toBe(2);
     expect(progress.completed).toEqual([{ id: "member", nickname: "길드원", role: "MEMBER", completedAt: completedAt.toISOString() }]);
     expect(progress.incomplete).toEqual([{ id: "owner", nickname: "길드장", role: "OWNER" }]);
+  });
+
+  it("validates announcements and schedule time ranges", () => {
+    expect(createAnnouncementSchema.safeParse({ title: "점령전 안내", content: "공격 전 방덱을 확인해 주세요.", pinned: true }).success).toBe(true);
+    expect(createAnnouncementSchema.safeParse({ title: "", content: "짧음", pinned: false }).success).toBe(false);
+    expect(createScheduleSchema.safeParse({ title: "점령전 마감", category: "점령전", startsAt: "2026-07-23T10:00:00.000Z", endsAt: "2026-07-23T12:00:00.000Z" }).success).toBe(true);
+    expect(createScheduleSchema.safeParse({ title: "점령전 마감", category: "점령전", startsAt: "2026-07-23T12:00:00.000Z", endsAt: "2026-07-23T10:00:00.000Z" }).success).toBe(false);
   });
 });

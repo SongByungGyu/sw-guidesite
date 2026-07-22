@@ -1,21 +1,101 @@
 "use client";
 
+import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { BuildSummary, type MonsterBuildDraft } from "@/components/team-build-editor";
 import { Icon } from "@/components/icon";
 
+type Schedule = { id: string; title: string; category: string; startsAt: string; endsAt?: string };
 type HomeData = {
   member: { nickname: string; role: string };
+  canManage: boolean;
   announcements: Array<{ id: string; title: string; content: string; pinned: boolean; author: string; createdAt: string }>;
-  schedules: Array<{ id: string; title: string; category: string; startsAt: string }>;
+  schedules: Schedule[];
   homeworks: Array<{ id: string; title: string; target: string; dueAt?: string; author: string; completedByMe: boolean; monsters: MonsterBuildDraft[] }>;
 };
 
 export function GuildHome() {
   const [data, setData] = useState<HomeData | null>(null);
-  useEffect(() => { void fetch("/api/home", { cache: "no-store" }).then((response) => response.json()).then(setData); }, []);
+  const [editor, setEditor] = useState<"announcement" | "schedule" | null>(null);
+  const [saving, setSaving] = useState<"announcement" | "schedule" | null>(null);
+  const [deletingSchedule, setDeletingSchedule] = useState<string | null>(null);
+  const [error, setError] = useState("");
+
+  async function load() {
+    try {
+      setData(await fetchHomeData());
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "길드 홈을 불러오지 못했습니다.");
+    }
+  }
+
+  useEffect(() => {
+    void fetchHomeData().then(setData).catch((loadError: unknown) => {
+      setError(loadError instanceof Error ? loadError.message : "길드 홈을 불러오지 못했습니다.");
+    });
+  }, []);
+
+  async function createAnnouncement(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    setSaving("announcement");
+    setError("");
+    const response = await fetch("/api/announcements", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: form.get("title"), content: form.get("content"), pinned: form.get("pinned") === "on" }),
+    });
+    const result = await response.json().catch(() => ({})) as { error?: string };
+    if (!response.ok) setError(result.error ?? "공지를 저장하지 못했습니다.");
+    else {
+      formElement.reset();
+      setEditor(null);
+      await load();
+    }
+    setSaving(null);
+  }
+
+  async function createSchedule(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const startsAt = String(form.get("startsAt") ?? "");
+    const endsAt = String(form.get("endsAt") ?? "");
+    setSaving("schedule");
+    setError("");
+    const response = await fetch("/api/schedules", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: form.get("title"),
+        category: form.get("category"),
+        startsAt: new Date(startsAt).toISOString(),
+        endsAt: endsAt ? new Date(endsAt).toISOString() : null,
+      }),
+    });
+    const result = await response.json().catch(() => ({})) as { error?: string };
+    if (!response.ok) setError(result.error ?? "일정을 저장하지 못했습니다.");
+    else {
+      formElement.reset();
+      setEditor(null);
+      await load();
+    }
+    setSaving(null);
+  }
+
+  async function deleteSchedule(schedule: Schedule) {
+    if (!window.confirm(`'${schedule.title}' 일정을 삭제할까요?`)) return;
+    setDeletingSchedule(schedule.id);
+    setError("");
+    const response = await fetch(`/api/schedules/${schedule.id}`, { method: "DELETE" });
+    const result = await response.json().catch(() => ({})) as { error?: string };
+    if (!response.ok) setError(result.error ?? "일정을 삭제하지 못했습니다.");
+    else await load();
+    setDeletingSchedule(null);
+  }
 
   return (
     <AppShell activeSection="home">
@@ -27,22 +107,26 @@ export function GuildHome() {
       <section className="home-kpis" aria-label="길드 요약">
         <div><span>새 공지</span><strong>{data?.announcements.length ?? "—"}</strong><small>최근 안내</small></div>
         <div><span>진행 숙제</span><strong>{data?.homeworks.length ?? "—"}</strong><small>길드 공통</small></div>
-        <div><span>다가오는 일정</span><strong>{data?.schedules.length ?? "—"}</strong><small>7일 이내</small></div>
+        <div><span>다가오는 일정</span><strong>{data?.schedules.length ?? "—"}</strong><small>예정된 일정</small></div>
         <div className="home-kpi-accent"><span>내 권한</span><strong>{translateRole(data?.member.role)}</strong><small>서버 검증</small></div>
       </section>
 
+      {error ? <p className="form-error home-management-error">{error}</p> : null}
+
       <div className="home-grid">
         <section className="home-panel home-announcements">
-          <header><div><p className="eyebrow">NOTICE</p><h2>공지사항</h2></div><span>{data?.announcements.length ?? 0}건</span></header>
+          <header><div><p className="eyebrow">NOTICE</p><h2>공지사항</h2></div><div className="home-panel-actions"><span>{data?.announcements.length ?? 0}건</span>{data?.canManage ? <button className="button secondary home-action-button" onClick={() => setEditor((value) => value === "announcement" ? null : "announcement")} type="button"><Icon name={editor === "announcement" ? "x" : "plus"} size={16} />{editor === "announcement" ? "닫기" : "공지 작성"}</button> : null}</div></header>
+          {editor === "announcement" ? <form className="home-manage-form" onSubmit={createAnnouncement}><div className="simple-fields"><label className="span-full"><span>공지 제목</span><input autoFocus maxLength={80} minLength={2} name="title" placeholder="예: 점령전 공격 전 방덱 확인" required /></label><label className="span-full"><span>공지 내용</span><textarea maxLength={2000} minLength={4} name="content" placeholder="길드원이 확인해야 할 내용을 적어주세요." required /></label></div><label className="pin-option"><input name="pinned" type="checkbox" /><span><strong>필독으로 표시</strong><small>공지 목록 상단에 고정됩니다.</small></span></label><footer><button className="button secondary" onClick={() => setEditor(null)} type="button">취소</button><button className="button primary" disabled={saving === "announcement"} type="submit">{saving === "announcement" ? "저장 중" : "공지 게시"}</button></footer></form> : null}
           <div className="announcement-list">
-            {data?.announcements.map((item) => <article key={item.id}><div>{item.pinned ? <span className="pin-badge">필독</span> : null}<h3>{item.title}</h3></div><p>{item.content}</p><small>{item.author} · {formatRelative(item.createdAt)}</small></article>)}
+            {data?.announcements.length ? data.announcements.map((item) => <article key={item.id}><div>{item.pinned ? <span className="pin-badge">필독</span> : null}<h3>{item.title}</h3></div><p>{item.content}</p><small>{item.author} · {formatRelative(item.createdAt)}</small></article>) : <div className="home-empty"><Icon name="bell" size={20} /><p>등록된 공지가 없습니다.</p></div>}
           </div>
         </section>
 
         <section className="home-panel home-schedule">
-          <header><div><p className="eyebrow">SCHEDULE</p><h2>다가오는 일정</h2></div></header>
+          <header><div><p className="eyebrow">SCHEDULE</p><h2>다가오는 일정</h2></div>{data?.canManage ? <button className="button secondary home-action-button" onClick={() => setEditor((value) => value === "schedule" ? null : "schedule")} type="button"><Icon name={editor === "schedule" ? "x" : "plus"} size={16} />{editor === "schedule" ? "닫기" : "일정 추가"}</button> : null}</header>
+          {editor === "schedule" ? <form className="home-manage-form schedule-create-form" onSubmit={createSchedule}><div className="simple-fields"><label className="span-full"><span>일정 제목</span><input autoFocus maxLength={80} minLength={2} name="title" placeholder="예: 점령전 공격 마감" required /></label><label><span>종류</span><select defaultValue="점령전" name="category"><option>점령전</option><option>길드전</option><option>미궁</option><option>레이드</option><option>길드 공지</option><option>기타</option></select></label><label><span>시작</span><input name="startsAt" required type="datetime-local" /></label><label><span>종료 (선택)</span><input name="endsAt" type="datetime-local" /></label></div><footer><button className="button secondary" onClick={() => setEditor(null)} type="button">취소</button><button className="button primary" disabled={saving === "schedule"} type="submit">{saving === "schedule" ? "저장 중" : "일정 저장"}</button></footer></form> : null}
           <div className="schedule-list">
-            {data?.schedules.map((item) => <article key={item.id}><time><strong>{new Date(item.startsAt).getDate()}</strong><span>{new Intl.DateTimeFormat("ko-KR", { month: "short" }).format(new Date(item.startsAt))}</span></time><div><span>{item.category}</span><h3>{item.title}</h3><p>{new Intl.DateTimeFormat("ko-KR", { weekday: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(item.startsAt))}</p></div></article>)}
+            {data?.schedules.length ? data.schedules.map((item) => <article key={item.id}><time dateTime={item.startsAt}><strong>{new Date(item.startsAt).getDate()}</strong><span>{new Intl.DateTimeFormat("ko-KR", { month: "short" }).format(new Date(item.startsAt))}</span></time><div className="schedule-copy"><span>{item.category}</span><h3>{item.title}</h3><p>{formatScheduleTime(item.startsAt, item.endsAt)}</p></div>{data.canManage ? <button aria-label={`${item.title} 일정 삭제`} className="schedule-delete-button" disabled={deletingSchedule === item.id} onClick={() => void deleteSchedule(item)} title="일정 삭제" type="button"><Icon name="trash" size={17} /></button> : null}</article>) : <div className="home-empty"><Icon name="bell" size={20} /><p>예정된 일정이 없습니다.</p></div>}
           </div>
         </section>
 
@@ -61,5 +145,20 @@ export function GuildHome() {
 }
 
 function translateRole(role?: string) { return role === "OWNER" ? "길드장" : role === "OFFICER" ? "운영진" : role === "MEMBER" ? "길드원" : "—"; }
+async function fetchHomeData() {
+  const response = await fetch("/api/home", { cache: "no-store" });
+  const result = await response.json().catch(() => ({})) as HomeData & { error?: string };
+  if (!response.ok) throw new Error(result.error ?? "길드 홈을 불러오지 못했습니다.");
+  return result;
+}
 function formatDate(value: string) { return new Intl.DateTimeFormat("ko-KR", { month: "short", day: "numeric", weekday: "short" }).format(new Date(value)); }
 function formatRelative(value: string) { return new Intl.RelativeTimeFormat("ko-KR", { numeric: "auto" }).format(Math.round((Date.parse(value) - Date.now()) / 86400000), "day"); }
+function formatScheduleTime(startsAt: string, endsAt?: string) {
+  const start = new Date(startsAt);
+  const startLabel = new Intl.DateTimeFormat("ko-KR", { weekday: "short", hour: "2-digit", minute: "2-digit" }).format(start);
+  if (!endsAt) return startLabel;
+  const end = new Date(endsAt);
+  const sameDay = start.toDateString() === end.toDateString();
+  const endLabel = new Intl.DateTimeFormat("ko-KR", sameDay ? { hour: "2-digit", minute: "2-digit" } : { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(end);
+  return `${startLabel} ~ ${endLabel}`;
+}

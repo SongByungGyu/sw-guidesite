@@ -72,6 +72,23 @@ export const createHomeworkSchema = z.object({
   builds: z.array(homeworkBuildSchema).length(3),
 }).superRefine((input, context) => uniqueBuilds(input.builds, context));
 
+export const createAnnouncementSchema = z.object({
+  title: z.string().trim().min(2, "공지 제목을 2자 이상 입력해 주세요.").max(80),
+  content: z.string().trim().min(4, "공지 내용을 4자 이상 입력해 주세요.").max(2000),
+  pinned: z.boolean().default(false),
+});
+
+export const createScheduleSchema = z.object({
+  title: z.string().trim().min(2, "일정 제목을 2자 이상 입력해 주세요.").max(80),
+  category: z.string().trim().min(1, "일정 종류를 선택해 주세요.").max(30),
+  startsAt: z.string().datetime(),
+  endsAt: z.string().datetime().nullable(),
+}).superRefine((input, context) => {
+  if (input.endsAt && Date.parse(input.endsAt) < Date.parse(input.startsAt)) {
+    context.addIssue({ code: "custom", path: ["endsAt"], message: "종료 시간은 시작 시간보다 늦어야 합니다." });
+  }
+});
+
 export function canManageGuildContent(role: string) {
   return role === "OWNER" || role === "OFFICER";
 }
