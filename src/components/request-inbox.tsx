@@ -127,7 +127,7 @@ export function RequestInbox() {
             <section className="access-card">
               <p className="eyebrow">관리자 확인</p>
               <h1>요청함을 열려면 관리자 키를 입력하세요</h1>
-              <p>키는 서버에서 확인되며 브라우저 저장소에 노출되지 않습니다.</p>
+              <p>확인되면 이 기기에 길드장 접근 권한도 함께 등록됩니다.</p>
               <form className="access-form" onSubmit={signIn}>
                 <label><span>관리자 키</span><input name="adminKey" type="password" required autoComplete="current-password" placeholder="관리자에게 받은 키" /></label>
                 {error ? <p className="form-error" role="alert">{error}</p> : null}
