@@ -8,9 +8,10 @@ type ChangeRequestItem = {
   id: string;
   category: string;
   content: string;
-  status: string;
+  status: "PENDING" | "IN_PROGRESS" | "COMPLETED";
   author: string;
   createdAt: string;
+  updatedAt: string;
 };
 
 export function ChangeRequestWidget({ canManage }: { canManage: boolean }) {
@@ -30,6 +31,7 @@ function ChangeRequestDialog({ canManage, onClose }: { canManage: boolean; onClo
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [updatingId, setUpdatingId] = useState("");
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -76,6 +78,20 @@ function ChangeRequestDialog({ canManage, onClose }: { canManage: boolean; onClo
     dialogRef.current?.close();
   }
 
+  async function updateStatus(id: string, status: ChangeRequestItem["status"]) {
+    setUpdatingId(id);
+    setError("");
+    const response = await fetch(`/api/change-requests/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    const result = await response.json().catch(() => ({})) as { error?: string; updatedAt?: string };
+    if (!response.ok) setError(result.error ?? "요청 상태를 변경하지 못했습니다.");
+    else setRequests((items) => items.map((item) => item.id === id ? { ...item, status, updatedAt: result.updatedAt ?? item.updatedAt } : item));
+    setUpdatingId("");
+  }
+
   return <dialog aria-labelledby="change-request-title" className="monster-dialog change-request-dialog" onCancel={(event) => { event.preventDefault(); closeDialog(); }} onClick={(event) => { if (event.target === event.currentTarget) closeDialog(); }} onClose={onClose} ref={dialogRef}>
     <div className="change-request-shell">
       <header className="dialog-header"><div><p className="eyebrow">GUILD FEEDBACK</p><h2 id="change-request-title">수정 요청 보내기</h2><p>불편한 점이나 추가하고 싶은 기능을 남겨주세요.</p></div><button aria-label="수정 요청 닫기" className="icon-button" onClick={closeDialog} type="button"><Icon name="x" /></button></header>
@@ -90,7 +106,7 @@ function ChangeRequestDialog({ canManage, onClose }: { canManage: boolean; onClo
 
         <section className="change-request-history" aria-labelledby="change-request-history-title">
           <header><div><h3 id="change-request-history-title">{canManage ? "길드 전체 요청" : "내가 보낸 요청"}</h3><p>{canManage ? "길드원이 남긴 최근 요청입니다." : "내가 남긴 요청을 확인할 수 있습니다."}</p></div><span>{requests.length}건</span></header>
-          {loading ? <div className="change-request-empty"><span className="loading-spinner" /><p>요청을 불러오는 중입니다.</p></div> : requests.length ? <div className="change-request-list">{requests.map((item) => <article key={item.id}><header><span>{item.category}</span><em>{item.status === "PENDING" ? "접수됨" : item.status}</em></header><p>{item.content}</p><footer>{canManage ? <strong>{item.author}</strong> : null}<time>{formatRequestDate(item.createdAt)}</time></footer></article>)}</div> : <div className="change-request-empty"><Icon name="sparkles" size={20} /><p>아직 등록된 수정 요청이 없습니다.</p></div>}
+          {loading ? <div className="change-request-empty"><span className="loading-spinner" /><p>요청을 불러오는 중입니다.</p></div> : requests.length ? <div className="change-request-list">{requests.map((item) => <article key={item.id}><header><span>{item.category}</span>{canManage ? <select aria-label={`${item.author}님의 요청 처리 상태`} className={`change-request-status status-${item.status.toLowerCase()}`} disabled={updatingId === item.id} onChange={(event) => void updateStatus(item.id, event.target.value as ChangeRequestItem["status"])} value={item.status}><option value="PENDING">확인 전</option><option value="IN_PROGRESS">진행 중</option><option value="COMPLETED">완료</option></select> : <em className={`change-request-status status-${item.status.toLowerCase()}`}>{statusLabel(item.status)}</em>}</header><p>{item.content}</p><footer>{canManage ? <strong>{item.author}</strong> : null}<time>{formatRequestDate(item.updatedAt || item.createdAt)}</time></footer></article>)}</div> : <div className="change-request-empty"><Icon name="sparkles" size={20} /><p>아직 등록된 수정 요청이 없습니다.</p></div>}
         </section>
       </div>
     </div>
@@ -106,4 +122,10 @@ async function fetchChangeRequests() {
 
 function formatRequestDate(value: string) {
   return new Intl.DateTimeFormat("ko-KR", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date(value));
+}
+
+function statusLabel(status: ChangeRequestItem["status"]) {
+  if (status === "IN_PROGRESS") return "진행 중";
+  if (status === "COMPLETED") return "완료";
+  return "확인 전";
 }

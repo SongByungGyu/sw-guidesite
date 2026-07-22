@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
         nickname: accessRequest.nickname,
         requestedAt: accessRequest.requestedAt.toISOString(),
       } : undefined,
-      member: { nickname: session.member.nickname, role: session.member.role },
+      member: { nickname: session.member.nickname, role: session.member.role, credentialsReady: Boolean(session.member.loginIdNormalized && session.member.passwordHash) },
     });
   }
 

@@ -5,10 +5,10 @@ import {
   isAdminRequest,
   setDeviceCookie,
 } from "@/lib/access-auth";
-import { accessRequestInputSchema } from "@/lib/access-api";
+import { accessRequestInputSchema, normalizeLoginId } from "@/lib/access-api";
 import { db } from "@/lib/db";
 import { serverEnv } from "@/lib/env";
-import { createOpaqueToken, digestSecret } from "@/lib/security";
+import { createOpaqueToken, digestSecret, hashPassword } from "@/lib/security";
 
 export async function GET(request: NextRequest) {
   if (!isAdminRequest(request)) {
@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
     requests: requests.map((item) => ({
       id: item.id,
       nickname: item.nickname,
+      loginId: item.loginId ?? undefined,
       message: item.message,
       status: item.status.toLowerCase(),
       requestedAt: item.requestedAt.toISOString(),
@@ -45,17 +46,36 @@ export async function POST(request: NextRequest) {
   const guild = await db.guild.findUnique({ where: { slug: serverEnv.GUILD_SLUG } });
   if (!guild) return NextResponse.json({ error: "길드 신청을 받을 준비가 되지 않았습니다." }, { status: 503 });
 
-  const duplicate = await db.accessRequest.findFirst({
-    where: { guildId: guild.id, nickname: parsed.data.nickname, status: "PENDING" },
-    select: { id: true },
-  });
-  if (duplicate) return NextResponse.json({ error: "같은 닉네임의 승인 대기 요청이 있습니다." }, { status: 409 });
+  const loginIdNormalized = normalizeLoginId(parsed.data.loginId);
+  const [existingMember, duplicate] = await Promise.all([
+    db.guildMember.findFirst({
+      where: {
+        guildId: guild.id,
+        OR: [{ nickname: parsed.data.nickname }, { loginIdNormalized }],
+      },
+      select: { id: true, nickname: true },
+    }),
+    db.accessRequest.findFirst({
+      where: {
+        guildId: guild.id,
+        status: "PENDING",
+        OR: [{ nickname: parsed.data.nickname }, { loginIdNormalized }],
+      },
+      select: { id: true },
+    }),
+  ]);
+  if (existingMember) return NextResponse.json({ error: "이미 등록된 닉네임 또는 로그인 아이디입니다. 기존 계정으로 로그인해 주세요." }, { status: 409 });
+  if (duplicate) return NextResponse.json({ error: "같은 닉네임 또는 로그인 아이디의 승인 대기 요청이 있습니다." }, { status: 409 });
 
   const token = createOpaqueToken();
+  const passwordHash = await hashPassword(parsed.data.password);
   const created = await db.accessRequest.create({
     data: {
       guildId: guild.id,
       nickname: parsed.data.nickname,
+      loginId: parsed.data.loginId,
+      loginIdNormalized,
+      passwordHash,
       message: parsed.data.message,
       deviceTokenHash: digestSecret(token),
     },

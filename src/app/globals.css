@@ -1337,6 +1337,32 @@ h3 {
   gap: 16px;
 }
 
+.access-mode-tabs {
+  padding: 4px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--background-base);
+}
+
+.access-mode-tabs button {
+  min-height: 38px;
+  padding: 7px 10px;
+  color: var(--text-secondary);
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.access-mode-tabs button[aria-selected="true"] {
+  color: var(--text-primary);
+  font-weight: 750;
+  background: var(--surface-hover);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
 .access-form label {
   display: grid;
   gap: 7px;
@@ -2136,7 +2162,13 @@ h3 {
 .change-request-list article { padding: 13px 14px; display: grid; gap: 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--background-base); }
 .change-request-list article > header, .change-request-list article > footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .change-request-list article > header span { color: var(--accent-gold); font-size: 0.68rem; font-weight: 750; }
-.change-request-list article > header em { padding: 2px 6px; color: var(--success); font-size: 0.62rem; font-style: normal; border-radius: 999px; background: color-mix(in srgb, var(--success) 9%, transparent); }
+.change-request-list article > header em { font-style: normal; }
+.change-request-status { min-height: 28px; padding: 4px 24px 4px 8px; color: var(--text-secondary); font-size: 0.68rem; font-style: normal; font-weight: 750; border: 1px solid var(--border); border-radius: 999px; outline: 0; background-color: var(--background-elevated); }
+.change-request-status:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgb(78 139 255 / 14%); }
+em.change-request-status { padding-right: 8px; }
+.change-request-status.status-pending { color: var(--text-secondary); border-color: var(--border); background-color: var(--background-elevated); }
+.change-request-status.status-in_progress { color: var(--accent-gold); border-color: rgb(231 184 92 / 34%); background-color: rgb(231 184 92 / 8%); }
+.change-request-status.status-completed { color: var(--success); border-color: rgb(56 199 139 / 34%); background-color: rgb(56 199 139 / 8%); }
 .change-request-list article > p { color: var(--text-secondary); white-space: pre-wrap; overflow-wrap: anywhere; }
 .change-request-list article > footer { color: var(--text-secondary); font-size: 0.66rem; }
 .change-request-list article > footer strong { color: var(--text-primary); }

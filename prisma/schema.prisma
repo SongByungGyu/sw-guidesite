@@ -59,6 +59,12 @@ model GuildMember {
   id                  String               @id @default(cuid())
   guildId             String
   nickname            String
+  loginId             String?
+  loginIdNormalized   String?
+  passwordHash        String?
+  failedLoginCount    Int                  @default(0)
+  lockedUntil         DateTime?
+  lastLoginAt         DateTime?
   role                MemberRole           @default(MEMBER)
   active              Boolean              @default(true)
   createdAt           DateTime             @default(now())
@@ -77,6 +83,7 @@ model GuildMember {
   defenseMetaRecords  DefenseMetaRecord[]
 
   @@unique([guildId, nickname])
+  @@unique([guildId, loginIdNormalized])
   @@index([guildId, role])
 }
 
@@ -84,6 +91,9 @@ model AccessRequest {
   id                 String              @id @default(cuid())
   guildId            String
   nickname           String
+  loginId            String?
+  loginIdNormalized  String?
+  passwordHash       String?
   message            String              @default("")
   status             AccessRequestStatus @default(PENDING)
   deviceTokenHash    String              @unique
@@ -94,6 +104,7 @@ model AccessRequest {
   reviewedBy         GuildMember?        @relation("AccessRequestReviewer", fields: [reviewedByMemberId], references: [id], onDelete: SetNull)
 
   @@index([guildId, status, requestedAt])
+  @@index([guildId, loginIdNormalized])
 }
 
 model DeviceSession {

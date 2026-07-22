@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
   const owner = await db.guildMember.findFirst({
     where: { guildId: guild.id, role: "OWNER", active: true },
-    select: { id: true, nickname: true },
+    select: { id: true, nickname: true, loginIdNormalized: true, passwordHash: true },
   });
   if (!owner) return NextResponse.json({ error: "길드장 계정이 준비되지 않았습니다." }, { status: 503 });
 
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
   const response = NextResponse.json({
     authenticated: true,
     expiresAt: adminSession.expiresAt,
-    member: { nickname: owner.nickname, role: "OWNER" },
+    member: { nickname: owner.nickname, role: "OWNER", credentialsReady: Boolean(owner.loginIdNormalized && owner.passwordHash) },
   });
   setAdminCookie(response, adminSession.token);
   setDeviceCookie(response, deviceToken);

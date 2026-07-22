@@ -29,15 +29,23 @@ export async function PATCH(
 
   await db.$transaction(async (transaction) => {
     if (parsed.data.status === "approved") {
+      const credentials = accessRequest.loginId && accessRequest.loginIdNormalized && accessRequest.passwordHash ? {
+        loginId: accessRequest.loginId,
+        loginIdNormalized: accessRequest.loginIdNormalized,
+        passwordHash: accessRequest.passwordHash,
+        failedLoginCount: 0,
+        lockedUntil: null,
+      } : {};
       const member = await transaction.guildMember.upsert({
         where: {
           guildId_nickname: { guildId: accessRequest.guildId, nickname: accessRequest.nickname },
         },
-        update: { active: true },
+        update: { active: true, ...credentials },
         create: {
           guildId: accessRequest.guildId,
           nickname: accessRequest.nickname,
           role: "MEMBER",
+          ...credentials,
         },
       });
       const expiresAt = new Date(reviewedAt);
@@ -57,6 +65,7 @@ export async function PATCH(
         status: parsed.data.status === "approved" ? "APPROVED" : "REJECTED",
         reviewedAt,
         reviewedByMemberId: owner?.id,
+        passwordHash: null,
       },
     });
     await transaction.auditLog.create({
@@ -66,7 +75,7 @@ export async function PATCH(
         action: parsed.data.status === "approved" ? "ACCESS_REQUEST_APPROVED" : "ACCESS_REQUEST_REJECTED",
         entityType: "AccessRequest",
         entityId: id,
-        metadata: { nickname: accessRequest.nickname, source: "admin-key" },
+        metadata: { nickname: accessRequest.nickname, loginId: accessRequest.loginId, source: "admin-key" },
       },
     });
   });

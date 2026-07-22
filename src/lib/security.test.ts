@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   createSignedToken,
   digestSecret,
+  hashPassword,
   secretsEqual,
+  verifyPassword,
   verifySignedToken,
 } from "@/lib/security";
 
@@ -23,5 +25,14 @@ describe("security helpers", () => {
     const token = createSignedToken("payload", secret);
     expect(verifySignedToken(token, secret)).toBe("payload");
     expect(verifySignedToken(`${token}changed`, secret)).toBeNull();
+  });
+
+  it("hashes passwords with a unique salt and verifies them safely", async () => {
+    const first = await hashPassword("guild1234");
+    const second = await hashPassword("guild1234");
+    expect(first).not.toBe(second);
+    await expect(verifyPassword("guild1234", first)).resolves.toBe(true);
+    await expect(verifyPassword("wrong1234", first)).resolves.toBe(false);
+    await expect(verifyPassword("guild1234", "invalid")).resolves.toBe(false);
   });
 });

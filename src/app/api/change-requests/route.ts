@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
       status: item.status,
       author: item.author.nickname,
       createdAt: item.createdAt.toISOString(),
+      updatedAt: item.updatedAt.toISOString(),
     })),
   });
 }

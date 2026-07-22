@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
     members: members.map((member) => ({
       id: member.id,
       nickname: member.nickname,
+      loginId: member.loginId ?? undefined,
       role: member.role,
       active: member.active,
       createdAt: member.createdAt.toISOString(),

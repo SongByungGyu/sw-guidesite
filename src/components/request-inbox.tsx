@@ -182,6 +182,7 @@ export function RequestInbox() {
                     <p>{request.message || "요청 메시지가 없습니다."}</p>
                     <dl className="request-meta">
                       <div><dt>신청 방식</dt><dd>관리자 승인</dd></div>
+                      <div><dt>로그인 ID</dt><dd>{request.loginId ?? "승인 후 설정"}</dd></div>
                       <div><dt>요청 시각</dt><dd>{formatDate(request.requestedAt)}</dd></div>
                       <div><dt>요청 번호</dt><dd>{request.id.slice(0, 8).toUpperCase()}</dd></div>
                     </dl>
@@ -219,7 +220,7 @@ export function RequestInbox() {
                       <span className={`member-role-badge ${member.role.toLowerCase()}`}>{roleLabel(member.role)}</span>
                     </div>
                     <p>
-                      가입 {formatDate(member.createdAt)}
+                      {member.loginId ? `ID ${member.loginId} · ` : "계정 미설정 · "}가입 {formatDate(member.createdAt)}
                       {member.lastSeenAt ? ` · 최근 접속 ${formatDate(member.lastSeenAt)}` : " · 접속 기록 없음"}
                     </p>
                   </div>
