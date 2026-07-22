@@ -8,6 +8,7 @@ import { BuildDetails, BuildSummary, type MonsterBuildDraft } from "@/components
 import { Icon } from "@/components/icon";
 import { ChangeRequestWidget } from "@/components/change-request-widget";
 import { KakaoShareButton } from "@/components/kakao-share-button";
+import { createSharedContentPath, readSharedHomeDetail } from "@/lib/share-links";
 
 type Schedule = { id: string; title: string; category: string; startsAt: string; endsAt?: string };
 type Announcement = { id: string; title: string; content: string; pinned: boolean; author: string; createdAt: string };
@@ -19,6 +20,7 @@ type HomeData = {
   announcements: Announcement[];
   schedules: Schedule[];
   homeworks: HomeworkPreview[];
+  sharedDetail?: HomeDetail;
 };
 
 export function GuildHome() {
@@ -45,6 +47,41 @@ export function GuildHome() {
       setError(loadError instanceof Error ? loadError.message : "길드 홈을 불러오지 못했습니다.");
     });
   }, []);
+
+  useEffect(() => {
+    if (!data) return;
+    const timer = window.setTimeout(() => {
+      const requested = readSharedHomeDetail(window.location.search);
+      if (!requested) return;
+      if (data.sharedDetail?.kind === requested.kind && data.sharedDetail.item.id === requested.id) {
+        setDetail(data.sharedDetail);
+        return;
+      }
+      const item = requested.kind === "announcement"
+        ? data.announcements.find((candidate) => candidate.id === requested.id)
+        : data.schedules.find((candidate) => candidate.id === requested.id);
+      if (item) {
+        setDetail(requested.kind === "announcement"
+          ? { kind: "announcement", item: item as Announcement }
+          : { kind: "schedule", item: item as Schedule });
+      } else {
+        setError("공유된 게시물을 찾을 수 없습니다. 삭제되었거나 더 이상 공개되지 않은 게시물일 수 있습니다.");
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [data]);
+
+  function openDetail(nextDetail: HomeDetail) {
+    setDetail(nextDetail);
+    if (nextDetail.kind !== "homework") {
+      window.history.replaceState(null, "", createSharedContentPath(nextDetail.kind, nextDetail.item.id));
+    }
+  }
+
+  function closeDetail() {
+    setDetail(null);
+    if (readSharedHomeDetail(window.location.search)) window.history.replaceState(null, "", window.location.pathname);
+  }
 
   async function saveAnnouncement(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -152,7 +189,7 @@ export function GuildHome() {
           <header><div><p className="eyebrow">NOTICE</p><h2>공지사항</h2></div><div className="home-panel-actions"><span>{data?.announcements.length ?? 0}건</span>{data?.canManage ? <button className="button secondary home-action-button" onClick={() => { if (editor === "announcement") { setEditor(null); setEditingAnnouncement(null); } else openAnnouncementEditor(null); }} type="button"><Icon name={editor === "announcement" ? "x" : "plus"} size={16} />{editor === "announcement" ? "닫기" : "공지 작성"}</button> : null}</div></header>
           {editor === "announcement" ? <form className="home-manage-form" key={editingAnnouncement?.id ?? "new-announcement"} onSubmit={saveAnnouncement}><div className="simple-fields"><label className="span-full"><span>공지 제목</span><input autoFocus defaultValue={editingAnnouncement?.title} maxLength={80} minLength={2} name="title" placeholder="예: 점령전 공격 전 방덱 확인" required /></label><label className="span-full"><span>공지 내용</span><textarea defaultValue={editingAnnouncement?.content} maxLength={2000} minLength={4} name="content" placeholder="길드원이 확인해야 할 내용을 적어주세요." required /></label></div><label className="pin-option"><input defaultChecked={editingAnnouncement?.pinned} name="pinned" type="checkbox" /><span><strong>필독으로 표시</strong><small>공지 목록 상단에 고정됩니다.</small></span></label><footer><button className="button secondary" onClick={() => { setEditor(null); setEditingAnnouncement(null); }} type="button">취소</button><button className="button primary" disabled={saving === "announcement"} type="submit">{saving === "announcement" ? "저장 중" : editingAnnouncement ? "공지 수정" : "공지 게시"}</button></footer></form> : null}
           <div className="announcement-list">
-            {data?.announcements.length ? data.announcements.map((item) => <article aria-haspopup="dialog" className="home-content-card" key={item.id} onClick={() => setDetail({ kind: "announcement", item })} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setDetail({ kind: "announcement", item }); } }} role="button" tabIndex={0}><div>{item.pinned ? <span className="pin-badge">필독</span> : null}<h3>{item.title}</h3><span className="content-admin-actions" onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}><KakaoShareButton category="공지사항" compact description={item.content} path="/home" title={item.title} />{data.canManage ? <><button aria-label={`${item.title} 공지 수정`} onClick={() => openAnnouncementEditor(item)} title="공지 수정" type="button"><Icon name="edit" size={15} /></button><button aria-label={`${item.title} 공지 삭제`} className="danger-icon" disabled={deletingAnnouncement === item.id} onClick={() => void deleteAnnouncement(item)} title="공지 삭제" type="button"><Icon name="trash" size={15} /></button></> : null}</span></div><p>{item.content}</p><small>{item.author} · {formatRelative(item.createdAt)} · 눌러서 상세 보기</small></article>) : <div className="home-empty"><Icon name="bell" size={20} /><p>등록된 공지가 없습니다.</p></div>}
+            {data?.announcements.length ? data.announcements.map((item) => <article aria-haspopup="dialog" className="home-content-card" key={item.id} onClick={() => openDetail({ kind: "announcement", item })} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openDetail({ kind: "announcement", item }); } }} role="button" tabIndex={0}><div>{item.pinned ? <span className="pin-badge">필독</span> : null}<h3>{item.title}</h3><span className="content-admin-actions" onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}><KakaoShareButton category="공지사항" compact description={item.content} path={createSharedContentPath("announcement", item.id)} title={item.title} />{data.canManage ? <><button aria-label={`${item.title} 공지 수정`} onClick={() => openAnnouncementEditor(item)} title="공지 수정" type="button"><Icon name="edit" size={15} /></button><button aria-label={`${item.title} 공지 삭제`} className="danger-icon" disabled={deletingAnnouncement === item.id} onClick={() => void deleteAnnouncement(item)} title="공지 삭제" type="button"><Icon name="trash" size={15} /></button></> : null}</span></div><p>{item.content}</p><small>{item.author} · {formatRelative(item.createdAt)} · 눌러서 상세 보기</small></article>) : <div className="home-empty"><Icon name="bell" size={20} /><p>등록된 공지가 없습니다.</p></div>}
           </div>
         </section>
 
@@ -160,13 +197,13 @@ export function GuildHome() {
           <header><div><p className="eyebrow">SCHEDULE</p><h2>다가오는 일정</h2></div>{data?.canManage ? <button className="button secondary home-action-button" onClick={() => { if (editor === "schedule") { setEditor(null); setEditingSchedule(null); } else openScheduleEditor(null); }} type="button"><Icon name={editor === "schedule" ? "x" : "plus"} size={16} />{editor === "schedule" ? "닫기" : "일정 추가"}</button> : null}</header>
           {editor === "schedule" ? <form className="home-manage-form schedule-create-form" key={editingSchedule?.id ?? "new-schedule"} onSubmit={saveSchedule}><div className="simple-fields"><label className="span-full"><span>일정 제목</span><input autoFocus defaultValue={editingSchedule?.title} maxLength={80} minLength={2} name="title" placeholder="예: 점령전 공격 마감" required /></label><label><span>종류</span><select defaultValue={editingSchedule?.category ?? "점령전"} name="category"><option>점령전</option><option>길드전</option><option>미궁</option><option>레이드</option><option>길드 공지</option><option>기타</option></select></label><label><span>시작</span><input defaultValue={editingSchedule ? toDateTimeLocal(editingSchedule.startsAt) : undefined} name="startsAt" required type="datetime-local" /></label><label><span>종료 (선택)</span><input defaultValue={editingSchedule?.endsAt ? toDateTimeLocal(editingSchedule.endsAt) : undefined} name="endsAt" type="datetime-local" /></label></div><footer><button className="button secondary" onClick={() => { setEditor(null); setEditingSchedule(null); }} type="button">취소</button><button className="button primary" disabled={saving === "schedule"} type="submit">{saving === "schedule" ? "저장 중" : editingSchedule ? "일정 수정" : "일정 저장"}</button></footer></form> : null}
           <div className="schedule-list">
-            {data?.schedules.length ? data.schedules.map((item) => <article aria-haspopup="dialog" className="home-content-card" key={item.id} onClick={() => setDetail({ kind: "schedule", item })} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setDetail({ kind: "schedule", item }); } }} role="button" tabIndex={0}><time dateTime={item.startsAt}><strong>{new Date(item.startsAt).getDate()}</strong><span>{new Intl.DateTimeFormat("ko-KR", { month: "short" }).format(new Date(item.startsAt))}</span></time><div className="schedule-copy"><span>{item.category}</span><h3>{item.title}</h3><p>{formatScheduleTime(item.startsAt, item.endsAt)} · 상세 보기</p></div><span className="content-admin-actions" onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}><KakaoShareButton category={`일정 · ${item.category}`} compact description={formatScheduleTime(item.startsAt, item.endsAt)} path="/home" title={item.title} />{data.canManage ? <><button aria-label={`${item.title} 일정 수정`} onClick={() => openScheduleEditor(item)} title="일정 수정" type="button"><Icon name="edit" size={16} /></button><button aria-label={`${item.title} 일정 삭제`} className="danger-icon" disabled={deletingSchedule === item.id} onClick={() => void deleteSchedule(item)} title="일정 삭제" type="button"><Icon name="trash" size={16} /></button></> : null}</span></article>) : <div className="home-empty"><Icon name="bell" size={20} /><p>예정된 일정이 없습니다.</p></div>}
+            {data?.schedules.length ? data.schedules.map((item) => <article aria-haspopup="dialog" className="home-content-card" key={item.id} onClick={() => openDetail({ kind: "schedule", item })} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openDetail({ kind: "schedule", item }); } }} role="button" tabIndex={0}><time dateTime={item.startsAt}><strong>{new Date(item.startsAt).getDate()}</strong><span>{new Intl.DateTimeFormat("ko-KR", { month: "short" }).format(new Date(item.startsAt))}</span></time><div className="schedule-copy"><span>{item.category}</span><h3>{item.title}</h3><p>{formatScheduleTime(item.startsAt, item.endsAt)} · 상세 보기</p></div><span className="content-admin-actions" onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}><KakaoShareButton category={`일정 · ${item.category}`} compact description={formatScheduleTime(item.startsAt, item.endsAt)} path={createSharedContentPath("schedule", item.id)} title={item.title} />{data.canManage ? <><button aria-label={`${item.title} 일정 수정`} onClick={() => openScheduleEditor(item)} title="일정 수정" type="button"><Icon name="edit" size={16} /></button><button aria-label={`${item.title} 일정 삭제`} className="danger-icon" disabled={deletingSchedule === item.id} onClick={() => void deleteSchedule(item)} title="일정 삭제" type="button"><Icon name="trash" size={16} /></button></> : null}</span></article>) : <div className="home-empty"><Icon name="bell" size={20} /><p>예정된 일정이 없습니다.</p></div>}
           </div>
         </section>
 
         <section className="home-panel home-homework">
           <header><div><p className="eyebrow">TODAY</p><h2>진행 중인 길드 숙제</h2></div><Link href="/homeworks">전체 보기</Link></header>
-          {data?.homeworks.map((item) => <article aria-haspopup="dialog" className="homework-preview home-content-card" key={item.id} onClick={() => setDetail({ kind: "homework", item })} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setDetail({ kind: "homework", item }); } }} role="button" tabIndex={0}><div className="homework-preview-copy"><span className="status-pill">{item.completedByMe ? "내 숙제 완료" : "진행 중"}</span><h3>{item.title}</h3><p>{item.target}</p><small>{item.dueAt ? `${formatDate(item.dueAt)} 마감` : "기한 없음"} · 작성 {item.author} · 눌러서 상세 보기</small><span className="homework-preview-share" onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}><KakaoShareButton category="길드 숙제" description={`${item.target} · ${item.dueAt ? `${formatDate(item.dueAt)} 마감` : "기한 없음"}`} path="/homeworks" title={item.title} /></span></div><BuildSummary builds={item.monsters} /></article>)}
+          {data?.homeworks.map((item) => <article aria-haspopup="dialog" className="homework-preview home-content-card" key={item.id} onClick={() => openDetail({ kind: "homework", item })} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openDetail({ kind: "homework", item }); } }} role="button" tabIndex={0}><div className="homework-preview-copy"><span className="status-pill">{item.completedByMe ? "내 숙제 완료" : "진행 중"}</span><h3>{item.title}</h3><p>{item.target}</p><small>{item.dueAt ? `${formatDate(item.dueAt)} 마감` : "기한 없음"} · 작성 {item.author} · 눌러서 상세 보기</small><span className="homework-preview-share" onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}><KakaoShareButton category="길드 숙제" description={`${item.target} · ${item.dueAt ? `${formatDate(item.dueAt)} 마감` : "기한 없음"}`} path={createSharedContentPath("homework", item.id)} title={item.title} /></span></div><BuildSummary builds={item.monsters} /></article>)}
         </section>
 
         <section className="home-panel quick-links">
@@ -175,7 +212,7 @@ export function GuildHome() {
         </section>
       </div>
       {data ? <ChangeRequestWidget canManage={data.canManage} /> : null}
-      <HomeContentDetail detail={detail} onClose={() => setDetail(null)} />
+      <HomeContentDetail detail={detail} onClose={closeDetail} />
     </AppShell>
   );
 }
@@ -210,9 +247,9 @@ function HomeContentDetail({ detail, onClose }: { detail: HomeDetail | null; onC
         </>}
       </div>
       <footer className="dialog-footer">
-        {detail.kind === "announcement" ? <KakaoShareButton category="공지사항" description={detail.item.content} path="/home" title={title} /> : detail.kind === "schedule" ? <KakaoShareButton category={`일정 · ${detail.item.category}`} description={formatScheduleTime(detail.item.startsAt, detail.item.endsAt)} path="/home" title={title} /> : <KakaoShareButton category="길드 숙제" description={`${detail.item.target} · ${detail.item.dueAt ? `${formatDate(detail.item.dueAt)} 마감` : "기한 없음"}`} path="/homeworks" title={title} />}
+        {detail.kind === "announcement" ? <KakaoShareButton category="공지사항" description={detail.item.content} path={createSharedContentPath("announcement", detail.item.id)} title={title} /> : detail.kind === "schedule" ? <KakaoShareButton category={`일정 · ${detail.item.category}`} description={formatScheduleTime(detail.item.startsAt, detail.item.endsAt)} path={createSharedContentPath("schedule", detail.item.id)} title={title} /> : <KakaoShareButton category="길드 숙제" description={`${detail.item.target} · ${detail.item.dueAt ? `${formatDate(detail.item.dueAt)} 마감` : "기한 없음"}`} path={createSharedContentPath("homework", detail.item.id)} title={title} />}
         <button className="button secondary" onClick={close} type="button">닫기</button>
-        {detail.kind === "homework" ? <Link className="button primary" href="/homeworks">숙제 전체 화면</Link> : null}
+        {detail.kind === "homework" ? <Link className="button primary" href={createSharedContentPath("homework", detail.item.id)}>해당 숙제 화면</Link> : null}
       </footer>
     </div>
   </dialog>;
@@ -220,7 +257,9 @@ function HomeContentDetail({ detail, onClose }: { detail: HomeDetail | null; onC
 
 function translateRole(role?: string) { return role === "OWNER" ? "길드장" : role === "OFFICER" ? "운영진" : role === "MEMBER" ? "길드원" : "—"; }
 async function fetchHomeData() {
-  const response = await fetch("/api/home", { cache: "no-store" });
+  const requested = readSharedHomeDetail(window.location.search);
+  const query = requested ? `?detail=${requested.kind}&id=${encodeURIComponent(requested.id)}` : "";
+  const response = await fetch(`/api/home${query}`, { cache: "no-store" });
   const result = await response.json().catch(() => ({})) as HomeData & { error?: string };
   if (!response.ok) throw new Error(result.error ?? "길드 홈을 불러오지 못했습니다.");
   return result;

@@ -6,6 +6,8 @@ import { canManageGuildContent, serializeBuild } from "@/lib/content-api";
 export async function GET(request: NextRequest) {
   const member = await getRequestMember(request);
   if (!member) return NextResponse.json({ error: "접근 승인이 필요합니다." }, { status: 401 });
+  const detailKind = request.nextUrl.searchParams.get("detail");
+  const detailId = request.nextUrl.searchParams.get("id")?.trim();
 
   const [announcements, schedules, homeworks] = await Promise.all([
     db.announcement.findMany({ where: { guildId: member.guildId }, include: { author: true }, orderBy: [{ pinned: "desc" }, { createdAt: "desc" }], take: 5 }),
@@ -13,11 +15,21 @@ export async function GET(request: NextRequest) {
     db.homework.findMany({ where: { guildId: member.guildId, status: "ACTIVE" }, include: { author: true, monsters: { orderBy: { position: "asc" } }, completions: { where: { memberId: member.id }, select: { id: true } } }, orderBy: [{ dueAt: "asc" }, { createdAt: "desc" }], take: 6 }),
   ]);
 
+  let sharedDetail;
+  if (detailId && detailKind === "announcement") {
+    const item = await db.announcement.findFirst({ where: { id: detailId, guildId: member.guildId }, include: { author: true } });
+    if (item) sharedDetail = { kind: "announcement", item: { ...item, createdAt: item.createdAt.toISOString(), updatedAt: item.updatedAt.toISOString(), author: item.author.nickname } };
+  } else if (detailId && detailKind === "schedule") {
+    const item = await db.guildSchedule.findFirst({ where: { id: detailId, guildId: member.guildId } });
+    if (item) sharedDetail = { kind: "schedule", item: { ...item, startsAt: item.startsAt.toISOString(), endsAt: item.endsAt?.toISOString(), createdAt: item.createdAt.toISOString() } };
+  }
+
   return NextResponse.json({
     member: { nickname: member.nickname, role: member.role },
     canManage: canManageGuildContent(member.role),
     announcements: announcements.map((item) => ({ ...item, createdAt: item.createdAt.toISOString(), updatedAt: item.updatedAt.toISOString(), author: item.author.nickname })),
     schedules: schedules.map((item) => ({ ...item, startsAt: item.startsAt.toISOString(), endsAt: item.endsAt?.toISOString(), createdAt: item.createdAt.toISOString() })),
     homeworks: homeworks.map((item) => ({ ...item, completedByMe: item.completions.length > 0, completions: undefined, dueAt: item.dueAt?.toISOString(), createdAt: item.createdAt.toISOString(), updatedAt: item.updatedAt.toISOString(), author: item.author.nickname, monsters: item.monsters.map(serializeBuild) })),
+    sharedDetail,
   });
 }

@@ -2340,6 +2340,8 @@ em.change-request-status { padding-right: 8px; }
 .homework-board-list { display: grid; gap: 14px; }
 .homework-card { padding: clamp(18px, 3vw, 24px); display: grid; gap: 20px; border: 1px solid var(--border); border-radius: 14px; background: var(--background-elevated); }
 .homework-card.is-completed { border-color: color-mix(in srgb, #42d7a2 46%, var(--border)); box-shadow: inset 3px 0 #42d7a2; }
+.homework-card.is-shared-target { scroll-margin: 24px; border-color: var(--accent-gold); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-gold) 18%, transparent), inset 3px 0 var(--accent-gold); }
+.homework-card.is-shared-target:focus { outline: 2px solid color-mix(in srgb, var(--accent-gold) 65%, white); outline-offset: 4px; }
 .homework-card > header, .homework-card > footer { display: flex; justify-content: space-between; gap: 18px; }
 .homework-card > header > div { display: grid; gap: 5px; }
 .homework-card > header p, .homework-card > header time, .homework-card > footer p { color: var(--text-secondary); }
