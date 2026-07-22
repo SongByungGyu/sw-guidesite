@@ -10,12 +10,12 @@ async function main() {
   const guild = await prisma.guild.upsert({
     where: { slug: process.env.GUILD_SLUG ?? "conan" },
     update: {
-      name: process.env.GUILD_NAME ?? "코난 길드",
+      name: process.env.GUILD_NAME ?? "질투",
       accessCodeHash: digestSecret(process.env.GUILD_ACCESS_CODE ?? "CONAN-01"),
     },
     create: {
       slug: process.env.GUILD_SLUG ?? "conan",
-      name: process.env.GUILD_NAME ?? "코난 길드",
+      name: process.env.GUILD_NAME ?? "질투",
       accessCodeHash: digestSecret(process.env.GUILD_ACCESS_CODE ?? "CONAN-01"),
     },
   });

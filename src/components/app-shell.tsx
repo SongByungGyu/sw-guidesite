@@ -22,7 +22,7 @@ export function AppShell({ children, activeSection = "offense" }: AppShellProps)
       <aside className="sidebar">
         <div className="brand">
           <span className="brand-mark"><Icon name="shield" /></span>
-          <span><strong>길드 아카이브</strong><small>코난 길드</small></span>
+          <span><strong>길드 아카이브</strong><small>질투</small></span>
         </div>
         <nav aria-label="주 메뉴" className="sidebar-nav">
           {navItems.map((item) => (
@@ -42,7 +42,7 @@ export function AppShell({ children, activeSection = "offense" }: AppShellProps)
         <header className="topbar">
           <div className="mobile-brand"><Icon name="shield" /><strong>길드 아카이브</strong></div>
           <button className="guild-switcher" type="button">
-            코난 길드 <Icon name="chevron" size={16} />
+            질투 <Icon name="chevron" size={16} />
           </button>
           <div className="topbar-actions">
             <button className="icon-button" type="button" aria-label="알림, P1 예정">
