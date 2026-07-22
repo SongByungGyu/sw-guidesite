@@ -2109,7 +2109,7 @@ h3 {
 .announcement-list article { padding: 17px 20px; display: grid; gap: 7px; border-bottom: 1px solid var(--border); }
 .announcement-list article:last-child { border-bottom: 0; }
 .announcement-list article > div { display: flex; align-items: center; gap: 8px; }
-.announcement-list p { color: var(--text-secondary); }
+.announcement-list p { overflow: hidden; display: -webkit-box; color: var(--text-secondary); -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .announcement-list small { color: var(--text-secondary); font-size: 0.72rem; }
 .pin-badge, .status-pill, .permission-badge { width: fit-content; padding: 3px 8px; color: var(--accent-gold); font-size: 0.68rem; font-weight: 700; border: 1px solid rgb(231 184 92 / 38%); border-radius: 999px; background: rgb(231 184 92 / 8%); }
 
@@ -2146,7 +2146,28 @@ h3 {
 .homework-preview { padding: 20px; display: grid; grid-template-columns: minmax(220px, 0.7fr) 1.3fr; align-items: center; gap: 24px; }
 .homework-preview-copy { display: grid; gap: 7px; }
 .homework-preview-copy p, .homework-preview-copy small { color: var(--text-secondary); }
+.homework-preview-copy > p { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .homework-preview-copy .kakao-share-button { width: fit-content; margin-top: 4px; }
+.homework-preview-share { width: fit-content; display: inline-flex; }
+.home-content-card { cursor: pointer; transition: border-color 160ms ease, background 160ms ease, transform 160ms ease; }
+.home-content-card:hover { background: color-mix(in srgb, var(--accent-blue) 5%, var(--background-elevated)); }
+.home-content-card:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: -2px; }
+.homework-preview.home-content-card:hover { transform: translateY(-1px); }
+.home-detail-dialog { position: fixed; inset: 0; width: min(820px, calc(100% - 32px)); margin: auto; }
+.home-detail-shell { max-height: calc(100dvh - 34px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.home-detail-body { padding: 20px 22px 24px; overflow-y: auto; display: grid; gap: 16px; }
+.home-detail-overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--border); border-radius: 11px; }
+.home-detail-overview > div { min-width: 0; padding: 13px 14px; display: grid; gap: 4px; border-right: 1px solid var(--border); background: var(--background-base); }
+.home-detail-overview > div:last-child { border-right: 0; }
+.home-detail-overview span, .home-detail-copy > span { color: var(--text-secondary); font-size: 0.68rem; }
+.home-detail-overview strong { overflow-wrap: anywhere; }
+.home-detail-copy { padding: 16px 18px; display: grid; gap: 7px; border-left: 3px solid var(--accent-gold); border-radius: 0 10px 10px 0; background: var(--background-base); }
+.home-detail-copy p { color: var(--text-primary); line-height: 1.75; white-space: pre-wrap; overflow-wrap: anywhere; }
+.home-detail-builds { display: grid; gap: 11px; }
+.home-detail-builds > header { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.home-detail-builds > header p { color: var(--text-secondary); font-size: 0.72rem; }
+.home-detail-builds > header > span { color: var(--accent-gold); font-size: 0.72rem; font-weight: 700; }
+.home-detail-shell > .dialog-footer { display: flex; justify-content: flex-end; gap: 8px; }
 .quick-links > div { padding: 8px; display: grid; }
 .quick-links a { padding: 13px 12px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 11px; border-radius: 10px; }
 .quick-links a:hover { background: var(--surface); }
@@ -2924,6 +2945,13 @@ em.change-request-status { padding-right: 8px; }
   .change-request-form, .change-request-history { padding-right: 14px; padding-left: 14px; }
   .change-request-form-meta { align-items: stretch; flex-direction: column; }
   .change-request-form-meta .button { width: 100%; }
+  .home-detail-shell { height: 100dvh; max-height: 100dvh; }
+  .home-detail-body { padding: 16px 14px 18px; }
+  .home-detail-overview { grid-template-columns: 1fr; }
+  .home-detail-overview > div { border-right: 0; border-bottom: 1px solid var(--border); }
+  .home-detail-overview > div:last-child { border-bottom: 0; }
+  .home-detail-shell > .dialog-footer { display: grid; grid-template-columns: 1fr; }
+  .home-detail-shell > .dialog-footer .button { width: 100%; }
   .defense-detail-shell { height: 100dvh; max-height: 100dvh; }
   .defense-detail-body { padding: 16px 14px 18px; }
   .defense-detail-overview { grid-template-columns: 1fr; }
