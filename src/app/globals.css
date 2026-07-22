@@ -2264,6 +2264,7 @@ em.change-request-status { padding-right: 8px; }
 .managed-deck-team > header span { color: var(--text-secondary); font-size: 0.7rem; }
 .managed-deck-team > div { display: flex; justify-content: center; gap: 18px; }
 .managed-deck-team .monster-card { max-width: 92px; }
+.defense-empty-selector { min-height: 180px; margin-top: 8px; }
 
 .dungeon-search { width: min(100%, 520px); min-height: 46px; margin-bottom: 12px; padding: 0 14px; display: flex; align-items: center; gap: 10px; color: var(--text-secondary); border: 1px solid var(--border); border-radius: 12px; background: var(--background-elevated); }
 .dungeon-search:focus-within { border-color: var(--accent-gold); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-gold) 15%, transparent); }

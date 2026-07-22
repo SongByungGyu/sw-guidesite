@@ -122,7 +122,7 @@ export function DeckRegistration({ initialDefenseIds }: DeckRegistrationProps) {
             <div><h2>상대 방어덱 확인</h2><p>공덱이 검색될 기준 방덱입니다. 순서는 검색에 영향을 주지 않습니다.</p></div>
             <button className="button secondary" type="button" onClick={() => openPicker("defense")}><Icon name="search" size={18} /> 방덱 다시 검색</button>
           </header>
-          <SelectedTeam ids={defenseIds} label="상대 방어덱" onSlotClick={(slot) => openPicker("defense", slot)} />
+          {defenseIds.length === 3 ? <SelectedTeam ids={defenseIds} label="상대 방어덱" onSlotClick={(slot) => openPicker("defense", slot)} /> : <button className="empty-team-selector" onClick={() => openPicker("defense")} type="button"><span><Icon name="plus" /></span><strong>상대 방어덱 3마리를 선택하세요</strong><small>공덱이 연결될 상대 몬스터 조합입니다.</small></button>}
         </section>
 
         <section className="registration-section">

@@ -8,9 +8,10 @@ import { getMonster } from "@/lib/monster-data";
 export async function GET(request: NextRequest) {
   const member = await getRequestMember(request);
   if (!member) return NextResponse.json({ error: "접근 승인이 필요합니다." }, { status: 401 });
+  const canManage = canManageGuildContent(member.role);
 
   const defenseIds = request.nextUrl.searchParams.get("defense")?.split(",").filter(Boolean) ?? [];
-  if (defenseIds.length !== 3) return NextResponse.json({ decks: [] });
+  if (defenseIds.length !== 3) return NextResponse.json({ canManage, decks: [] });
 
   const defenses = await db.deck.findMany({
     where: {
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
   ));
 
   return NextResponse.json({
-    canManage: canManageGuildContent(member.role),
+    canManage,
     decks: matchingDefenses.flatMap((defense) => defense.offenseRecommendations.map((deck) => ({
       id: deck.id,
       title: deck.title,

@@ -77,16 +77,17 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
 
   const allDecks = useMemo(() => savedDecks, [savedDecks]);
   const authors = useMemo(() => Array.from(new Set(allDecks.map((deck) => deck.author))), [allDecks]);
+  const hasSelectedDefense = defenseIds.length === 3;
   const defense = defenseIds.map(getMonster);
-  const results = searchDecks(allDecks, defenseIds, { sort, officialOnly, author });
+  const results = hasSelectedDefense ? searchDecks(allDecks, defenseIds, { sort, officialOnly, author }) : [];
 
   const exact = results.filter((result) => result.match === "exact").map((result) => result.deck);
   const partial = results.filter((result) => result.match === "partial").map((result) => result.deck);
-  const selectedOffenses = searchDecks(allDecks, defenseIds, { sort: "recommended", officialOnly: false, author: "all" })
+  const selectedOffenses = (hasSelectedDefense ? searchDecks(allDecks, defenseIds, { sort: "recommended", officialOnly: false, author: "all" }) : [])
     .filter((result) => result.match === "exact")
     .map((result) => result.deck);
   const selectedKey = createCombinationKey(defenseIds);
-  const canRecordFourStar = defense.every((monster) => monster.grade <= 4);
+  const canRecordFourStar = hasSelectedDefense && defense.every((monster) => monster.grade <= 4);
   const filtersActive = officialOnly || author !== "all";
 
   function resetFilters() {
@@ -110,6 +111,10 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
   }
 
   function openRegistration() {
+    if (!hasSelectedDefense) {
+      openTeamPicker();
+      return;
+    }
     router.push(`/decks/new?defense=${encodeURIComponent(defenseKey)}`);
   }
 
@@ -121,6 +126,7 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
   }
 
   async function recordCurrentDefense() {
+    if (!hasSelectedDefense) return setRecordMessage("먼저 상대 방어덱 몬스터 3마리를 선택해 주세요.");
     if (recordGrade === 4 && !canRecordFourStar) return;
     setRecording(true);
     setRecordMessage("");
@@ -153,6 +159,7 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
         fiveStar={metaFiveStar}
         fourStar={metaFourStar}
         loading={metaLoading}
+        hasSelectedDefense={hasSelectedDefense}
         onGradeChange={setRecordGrade}
         onRecord={recordCurrentDefense}
         onRegisterOffense={openRegistration}
@@ -175,7 +182,7 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
             <Icon name="search" size={18} /> 몬스터 변경
           </button>
         </div>
-        <div className="defense-team">
+        {hasSelectedDefense ? <div className="defense-team">
           {defense.map((monster, index) => (
             <button
               aria-label={`${index + 1}번 ${monster.displayName} 변경`}
@@ -188,7 +195,7 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
               <span>클릭하여 변경</span>
             </button>
           ))}
-        </div>
+        </div> : <button className="empty-team-selector defense-empty-selector" onClick={openTeamPicker} type="button"><span><Icon name="plus" /></span><strong>상대 방어덱 3마리를 선택하세요</strong><small>선택한 뒤 검증된 공덱과 메타 기록을 확인할 수 있습니다.</small></button>}
       </section>
 
       <section className="result-toolbar" aria-label="검색 결과 정렬과 필터">

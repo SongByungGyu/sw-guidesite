@@ -17,6 +17,7 @@ type MetaDefenseBoardProps = {
   fiveStar: MetaDefenseItem[];
   fourStar: MetaDefenseItem[];
   loading: boolean;
+  hasSelectedDefense: boolean;
   selectedKey: string;
   selectedDefenseIds: string[];
   selectedOffenses: Deck[];
@@ -34,6 +35,7 @@ export function MetaDefenseBoard({
   fiveStar,
   fourStar,
   loading,
+  hasSelectedDefense,
   selectedKey,
   selectedDefenseIds,
   selectedOffenses,
@@ -72,7 +74,7 @@ export function MetaDefenseBoard({
           </div>
           <button
             className="button primary"
-            disabled={recording || (recordGrade === 4 && !canRecordFourStar)}
+            disabled={!hasSelectedDefense || recording || (recordGrade === 4 && !canRecordFourStar)}
             onClick={onRecord}
             type="button"
           >
@@ -81,7 +83,9 @@ export function MetaDefenseBoard({
         </div>
       </header>
 
-      {recordGrade === 4 && !canRecordFourStar ? (
+      {!hasSelectedDefense ? (
+        <p className="meta-record-message">메타 방덱을 선택하거나 아래에서 몬스터 3마리를 선택해 주세요.</p>
+      ) : recordGrade === 4 && !canRecordFourStar ? (
         <p className="meta-record-message is-error">4성 거점에는 태생 5성 몬스터가 포함될 수 없습니다.</p>
       ) : recordMessage ? <p className="meta-record-message" aria-live="polite">{recordMessage}</p> : null}
 
@@ -94,8 +98,8 @@ export function MetaDefenseBoard({
         <div className="meta-selected-defense">
           <div>
             <span className="meta-panel-label">선택한 방덱</span>
-            <strong>{selectedTeam.map((monster) => monster.displayName).join(" · ")}</strong>
-            <span>{selectedMeta ? `최근 30일 ${selectedMeta.recordCount}회 기록` : "TOP 5 밖의 직접 선택 방덱"}</span>
+            <strong>{hasSelectedDefense ? selectedTeam.map((monster) => monster.displayName).join(" · ") : "선택된 방덱 없음"}</strong>
+            <span>{hasSelectedDefense ? selectedMeta ? `최근 30일 ${selectedMeta.recordCount}회 기록` : "TOP 5 밖의 직접 선택 방덱" : "메타 목록이나 몬스터 선택에서 방덱을 골라주세요."}</span>
           </div>
           <div className="meta-selected-portraits" aria-label={selectedTeam.map((monster) => monster.displayName).join(", ")}>
             {selectedTeam.map((monster) => <MonsterPortrait compact key={monster.id} monster={monster} />)}
