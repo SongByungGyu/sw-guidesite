@@ -2,12 +2,15 @@ import { z } from "zod";
 
 export const accessRequestInputSchema = z.object({
   nickname: z.string().trim().min(2, "닉네임은 두 글자 이상 입력해 주세요.").max(20),
-  guildCode: z.string().trim().min(4, "길드 코드를 확인해 주세요.").max(20),
   message: z.string().trim().max(120).default(""),
 });
 
 export const accessReviewInputSchema = z.object({
   status: z.enum(["approved", "rejected"]),
+});
+
+export const memberRoleInputSchema = z.object({
+  role: z.enum(["OFFICER", "MEMBER"]),
 });
 
 export const adminSessionInputSchema = z.object({
@@ -34,4 +37,13 @@ export type AdminAccessRequest = {
   status: "pending" | "approved" | "rejected";
   requestedAt: string;
   reviewedAt?: string;
+};
+
+export type AdminGuildMember = {
+  id: string;
+  nickname: string;
+  role: "OWNER" | "OFFICER" | "MEMBER";
+  active: boolean;
+  createdAt: string;
+  lastSeenAt?: string;
 };

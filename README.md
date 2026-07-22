@@ -21,9 +21,9 @@ npm run test:run
 npm run build
 ```
 
-최초 실행 전 `.env.example`을 `.env`로 복사하고 길드 코드, 관리자 키, 세션 비밀값을 변경하세요. 로컬 PostgreSQL은 기존 5432 포트와의 충돌을 피하도록 `localhost:5433`을 사용합니다.
+최초 실행 전 `.env.example`을 `.env`로 복사하고 관리자 키와 세션 비밀값을 변경하세요. 로컬 PostgreSQL은 기존 5432 포트와의 충돌을 피하도록 `localhost:5433`을 사용합니다.
 
-로그인 대신 `닉네임 + 길드 코드`로 접근을 요청하고 관리자가 `/requests`에서 승인합니다. 요청·길드원·기기 세션·감사 로그는 PostgreSQL에 저장하며, 기기 토큰은 원문이 아닌 SHA-256 해시로 보관합니다. `/requests`는 `ADMIN_ACCESS_KEY` 확인 뒤 12시간 동안만 열리고, 승인된 기기 세션은 기본 90일 유지됩니다.
+로그인이나 길드 코드 입력 없이 닉네임으로 접근을 요청하고, 현재 관리자가 `/requests`에서 직접 확인해 승인합니다. 승인된 길드원은 같은 화면의 목록에 자동으로 추가되며 관리자가 `MEMBER`와 `OFFICER` 권한을 변경할 수 있습니다. 요청·길드원·기기 세션·권한 변경 감사 로그는 PostgreSQL에 저장하며, 기기 토큰은 원문이 아닌 SHA-256 해시로 보관합니다. `/requests`는 `ADMIN_ACCESS_KEY` 확인 뒤 12시간 동안만 열리고, 승인된 기기 세션은 기본 90일 유지됩니다.
 
 공덱 검색 화면에서 선택한 상대 방어덱을 기준으로 `공덱 등록`을 누르면 `/decks/new`에서 공격 몬스터 3마리, 리더, 운용법과 조건을 작성할 수 있습니다. 게시된 공덱은 PostgreSQL에 저장되며 해당 방덱의 정확 일치 검색 결과에 즉시 표시됩니다. 미완성 내용은 임시저장할 수 있습니다.
 
@@ -36,7 +36,7 @@ npm run build
 
 던전 분류는 Com2uS 공식 업데이트의 [v9.0.0 콘텐츠 목록](https://summonerswar.com/en/skyarena/news/list/6113)과 [v9.1.6 차원 인페라스 업데이트](https://summonerswar.com/en/skyarena/news/list/4911?category=all&page=1)를 기준으로 정리했습니다.
 
-로컬 개발용 기본값은 길드 코드 `CONAN-01`, 관리자 키 `CONAN-ADMIN-01`입니다. 배포 환경에서는 반드시 `.env.example`의 값을 교체하고 HTTPS를 사용하세요.
+로컬 개발용 관리자 키 기본값은 `CONAN-ADMIN-01`입니다. 배포 환경에서는 반드시 `.env.example`의 값을 교체하고 HTTPS를 사용하세요.
 
 ## 몬스터 데이터
 

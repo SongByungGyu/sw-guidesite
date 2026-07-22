@@ -8,7 +8,7 @@ import {
 import { accessRequestInputSchema } from "@/lib/access-api";
 import { db } from "@/lib/db";
 import { serverEnv } from "@/lib/env";
-import { createOpaqueToken, digestSecret, secretsEqual } from "@/lib/security";
+import { createOpaqueToken, digestSecret } from "@/lib/security";
 
 export async function GET(request: NextRequest) {
   if (!isAdminRequest(request)) {
@@ -43,9 +43,13 @@ export async function POST(request: NextRequest) {
   }
 
   const guild = await db.guild.findUnique({ where: { slug: serverEnv.GUILD_SLUG } });
-  if (!guild || !secretsEqual(digestSecret(parsed.data.guildCode.toUpperCase()), guild.accessCodeHash)) {
-    return NextResponse.json({ error: "길드 코드가 올바르지 않습니다." }, { status: 403 });
-  }
+  if (!guild) return NextResponse.json({ error: "길드 신청을 받을 준비가 되지 않았습니다." }, { status: 503 });
+
+  const duplicate = await db.accessRequest.findFirst({
+    where: { guildId: guild.id, nickname: parsed.data.nickname, status: "PENDING" },
+    select: { id: true },
+  });
+  if (duplicate) return NextResponse.json({ error: "같은 닉네임의 승인 대기 요청이 있습니다." }, { status: 409 });
 
   const token = createOpaqueToken();
   const created = await db.accessRequest.create({

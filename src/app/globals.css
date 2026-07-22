@@ -1180,7 +1180,7 @@ h3 {
 
 .admin-overview {
   display: grid;
-  grid-template-columns: 180px 180px 1fr;
+  grid-template-columns: 150px 150px 190px 1fr;
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
@@ -1306,6 +1306,92 @@ h3 {
   text-align: center;
   border: 1px dashed var(--border);
   border-radius: 12px;
+}
+
+.section-description,
+.member-admin-copy p,
+.member-count {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+}
+
+.member-count {
+  white-space: nowrap;
+}
+
+.member-admin-list {
+  display: grid;
+  gap: 10px;
+}
+
+.member-admin-row {
+  min-height: 74px;
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--background-base);
+}
+
+.member-admin-avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  color: var(--accent-gold);
+  font-weight: 800;
+  border: 1px solid rgb(231 184 92 / 35%);
+  border-radius: 50%;
+  background: rgb(231 184 92 / 10%);
+}
+
+.member-admin-copy {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.member-admin-copy > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.member-role-badge {
+  padding: 3px 8px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.member-role-badge.owner {
+  color: var(--accent-gold);
+  border-color: rgb(231 184 92 / 35%);
+  background: rgb(231 184 92 / 10%);
+}
+
+.member-role-badge.officer {
+  color: var(--success);
+  border-color: rgb(55 205 152 / 35%);
+  background: rgb(55 205 152 / 10%);
+}
+
+.member-role-badge.member {
+  color: var(--text-secondary);
+}
+
+.owner-lock {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-gold);
+  font-size: 0.76rem;
+  font-weight: 700;
 }
 
 .request-list-section.reviewed {
@@ -1870,6 +1956,12 @@ h3 {
     grid-template-columns: 1fr 1fr;
   }
 
+  .admin-overview > div:nth-child(3) {
+    grid-column: 1 / -1;
+    border-right: 0;
+    border-top: 1px solid var(--border);
+  }
+
   .admin-overview > p {
     grid-column: 1 / -1;
     justify-content: flex-start;
@@ -2160,6 +2252,11 @@ h3 {
     grid-template-columns: 1fr 1fr;
   }
 
+  .admin-overview > div:nth-child(3) {
+    grid-column: 1 / -1;
+    border-right: 0;
+  }
+
   .request-card {
     grid-template-columns: 1fr;
   }
@@ -2185,6 +2282,19 @@ h3 {
 
   .reviewed-list time {
     grid-column: 1 / -1;
+  }
+
+  .member-admin-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .member-admin-row > .button,
+  .member-admin-row > .owner-lock {
+    grid-column: 1 / -1;
+  }
+
+  .member-admin-row > .button {
+    width: 100%;
   }
 
   .home-welcome { align-items: flex-start; flex-direction: column; }

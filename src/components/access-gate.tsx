@@ -2,7 +2,6 @@
 
 import type { FormEvent, ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { Icon } from "@/components/icon";
 import type { AccessSessionResponse } from "@/lib/access-api";
 
@@ -47,7 +46,6 @@ export function AccessGate({ children }: { children: ReactNode }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         nickname: String(form.get("nickname") ?? ""),
-        guildCode: String(form.get("guildCode") ?? ""),
         message: String(form.get("message") ?? ""),
       }),
     });
@@ -86,13 +84,13 @@ export function AccessGate({ children }: { children: ReactNode }) {
             <p>승인되면 이 화면이 자동으로 열립니다. 별도 로그인은 필요하지 않습니다.</p>
             <dl className="request-summary">
               <div><dt>닉네임</dt><dd>{session.request?.nickname}</dd></div>
-              <div><dt>길드 코드</dt><dd>확인 완료</dd></div>
+              <div><dt>신청 상태</dt><dd>관리자 확인 대기</dd></div>
               <div><dt>요청 번호</dt><dd>{session.request?.id.slice(0, 8).toUpperCase()}</dd></div>
             </dl>
             <div className="access-actions">
-              <Link className="button primary" href="/requests" target="_blank" rel="noreferrer">
-                <Icon name="users" size={18} /> 관리자 요청함 열기
-              </Link>
+              <button className="button primary" type="button" onClick={() => void refreshSession()}>
+                <Icon name="check" size={18} /> 승인 상태 확인
+              </button>
               <button className="button secondary" type="button" onClick={requestAgain}>요청 취소</button>
             </div>
             <p className="prototype-note"><Icon name="sparkles" size={15} /> 요청과 승인은 서버에 안전하게 저장됩니다.</p>
@@ -101,22 +99,18 @@ export function AccessGate({ children }: { children: ReactNode }) {
           <section className="access-card" aria-labelledby="rejected-title">
             <span className="access-status rejected"><span /> 요청 반려</span>
             <h1 id="rejected-title">접근 요청이 반려됐습니다.</h1>
-            <p>길드 코드와 닉네임을 확인한 뒤 다시 요청해 주세요.</p>
+            <p>닉네임과 요청 메시지를 확인한 뒤 다시 신청해 주세요.</p>
             <button className="button primary" type="button" onClick={requestAgain}>다시 요청하기</button>
           </section>
         ) : (
           <section className="access-card" aria-labelledby="request-title">
-            <p className="eyebrow">로그인 없는 접근</p>
+            <p className="eyebrow">코드 없는 가입 신청</p>
             <h1 id="request-title">길드 접근을 요청하세요</h1>
-            <p>계정 생성 없이 길드 관리자의 승인을 받은 기기만 이용할 수 있습니다.</p>
+            <p>닉네임으로 신청하면 길드 관리자가 확인 후 승인합니다.</p>
             <form className="access-form" onSubmit={submitRequest}>
               <label>
                 <span>게임 닉네임</span>
                 <input name="nickname" required minLength={2} maxLength={20} pattern=".*\S.*\S.*" title="공백을 제외하고 두 글자 이상 입력해 주세요." placeholder="예: 서머너별빛" autoComplete="nickname" />
-              </label>
-              <label>
-                <span>길드 코드</span>
-                <input name="guildCode" required minLength={4} maxLength={20} pattern=".*\S.*\S.*\S.*\S.*" title="공백을 제외하고 네 글자 이상 입력해 주세요." placeholder="관리자에게 받은 코드" autoCapitalize="characters" />
               </label>
               <label>
                 <span>요청 메시지 <small>선택</small></span>
