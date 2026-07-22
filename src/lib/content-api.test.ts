@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canManageGuildContent, createDefenseSchema, createDungeonGuideSchema, createHomeworkSchema } from "@/lib/content-api";
+import { buildHomeworkProgress, canManageGuildContent, createDefenseSchema, createDungeonGuideSchema, createHomeworkSchema } from "@/lib/content-api";
 
 const monsterIds = ["1001", "1002", "1003", "1004", "1005"];
 const builds = monsterIds.map((monsterId, position) => ({
@@ -49,5 +49,16 @@ describe("guild content validation", () => {
     const base = { title: "점령전 공덱 숙제", target: "속도 리더 방어덱", strategy: "해제 후 핵심 딜러부터 공격합니다.", dueAt: null };
     expect(createHomeworkSchema.safeParse({ ...base, builds: builds.slice(0, 3).map((build) => ({ ...build, runeSets: "" })) }).success).toBe(false);
     expect(createHomeworkSchema.safeParse({ ...base, builds: builds.slice(0, 3).map((build) => ({ ...build, hp: null, attack: null, defense: null, speed: null, critRate: null, critDamage: null, resistance: null, accuracy: null })) }).success).toBe(false);
+  });
+
+  it("separates completed and incomplete guild members", () => {
+    const completedAt = new Date("2026-07-22T12:00:00.000Z");
+    const progress = buildHomeworkProgress([
+      { id: "owner", nickname: "길드장", role: "OWNER" },
+      { id: "member", nickname: "길드원", role: "MEMBER" },
+    ], [{ memberId: "member", completedAt }]);
+    expect(progress.total).toBe(2);
+    expect(progress.completed).toEqual([{ id: "member", nickname: "길드원", role: "MEMBER", completedAt: completedAt.toISOString() }]);
+    expect(progress.incomplete).toEqual([{ id: "owner", nickname: "길드장", role: "OWNER" }]);
   });
 });

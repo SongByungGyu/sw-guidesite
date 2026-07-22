@@ -1863,6 +1863,39 @@ h3 {
 .homework-target span { display: flex; align-items: center; gap: 6px; color: var(--accent-gold); font-size: 0.72rem; }
 .homework-card > footer { align-items: flex-end; padding-top: 16px; border-top: 1px solid var(--border); }
 .homework-footer-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.homework-progress { overflow: hidden; border: 1px solid var(--border); border-radius: 11px; background: var(--background-base); }
+.homework-progress > summary { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 16px; list-style: none; cursor: pointer; }
+.homework-progress > summary::-webkit-details-marker { display: none; }
+.homework-progress-summary-copy { display: grid; gap: 3px; }
+.homework-progress-summary-copy > span { display: flex; align-items: center; gap: 7px; }
+.homework-progress-summary-copy small { color: var(--text-secondary); }
+.homework-progress-summary-copy em { padding: 2px 6px; color: var(--accent-blue); font-size: 0.62rem; font-style: normal; border: 1px solid color-mix(in srgb, var(--accent-blue) 30%, var(--border)); border-radius: 999px; background: color-mix(in srgb, var(--accent-blue) 8%, transparent); }
+.homework-progress-count { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.homework-progress-count strong { color: var(--success); font-size: 1.02rem; }
+.homework-progress-count > span { color: var(--text-secondary); font-size: 0.68rem; }
+.homework-progress-count svg { color: var(--text-secondary); transition: transform 160ms ease; }
+.homework-progress[open] > summary { border-bottom: 1px solid var(--border); }
+.homework-progress[open] .homework-progress-count svg { transform: rotate(90deg); }
+.homework-progress-body { padding: 16px; display: grid; gap: 14px; }
+.homework-progress-bar { height: 7px; overflow: hidden; border-radius: 999px; background: var(--surface); }
+.homework-progress-bar span { display: block; height: 100%; border-radius: inherit; background: var(--success); transition: width 180ms ease; }
+.homework-status-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.homework-status-group { min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--background-elevated); }
+.homework-status-group > header { padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+.homework-status-group > header b { color: var(--text-secondary); font-size: 0.7rem; }
+.homework-status-title { display: flex; align-items: center; gap: 7px; }
+.homework-status-title i { width: 8px; height: 8px; border-radius: 50%; }
+.status-dot-complete { background: var(--success); box-shadow: 0 0 0 4px color-mix(in srgb, var(--success) 12%, transparent); }
+.status-dot-incomplete { background: var(--accent-gold); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-gold) 12%, transparent); }
+.homework-member-list { margin: 0; padding: 0; list-style: none; }
+.homework-member-list li { min-height: 43px; padding: 8px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--border); }
+.homework-member-list li:last-child { border-bottom: 0; }
+.homework-member-identity { min-width: 0; display: flex; align-items: center; gap: 7px; }
+.homework-member-identity strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.homework-member-identity em { padding: 2px 5px; color: var(--text-secondary); font-size: 0.6rem; font-style: normal; border-radius: 4px; background: var(--surface); }
+.member-completion-time, .member-incomplete-label { flex: 0 0 auto; color: var(--text-secondary); font-size: 0.68rem; }
+.member-incomplete-label { color: var(--accent-gold); }
+.homework-member-empty { padding: 16px 0 4px; color: var(--text-secondary); font-size: 0.72rem; text-align: center; }
 .homework-build-guide { padding: 13px 15px; display: flex; align-items: flex-start; gap: 10px; color: var(--accent-blue); border: 1px solid color-mix(in srgb, var(--accent-blue) 32%, var(--border)); border-radius: 10px; background: color-mix(in srgb, var(--accent-blue) 8%, var(--background-base)); }
 .homework-build-guide > div { display: grid; gap: 3px; }
 .homework-build-guide p { color: var(--text-secondary); font-size: 0.76rem; }
@@ -2357,6 +2390,11 @@ h3 {
 
 @media (max-width: 767px) {
   .artifact-field-grid { grid-template-columns: 1fr; }
+  .homework-progress > summary { align-items: flex-start; }
+  .homework-progress-summary-copy small { display: none; }
+  .homework-progress-count { align-items: flex-end; flex-direction: column; gap: 1px; }
+  .homework-progress-count svg { display: none; }
+  .homework-status-columns { grid-template-columns: 1fr; }
   .homework-spec-heading > span { display: inline; }
   .homework-spec-table-wrap { display: none; }
   .homework-spec-mobile { display: grid; gap: 10px; }

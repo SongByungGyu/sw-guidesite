@@ -105,3 +105,16 @@ export function homeworkBuildCreateData(build: z.infer<typeof homeworkBuildSchem
     artifactRight: build.artifactRight,
   };
 }
+
+export function buildHomeworkProgress(
+  members: Array<{ id: string; nickname: string; role: string }>,
+  completions: Array<{ memberId: string; completedAt: Date }>,
+) {
+  const completionByMember = new Map(completions.map((completion) => [completion.memberId, completion.completedAt]));
+  const completed = members.flatMap((member) => {
+    const completedAt = completionByMember.get(member.id);
+    return completedAt ? [{ ...member, completedAt: completedAt.toISOString() }] : [];
+  });
+  const incomplete = members.filter((member) => !completionByMember.has(member.id));
+  return { completed, incomplete, total: members.length };
+}

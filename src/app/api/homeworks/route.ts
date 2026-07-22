@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { canManageGuildContent, createHomeworkSchema, homeworkBuildCreateData, serializeBuild } from "@/lib/content-api";
+import { buildHomeworkProgress, canManageGuildContent, createHomeworkSchema, homeworkBuildCreateData, serializeBuild } from "@/lib/content-api";
 import { db } from "@/lib/db";
 import { getRequestMember } from "@/lib/member-session";
 
 export async function GET(request: NextRequest) {
   const member = await getRequestMember(request);
   if (!member) return NextResponse.json({ error: "접근 승인이 필요합니다." }, { status: 401 });
-  const homeworks = await db.homework.findMany({ where: { guildId: member.guildId, status: { not: "ARCHIVED" } }, include: { author: true, monsters: { orderBy: { position: "asc" } }, completions: { where: { memberId: member.id }, select: { id: true } } }, orderBy: [{ status: "asc" }, { dueAt: "asc" }, { createdAt: "desc" }] });
-  return NextResponse.json({ canCreate: canManageGuildContent(member.role), homeworks: homeworks.map((homework) => ({ ...homework, author: homework.author.nickname, completedByMe: homework.completions.length > 0, completions: undefined, dueAt: homework.dueAt?.toISOString(), createdAt: homework.createdAt.toISOString(), updatedAt: homework.updatedAt.toISOString(), monsters: homework.monsters.map(serializeBuild) })) });
+  const canCreate = canManageGuildContent(member.role);
+  const [homeworks, members] = await Promise.all([
+    db.homework.findMany({ where: { guildId: member.guildId, status: { not: "ARCHIVED" } }, include: { author: true, monsters: { orderBy: { position: "asc" } }, completions: { where: canCreate ? {} : { memberId: member.id }, select: { memberId: true, completedAt: true } } }, orderBy: [{ status: "asc" }, { dueAt: "asc" }, { createdAt: "desc" }] }),
+    canCreate ? db.guildMember.findMany({ where: { guildId: member.guildId, active: true }, select: { id: true, nickname: true, role: true }, orderBy: [{ role: "asc" }, { nickname: "asc" }] }) : Promise.resolve([]),
+  ]);
+  return NextResponse.json({ canCreate, homeworks: homeworks.map((homework) => ({ ...homework, author: homework.author.nickname, completedByMe: homework.completions.some((completion) => completion.memberId === member.id), progress: canCreate ? buildHomeworkProgress(members, homework.completions) : undefined, completions: undefined, dueAt: homework.dueAt?.toISOString(), createdAt: homework.createdAt.toISOString(), updatedAt: homework.updatedAt.toISOString(), monsters: homework.monsters.map(serializeBuild) })) });
 }
 
 export async function POST(request: NextRequest) {
