@@ -40,7 +40,7 @@ const uniqueBuilds = (builds: Array<{ monsterId: string }>, context: z.Refinemen
 
 export const createDefenseSchema = z.object({
   title: z.string().trim().min(2).max(60),
-  note: z.string().trim().max(1000).default(""),
+  skillOrder: z.string().trim().max(1000).default(""),
   builds: z.array(monsterBuildSchema).length(3),
 }).superRefine((input, context) => uniqueBuilds(input.builds, context));
 

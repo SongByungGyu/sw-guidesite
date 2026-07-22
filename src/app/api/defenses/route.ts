@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   });
   return NextResponse.json({
     member: { id: member.id, role: member.role },
-    defenses: decks.map((deck) => ({ id: deck.id, title: deck.title, note: deck.strategy, author: deck.author.nickname, authorId: deck.authorId, updatedAt: deck.updatedAt.toISOString(), recommendationCount: deck.offenseRecommendations.length, monsters: deck.monsters.map(serializeBuild) })),
+    defenses: decks.map((deck) => ({ id: deck.id, title: deck.title, skillOrder: deck.strategy, author: deck.author.nickname, authorId: deck.authorId, updatedAt: deck.updatedAt.toISOString(), recommendationCount: deck.offenseRecommendations.length, monsters: deck.monsters.map(serializeBuild) })),
   });
 }
 
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       type: "SIEGE_DEFENSE",
       status: "PUBLISHED",
       title: input.title,
-      strategy: input.note,
+      strategy: input.skillOrder,
       combinationKey: createCombinationKey(input.builds.map((build) => build.monsterId)),
       monsters: { create: input.builds.map(buildCreateData) },
     },

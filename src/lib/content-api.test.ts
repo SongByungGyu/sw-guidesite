@@ -28,8 +28,8 @@ describe("guild content validation", () => {
   });
 
   it("requires exactly three unique monsters for defenses", () => {
-    expect(createDefenseSchema.safeParse({ title: "방덱", note: "", builds: builds.slice(0, 3) }).success).toBe(true);
-    expect(createDefenseSchema.safeParse({ title: "방덱", note: "", builds: [builds[0], builds[0], builds[1]] }).success).toBe(false);
+    expect(createDefenseSchema.safeParse({ title: "방덱", skillOrder: "2스 → 3스 → 1스", builds: builds.slice(0, 3) }).success).toBe(true);
+    expect(createDefenseSchema.safeParse({ title: "방덱", skillOrder: "", builds: [builds[0], builds[0], builds[1]] }).success).toBe(false);
   });
 
   it("matches the registered team size for each dungeon", () => {
