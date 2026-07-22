@@ -39,15 +39,21 @@ async function main() {
 
   const nextSiege = nextWeekday(3, 12);
   const nextLab = nextWeekday(6, 21);
-  await prisma.guildSchedule.upsert({
-    where: { id: "seed-schedule-siege" },
-    update: { title: "점령전 공격 마감", category: "점령전", startsAt: nextSiege },
-    create: { id: "seed-schedule-siege", guildId: guild.id, authorId: owner.id, title: "점령전 공격 마감", category: "점령전", startsAt: nextSiege },
+  await seedScheduleUnlessDeleted({
+    id: "seed-schedule-siege",
+    guildId: guild.id,
+    authorId: owner.id,
+    title: "점령전 공격 마감",
+    category: "점령전",
+    startsAt: nextSiege,
   });
-  await prisma.guildSchedule.upsert({
-    where: { id: "seed-schedule-lab" },
-    update: { title: "길드 미궁 정리", category: "미궁", startsAt: nextLab },
-    create: { id: "seed-schedule-lab", guildId: guild.id, authorId: owner.id, title: "길드 미궁 정리", category: "미궁", startsAt: nextLab },
+  await seedScheduleUnlessDeleted({
+    id: "seed-schedule-lab",
+    guildId: guild.id,
+    authorId: owner.id,
+    title: "길드 미궁 정리",
+    category: "미궁",
+    startsAt: nextLab,
   });
 
   const homework = await prisma.homework.upsert({
@@ -61,6 +67,40 @@ async function main() {
     { homeworkId: homework.id, monsterId: "1303", position: 1, isLeader: true, runeSets: "폭주 + 의지", hp: 28000, attack: 1200, defense: 1000, speed: 245, critRate: 15, critDamage: 50, resistance: 100, accuracy: 45, artifactLeft: "속성 피해 감소", artifactRight: "2스킬 효과 적중", note: "해제 후 제어" },
     { homeworkId: homework.id, monsterId: "3118", position: 2, runeSets: "격노 + 칼날", hp: 22000, attack: 2100, defense: 1100, speed: 190, critRate: 85, critDamage: 190, resistance: 15, accuracy: 0, artifactLeft: "받는 치명타 피해 감소", artifactRight: "3스킬 치명타 피해", note: "마무리 딜러" },
   ] });
+}
+
+async function seedScheduleUnlessDeleted(input: {
+  id: string;
+  guildId: string;
+  authorId: string;
+  title: string;
+  category: string;
+  startsAt: Date;
+}) {
+  const deletion = await prisma.auditLog.findFirst({
+    where: {
+      guildId: input.guildId,
+      action: "GUILD_SCHEDULE_DELETED",
+      entityType: "GuildSchedule",
+      entityId: input.id,
+    },
+    select: { id: true },
+  });
+
+  if (deletion) {
+    await prisma.guildSchedule.deleteMany({ where: { id: input.id } });
+    return;
+  }
+
+  await prisma.guildSchedule.upsert({
+    where: { id: input.id },
+    update: {
+      title: input.title,
+      category: input.category,
+      startsAt: input.startsAt,
+    },
+    create: input,
+  });
 }
 
 function nextWeekday(day: number, hour: number) {
