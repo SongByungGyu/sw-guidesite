@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildHomeworkProgress, canManageGuildContent, createAnnouncementSchema, createDefenseSchema, createDungeonGuideSchema, createHomeworkSchema, createScheduleSchema } from "@/lib/content-api";
+import { buildHomeworkProgress, canManageGuildContent, createAnnouncementSchema, createChangeRequestSchema, createDefenseSchema, createDungeonGuideSchema, createHomeworkSchema, createScheduleSchema } from "@/lib/content-api";
 
 const monsterIds = ["1001", "1002", "1003", "1004", "1005"];
 const builds = monsterIds.map((monsterId, position) => ({
@@ -67,5 +67,11 @@ describe("guild content validation", () => {
     expect(createAnnouncementSchema.safeParse({ title: "", content: "짧음", pinned: false }).success).toBe(false);
     expect(createScheduleSchema.safeParse({ title: "점령전 마감", category: "점령전", startsAt: "2026-07-23T10:00:00.000Z", endsAt: "2026-07-23T12:00:00.000Z" }).success).toBe(true);
     expect(createScheduleSchema.safeParse({ title: "점령전 마감", category: "점령전", startsAt: "2026-07-23T12:00:00.000Z", endsAt: "2026-07-23T10:00:00.000Z" }).success).toBe(false);
+  });
+
+  it("validates guild change requests", () => {
+    expect(createChangeRequestSchema.safeParse({ category: "기능 요청", content: "방덱 상세 화면에 메모를 추가해 주세요." }).success).toBe(true);
+    expect(createChangeRequestSchema.safeParse({ category: "임의 분류", content: "요청 내용입니다." }).success).toBe(false);
+    expect(createChangeRequestSchema.safeParse({ category: "오류 수정", content: "짧음" }).success).toBe(false);
   });
 });

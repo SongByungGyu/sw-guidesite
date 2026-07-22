@@ -1774,6 +1774,36 @@ h3 {
 .quick-links a > span { display: grid; }
 .quick-links small { color: var(--text-secondary); }
 
+.change-request-fab { position: fixed; right: 24px; bottom: 24px; z-index: 35; min-height: 46px; padding: 10px 15px; display: inline-flex; align-items: center; gap: 8px; color: var(--background-base); font-weight: 800; border: 0; border-radius: 999px; background: var(--accent-gold); box-shadow: 0 12px 32px rgb(0 0 0 / 38%); cursor: pointer; }
+.change-request-fab:hover { background: color-mix(in srgb, var(--accent-gold) 88%, white); transform: translateY(-2px); }
+.change-request-dialog { position: fixed; inset: 0; width: min(640px, calc(100% - 32px)); margin: auto; }
+.change-request-shell { max-height: calc(100dvh - 34px); display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.change-request-dialog .dialog-header { align-items: flex-start; }
+.change-request-dialog .dialog-header p:not(.eyebrow) { color: var(--text-secondary); font-size: 0.76rem; }
+.change-request-body { overflow-y: auto; }
+.change-request-form { padding: 20px 22px; display: grid; gap: 13px; border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--accent-gold) 4%, var(--background-base)); }
+.change-request-form > label { display: grid; gap: 6px; font-size: 0.78rem; font-weight: 750; }
+.change-request-form select, .change-request-form textarea { width: 100%; padding: 10px 12px; color: var(--text-primary); font: inherit; border: 1px solid var(--border); border-radius: 9px; outline: 0; background: var(--background-elevated); }
+.change-request-form select { min-height: 44px; }
+.change-request-form textarea { min-height: 120px; resize: vertical; }
+.change-request-form select:focus, .change-request-form textarea:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgb(78 139 255 / 14%); }
+.change-request-form-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.change-request-form-meta > span { color: var(--text-secondary); font-size: 0.68rem; }
+.change-request-success { padding: 9px 11px; display: flex; align-items: center; gap: 7px; color: var(--success); font-size: 0.76rem; border-radius: 8px; background: color-mix(in srgb, var(--success) 8%, transparent); }
+.change-request-history { padding: 18px 22px 22px; display: grid; gap: 12px; }
+.change-request-history > header { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.change-request-history > header p { color: var(--text-secondary); font-size: 0.72rem; }
+.change-request-history > header > span { color: var(--accent-blue); font-size: 0.72rem; }
+.change-request-list { display: grid; gap: 9px; }
+.change-request-list article { padding: 13px 14px; display: grid; gap: 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--background-base); }
+.change-request-list article > header, .change-request-list article > footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.change-request-list article > header span { color: var(--accent-gold); font-size: 0.68rem; font-weight: 750; }
+.change-request-list article > header em { padding: 2px 6px; color: var(--success); font-size: 0.62rem; font-style: normal; border-radius: 999px; background: color-mix(in srgb, var(--success) 9%, transparent); }
+.change-request-list article > p { color: var(--text-secondary); white-space: pre-wrap; overflow-wrap: anywhere; }
+.change-request-list article > footer { color: var(--text-secondary); font-size: 0.66rem; }
+.change-request-list article > footer strong { color: var(--text-primary); }
+.change-request-empty { min-height: 110px; display: grid; place-items: center; align-content: center; gap: 8px; color: var(--text-secondary); text-align: center; }
+
 .content-create-form {
   margin-bottom: 18px;
   padding: clamp(18px, 3vw, 26px);
@@ -2429,6 +2459,11 @@ h3 {
 
 @media (max-width: 767px) {
   .artifact-field-grid { grid-template-columns: 1fr; }
+  .change-request-fab { right: 14px; bottom: calc(78px + env(safe-area-inset-bottom)); }
+  .change-request-shell { height: 100dvh; max-height: 100dvh; }
+  .change-request-form, .change-request-history { padding-right: 14px; padding-left: 14px; }
+  .change-request-form-meta { align-items: stretch; flex-direction: column; }
+  .change-request-form-meta .button { width: 100%; }
   .defense-detail-shell { height: 100dvh; max-height: 100dvh; }
   .defense-detail-body { padding: 16px 14px 18px; }
   .defense-detail-overview { grid-template-columns: 1fr; }

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
 import { BuildSummary, type MonsterBuildDraft } from "@/components/team-build-editor";
 import { Icon } from "@/components/icon";
+import { ChangeRequestWidget } from "@/components/change-request-widget";
 
 type Schedule = { id: string; title: string; category: string; startsAt: string; endsAt?: string };
 type HomeData = {
@@ -140,6 +141,7 @@ export function GuildHome() {
           <div><Link href="/defenses"><Icon name="shield" /><span><strong>방덱 스펙 정리</strong><small>3마리와 룬·속도 저장</small></span><Icon name="chevron" size={18} /></Link><Link href="/dungeons"><Icon name="book" /><span><strong>던전 공략 찾기</strong><small>카이로스부터 인페라스까지</small></span><Icon name="chevron" size={18} /></Link></div>
         </section>
       </div>
+      {data ? <ChangeRequestWidget canManage={data.canManage} /> : null}
     </AppShell>
   );
 }

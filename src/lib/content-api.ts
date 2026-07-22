@@ -89,6 +89,11 @@ export const createScheduleSchema = z.object({
   }
 });
 
+export const createChangeRequestSchema = z.object({
+  category: z.enum(["기능 요청", "오류 수정", "내용 수정", "기타"]),
+  content: z.string().trim().min(5, "요청 내용을 5자 이상 입력해 주세요.").max(1000),
+});
+
 export function canManageGuildContent(role: string) {
   return role === "OWNER" || role === "OFFICER";
 }

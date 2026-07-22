@@ -51,6 +51,7 @@ model Guild {
   dungeonGuides       DungeonGuide[]
   homeworks           Homework[]
   homeworkCompletions HomeworkCompletion[]
+  changeRequests      ChangeRequest[]
 }
 
 model GuildMember {
@@ -71,6 +72,7 @@ model GuildMember {
   dungeonGuides       DungeonGuide[]
   homeworks           Homework[]
   homeworkCompletions HomeworkCompletion[]
+  changeRequests      ChangeRequest[]
 
   @@unique([guildId, nickname])
   @@index([guildId, role])
@@ -183,6 +185,22 @@ model Announcement {
   author    GuildMember @relation(fields: [authorId], references: [id], onDelete: Restrict)
 
   @@index([guildId, pinned, createdAt])
+}
+
+model ChangeRequest {
+  id        String      @id @default(cuid())
+  guildId   String
+  authorId  String
+  category  String
+  content   String
+  status    String      @default("PENDING")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  guild     Guild       @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  author    GuildMember @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([guildId, status, createdAt])
+  @@index([authorId, createdAt])
 }
 
 model GuildSchedule {
