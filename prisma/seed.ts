@@ -52,7 +52,7 @@ async function main() {
 
   const homework = await prisma.homework.upsert({
     where: { id: "seed-homework-first" },
-    update: { title: "공식 공덱 1회 사용", target: "상대 방덱의 속도 리더 + 해제 조합을 우선 공격", strategy: "공덱 검색에서 공식 배지가 붙은 조합을 확인하고 전투 결과를 남겨주세요.", dueAt: nextSiege, status: "ACTIVE" },
+    update: { title: "공식 공덱 1회 사용", target: "상대 방덱의 속도 리더 + 해제 조합을 우선 공격", strategy: "공덱 검색에서 공식 배지가 붙은 조합을 확인하고 전투 결과를 남겨주세요.", dueAt: nextSiege },
     create: { id: "seed-homework-first", guildId: guild.id, authorId: owner.id, title: "공식 공덱 1회 사용", target: "상대 방덱의 속도 리더 + 해제 조합을 우선 공격", strategy: "공덱 검색에서 공식 배지가 붙은 조합을 확인하고 전투 결과를 남겨주세요.", dueAt: nextSiege },
   });
   await prisma.homeworkMonster.deleteMany({ where: { homeworkId: homework.id } });

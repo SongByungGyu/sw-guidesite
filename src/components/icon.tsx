@@ -12,6 +12,7 @@ type IconName =
   | "check"
   | "crown"
   | "plus"
+  | "trash"
   | "x"
   | "menu"
   | "sparkles";
@@ -33,6 +34,7 @@ const paths: Record<IconName, ReactNode> = {
   check: <path d="m5 12 4 4L19 6" />,
   crown: <><path d="m3 6 4 4 5-7 5 7 4-4-2 12H5Z" /><path d="M5 21h14" /></>,
   plus: <><path d="M12 5v14" /><path d="M5 12h14" /></>,
+  trash: <><path d="M4 7h16" /><path d="M9 7V4h6v3" /><path d="m6 7 1 14h10l1-14" /><path d="M10 11v6" /><path d="M14 11v6" /></>,
   x: <><path d="m6 6 12 12" /><path d="M18 6 6 18" /></>,
   menu: <><path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h16" /></>,
   sparkles: <><path d="m12 3-1 3-3 1 3 1 1 3 1-3 3-1-3-1Z" /><path d="m5 14-1 2-2 1 2 1 1 2 1-2 2-1-2-1Z" /><path d="m19 13-1 2-2 1 2 1 1 2 1-2 2-1-2-1Z" /></>,

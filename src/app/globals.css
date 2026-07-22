@@ -1862,6 +1862,7 @@ h3 {
 .homework-target { padding: 14px 16px; display: grid; gap: 5px; border-left: 3px solid var(--accent-gold); border-radius: 0 9px 9px 0; background: var(--background-base); }
 .homework-target span { display: flex; align-items: center; gap: 6px; color: var(--accent-gold); font-size: 0.72rem; }
 .homework-card > footer { align-items: flex-end; padding-top: 16px; border-top: 1px solid var(--border); }
+.homework-footer-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .homework-build-guide { padding: 13px 15px; display: flex; align-items: flex-start; gap: 10px; color: var(--accent-blue); border: 1px solid color-mix(in srgb, var(--accent-blue) 32%, var(--border)); border-radius: 10px; background: color-mix(in srgb, var(--accent-blue) 8%, var(--background-base)); }
 .homework-build-guide > div { display: grid; gap: 3px; }
 .homework-build-guide p { color: var(--text-secondary); font-size: 0.76rem; }
@@ -2369,6 +2370,7 @@ h3 {
   .homework-spec-mobile dt { color: var(--text-secondary); font-size: 0.65rem; }
   .homework-spec-mobile dd { overflow-wrap: anywhere; font-size: 0.75rem; font-weight: 750; }
   .homework-spec-mobile dd.is-empty { color: color-mix(in srgb, var(--text-secondary) 65%, transparent); font-size: 0.68rem; font-weight: 500; }
+  .homework-footer-actions { width: 100%; display: grid; grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
