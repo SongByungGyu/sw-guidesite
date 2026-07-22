@@ -1,0 +1,3 @@
+ALTER TABLE "HomeworkMonster"
+ADD COLUMN "artifactLeft" TEXT NOT NULL DEFAULT '',
+ADD COLUMN "artifactRight" TEXT NOT NULL DEFAULT '';

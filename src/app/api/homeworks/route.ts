@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { buildCreateData, canManageGuildContent, createHomeworkSchema, serializeBuild } from "@/lib/content-api";
+import { canManageGuildContent, createHomeworkSchema, homeworkBuildCreateData, serializeBuild } from "@/lib/content-api";
 import { db } from "@/lib/db";
 import { getRequestMember } from "@/lib/member-session";
 
@@ -17,6 +17,6 @@ export async function POST(request: NextRequest) {
   const parsed = createHomeworkSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "입력값을 확인해 주세요." }, { status: 400 });
   const input = parsed.data;
-  const homework = await db.homework.create({ data: { guildId: member.guildId, authorId: member.id, title: input.title, target: input.target, strategy: input.strategy, dueAt: input.dueAt ? new Date(input.dueAt) : null, monsters: { create: input.builds.map(buildCreateData) } } });
+  const homework = await db.homework.create({ data: { guildId: member.guildId, authorId: member.id, title: input.title, target: input.target, strategy: input.strategy, dueAt: input.dueAt ? new Date(input.dueAt) : null, monsters: { create: input.builds.map(homeworkBuildCreateData) } } });
   return NextResponse.json({ id: homework.id }, { status: 201 });
 }

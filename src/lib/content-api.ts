@@ -21,6 +21,17 @@ export const monsterBuildSchema = z.object({
   note: z.string().trim().max(300).default(""),
 });
 
+export const homeworkBuildSchema = monsterBuildSchema.extend({
+  runeSets: z.string().trim().min(1, "몬스터별 룬 세트를 입력해 주세요.").max(80),
+  artifactLeft: z.string().trim().max(100).default(""),
+  artifactRight: z.string().trim().max(100).default(""),
+}).superRefine((build, context) => {
+  const stats = [build.hp, build.attack, build.defense, build.speed, build.critRate, build.critDamage, build.resistance, build.accuracy];
+  if (!stats.some((value) => value !== null && value !== undefined)) {
+    context.addIssue({ code: "custom", message: "몬스터별로 필요한 최소 스탯을 하나 이상 입력해 주세요." });
+  }
+});
+
 const uniqueBuilds = (builds: Array<{ monsterId: string }>, context: z.RefinementCtx) => {
   if (new Set(builds.map((build) => build.monsterId)).size !== builds.length) {
     context.addIssue({ code: "custom", message: "같은 몬스터를 중복 선택할 수 없습니다." });
@@ -58,7 +69,7 @@ export const createHomeworkSchema = z.object({
   target: z.string().trim().min(4).max(300),
   strategy: z.string().trim().min(10).max(2000),
   dueAt: z.string().datetime().nullable(),
-  builds: z.array(monsterBuildSchema).length(3),
+  builds: z.array(homeworkBuildSchema).length(3),
 }).superRefine((input, context) => uniqueBuilds(input.builds, context));
 
 export function canManageGuildContent(role: string) {
@@ -84,5 +95,13 @@ export function buildCreateData(build: z.infer<typeof monsterBuildSchema>) {
     resistance: build.resistance ?? null,
     accuracy: build.accuracy ?? null,
     note: build.note,
+  };
+}
+
+export function homeworkBuildCreateData(build: z.infer<typeof homeworkBuildSchema>) {
+  return {
+    ...buildCreateData(build),
+    artifactLeft: build.artifactLeft,
+    artifactRight: build.artifactRight,
   };
 }

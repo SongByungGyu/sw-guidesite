@@ -19,6 +19,8 @@ export type MonsterBuildDraft = {
   critDamage: number | null;
   resistance: number | null;
   accuracy: number | null;
+  artifactLeft?: string;
+  artifactRight?: string;
   note: string;
 };
 
@@ -33,7 +35,7 @@ const statFields: Array<{ key: keyof MonsterBuildDraft; label: string; placehold
   { key: "accuracy", label: "효적", placeholder: "55" },
 ];
 
-export function TeamBuildEditor({ builds, onChange, teamSize, allowLeader = true }: { builds: MonsterBuildDraft[]; onChange: (builds: MonsterBuildDraft[]) => void; teamSize: number; allowLeader?: boolean }) {
+export function TeamBuildEditor({ builds, onChange, teamSize, allowLeader = true, showArtifacts = false, requireRuneSets = false }: { builds: MonsterBuildDraft[]; onChange: (builds: MonsterBuildDraft[]) => void; teamSize: number; allowLeader?: boolean; showArtifacts?: boolean; requireRuneSets?: boolean }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [replaceSlot, setReplaceSlot] = useState<number | null>(null);
 
@@ -75,11 +77,15 @@ export function TeamBuildEditor({ builds, onChange, teamSize, allowLeader = true
                 </button>
                 <div className="build-inputs">
                   {allowLeader ? <label className="leader-check"><input checked={build.isLeader} name="build-leader" onChange={() => updateBuild(index, "isLeader", true)} type="radio" /> 리더</label> : null}
-                  <label className="rune-field"><span>룬 세트</span><input value={build.runeSets} onChange={(event) => updateBuild(index, "runeSets", event.target.value)} placeholder="폭주 + 의지" /></label>
+                  <label className="rune-field"><span>룬 세트{requireRuneSets ? " · 필수" : ""}</span><input required={requireRuneSets} value={build.runeSets} onChange={(event) => updateBuild(index, "runeSets", event.target.value)} placeholder="예: 폭주 + 의지" /></label>
                   <div className="compact-stat-grid">
                     {statFields.map((field) => <label key={field.key}><span>{field.label}</span><input inputMode="numeric" min="0" type="number" value={(build[field.key] as number | null) ?? ""} onChange={(event) => updateBuild(index, field.key, event.target.value)} placeholder={field.placeholder} /></label>)}
                   </div>
-                  <label className="build-note"><span>메모</span><input value={build.note} onChange={(event) => updateBuild(index, "note", event.target.value)} placeholder="속도 순서·아티팩트 등" /></label>
+                  {showArtifacts ? <div className="artifact-field-grid">
+                    <label><span>좌측 아티팩트</span><input value={build.artifactLeft ?? ""} onChange={(event) => updateBuild(index, "artifactLeft", event.target.value)} placeholder="예: 속도 비례 피해 감소" /></label>
+                    <label><span>우측 아티팩트</span><input value={build.artifactRight ?? ""} onChange={(event) => updateBuild(index, "artifactRight", event.target.value)} placeholder="예: 2스킬 회복량" /></label>
+                  </div> : null}
+                  <label className="build-note"><span>추가 메모</span><input value={build.note} onChange={(event) => updateBuild(index, "note", event.target.value)} placeholder="속도 순서·행동 조건 등" /></label>
                 </div>
               </article>
             );
@@ -112,7 +118,7 @@ export function BuildDetails({ builds }: { builds: MonsterBuildDraft[] }) {
 }
 
 export function createEmptyBuild(monsterId: string, position: number): MonsterBuildDraft {
-  return { monsterId, position, isLeader: position === 0, runeSets: "", hp: null, attack: null, defense: null, speed: null, critRate: null, critDamage: null, resistance: null, accuracy: null, note: "" };
+  return { monsterId, position, isLeader: position === 0, runeSets: "", hp: null, attack: null, defense: null, speed: null, critRate: null, critDamage: null, resistance: null, accuracy: null, artifactLeft: "", artifactRight: "", note: "" };
 }
 
 function compactNumber(value: number) {

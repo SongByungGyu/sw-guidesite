@@ -15,6 +15,8 @@ const builds = monsterIds.map((monsterId, position) => ({
   critDamage: 150,
   resistance: 30,
   accuracy: 45,
+  artifactLeft: "속성 피해 감소",
+  artifactRight: "2스킬 효과 적중",
   note: "행동 순서 기준",
 }));
 
@@ -41,5 +43,11 @@ describe("guild content validation", () => {
   it("requires exactly three monsters for homework", () => {
     const result = createHomeworkSchema.safeParse({ title: "공식 공덱 사용", target: "면역 없는 방어덱", strategy: "해제 후 핵심 딜러부터 공격합니다.", dueAt: null, builds: builds.slice(0, 3) });
     expect(result.success).toBe(true);
+  });
+
+  it("requires rune sets and at least one stat for each homework monster", () => {
+    const base = { title: "점령전 공덱 숙제", target: "속도 리더 방어덱", strategy: "해제 후 핵심 딜러부터 공격합니다.", dueAt: null };
+    expect(createHomeworkSchema.safeParse({ ...base, builds: builds.slice(0, 3).map((build) => ({ ...build, runeSets: "" })) }).success).toBe(false);
+    expect(createHomeworkSchema.safeParse({ ...base, builds: builds.slice(0, 3).map((build) => ({ ...build, hp: null, attack: null, defense: null, speed: null, critRate: null, critDamage: null, resistance: null, accuracy: null })) }).success).toBe(false);
   });
 });

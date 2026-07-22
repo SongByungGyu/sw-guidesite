@@ -57,9 +57,9 @@ async function main() {
   });
   await prisma.homeworkMonster.deleteMany({ where: { homeworkId: homework.id } });
   await prisma.homeworkMonster.createMany({ data: [
-    { homeworkId: homework.id, monsterId: "2120", position: 0, runeSets: "신속 + 의지", speed: 310, accuracy: 55 },
-    { homeworkId: homework.id, monsterId: "1303", position: 1, isLeader: true, runeSets: "폭주 + 의지", speed: 245, hp: 28000 },
-    { homeworkId: homework.id, monsterId: "3118", position: 2, runeSets: "격노 + 칼날", attack: 2100, critRate: 85, critDamage: 190 },
+    { homeworkId: homework.id, monsterId: "2120", position: 0, runeSets: "신속 + 의지", hp: 26000, attack: 900, defense: 1800, speed: 310, critRate: 15, critDamage: 50, resistance: 100, accuracy: 55, artifactLeft: "속도 비례 피해 감소", artifactRight: "1스킬 회복량", note: "가장 먼저 행동" },
+    { homeworkId: homework.id, monsterId: "1303", position: 1, isLeader: true, runeSets: "폭주 + 의지", hp: 28000, attack: 1200, defense: 1000, speed: 245, critRate: 15, critDamage: 50, resistance: 100, accuracy: 45, artifactLeft: "속성 피해 감소", artifactRight: "2스킬 효과 적중", note: "해제 후 제어" },
+    { homeworkId: homework.id, monsterId: "3118", position: 2, runeSets: "격노 + 칼날", hp: 22000, attack: 2100, defense: 1100, speed: 190, critRate: 85, critDamage: 190, resistance: 15, accuracy: 0, artifactLeft: "받는 치명타 피해 감소", artifactRight: "3스킬 치명타 피해", note: "마무리 딜러" },
   ] });
 }
 

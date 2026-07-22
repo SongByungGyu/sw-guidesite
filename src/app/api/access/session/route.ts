@@ -8,9 +8,24 @@ export async function GET(request: NextRequest) {
   if (!token) return NextResponse.json({ status: "none" });
 
   const tokenHash = digestSecret(token);
-  const accessRequest = await db.accessRequest.findUnique({
-    where: { deviceTokenHash: tokenHash },
-  });
+  const [accessRequest, session] = await Promise.all([
+    db.accessRequest.findUnique({ where: { deviceTokenHash: tokenHash } }),
+    db.deviceSession.findUnique({ where: { tokenHash }, include: { member: true } }),
+  ]);
+
+  if (session && !session.revokedAt && session.expiresAt > new Date() && session.member.active) {
+    await db.deviceSession.update({ where: { id: session.id }, data: { lastSeenAt: new Date() } });
+    return NextResponse.json({
+      status: "approved",
+      request: accessRequest ? {
+        id: accessRequest.id,
+        nickname: accessRequest.nickname,
+        requestedAt: accessRequest.requestedAt.toISOString(),
+      } : undefined,
+      member: { nickname: session.member.nickname, role: session.member.role },
+    });
+  }
+
   if (!accessRequest) return NextResponse.json({ status: "none" });
 
   const requestSummary = {
@@ -26,22 +41,5 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const session = await db.deviceSession.findUnique({
-    where: { tokenHash },
-    include: { member: true },
-  });
-  if (!session || session.revokedAt || session.expiresAt <= new Date() || !session.member.active) {
-    return NextResponse.json({ status: "none" });
-  }
-
-  await db.deviceSession.update({
-    where: { id: session.id },
-    data: { lastSeenAt: new Date() },
-  });
-
-  return NextResponse.json({
-    status: "approved",
-    request: requestSummary,
-    member: { nickname: session.member.nickname, role: session.member.role },
-  });
+  return NextResponse.json({ status: "none" });
 }

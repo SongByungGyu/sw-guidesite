@@ -274,8 +274,10 @@ model HomeworkMonster {
   critDamage Int?
   resistance Int?
   accuracy   Int?
-  note       String   @default("")
-  homework   Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  artifactLeft  String   @default("")
+  artifactRight String   @default("")
+  note          String   @default("")
+  homework      Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
 
   @@unique([homeworkId, position])
 }
