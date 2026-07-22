@@ -2,6 +2,7 @@
 
 import type { FormEvent, ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { Icon } from "@/components/icon";
 import type { AccessSessionResponse } from "@/lib/access-api";
 
@@ -120,6 +121,9 @@ export function AccessGate({ children }: { children: ReactNode }) {
               <button className="button primary" type="submit" disabled={submitting}>
                 {submitting ? "요청 보내는 중…" : "접근 요청 보내기"} <Icon name="chevron" size={18} />
               </button>
+              <Link className="button secondary" href="/requests">
+                <Icon name="shield" size={18} /> 관리자 입장
+              </Link>
             </form>
             <p className="access-footnote">승인된 기기는 90일간 유지되며, 새 기기에서는 다시 요청해야 합니다.</p>
           </section>
