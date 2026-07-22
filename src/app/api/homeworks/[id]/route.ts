@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { canManageGuildContent } from "@/lib/content-api";
+import { canManageGuildContent, createHomeworkSchema, homeworkBuildCreateData } from "@/lib/content-api";
 import { getRequestMember } from "@/lib/member-session";
 
 const completionSchema = z.object({ completed: z.boolean() });
@@ -13,8 +13,7 @@ export async function PATCH(
   const member = await getRequestMember(request);
   if (!member) return NextResponse.json({ error: "접근 승인이 필요합니다." }, { status: 401 });
 
-  const parsed = completionSchema.safeParse(await request.json().catch(() => null));
-  if (!parsed.success) return NextResponse.json({ error: "완료 상태를 확인해 주세요." }, { status: 400 });
+  const body = await request.json().catch(() => null);
 
   const { id } = await context.params;
   const homework = await db.homework.findFirst({
@@ -22,6 +21,21 @@ export async function PATCH(
     select: { id: true },
   });
   if (!homework) return NextResponse.json({ error: "숙제를 찾을 수 없습니다." }, { status: 404 });
+
+  const content = createHomeworkSchema.safeParse(body);
+  if (content.success) {
+    if (!canManageGuildContent(member.role)) return NextResponse.json({ error: "운영진만 숙제를 수정할 수 있습니다." }, { status: 403 });
+    const input = content.data;
+    await db.$transaction(async (transaction) => {
+      await transaction.homeworkMonster.deleteMany({ where: { homeworkId: homework.id } });
+      await transaction.homework.update({ where: { id: homework.id }, data: { title: input.title, target: input.target, strategy: input.strategy, dueAt: input.dueAt ? new Date(input.dueAt) : null, monsters: { create: input.builds.map(homeworkBuildCreateData) } } });
+      await transaction.auditLog.create({ data: { guildId: member.guildId, actorMemberId: member.id, action: "HOMEWORK_UPDATED", entityType: "Homework", entityId: homework.id, metadata: { title: input.title } } });
+    });
+    return NextResponse.json({ updated: true, id: homework.id });
+  }
+
+  const parsed = completionSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: content.error.issues[0]?.message ?? "입력값을 확인해 주세요." }, { status: 400 });
 
   if (parsed.data.completed) {
     await db.homeworkCompletion.upsert({

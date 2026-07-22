@@ -4,9 +4,11 @@ import { getMonster, type Deck } from "@/lib/mock-data";
 
 type DeckCardProps = {
   deck: Deck;
+  canManage?: boolean;
+  onManage?: (deck: Deck) => void;
 };
 
-export function DeckCard({ deck }: DeckCardProps) {
+export function DeckCard({ canManage = false, deck, onManage }: DeckCardProps) {
   const offense = deck.offenseIds.map(getMonster);
   const winRate = deck.battles ? Math.round((deck.wins / deck.battles) * 100) : null;
 
@@ -25,9 +27,7 @@ export function DeckCard({ deck }: DeckCardProps) {
           </div>
           <p>{deck.summary}</p>
         </div>
-        <button className="icon-button" type="button" aria-label={`${deck.title} 상세 보기`}>
-          <Icon name="chevron" />
-        </button>
+        {canManage ? <button className="button secondary content-manage-button" onClick={() => onManage?.(deck)} type="button"><Icon name="edit" size={16} /> 관리</button> : <button className="icon-button" type="button" aria-label={`${deck.title} 상세 보기`}><Icon name="chevron" /></button>}
       </div>
 
       <div className="deck-body">

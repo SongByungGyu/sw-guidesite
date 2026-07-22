@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import type { FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { DeckCard } from "@/components/deck-card";
@@ -9,7 +10,7 @@ import { MetaDefenseBoard, type MetaDefenseItem } from "@/components/meta-defens
 import { MonsterPicker } from "@/components/monster-picker";
 import { MonsterPortrait } from "@/components/monster-portrait";
 import { searchDecks, type DeckSort } from "@/lib/deck-search";
-import { decks as mockDecks, getMonster, type Deck } from "@/lib/mock-data";
+import { getMonster, type Deck } from "@/lib/mock-data";
 import { createCombinationKey } from "@/lib/deck-api";
 
 const sortOptions: Array<{ value: DeckSort; label: string }> = [
@@ -25,6 +26,9 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
   const [replaceSlot, setReplaceSlot] = useState<number | null>(null);
   const [defenseIds, setDefenseIds] = useState<string[]>(initialDefenseIds);
   const [savedDecks, setSavedDecks] = useState<Deck[]>([]);
+  const [canManage, setCanManage] = useState(false);
+  const [manageDeck, setManageDeck] = useState<Deck | null>(null);
+  const [deckReloadKey, setDeckReloadKey] = useState(0);
   const [sort, setSort] = useState<DeckSort>("recommended");
   const [officialOnly, setOfficialOnly] = useState(false);
   const [author, setAuthor] = useState("all");
@@ -40,11 +44,11 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
     let cancelled = false;
     void fetch(`/api/decks?defense=${encodeURIComponent(defenseKey)}`, { cache: "no-store" })
       .then((response) => response.ok ? response.json() : { decks: [] })
-      .then((result: { decks: Deck[] }) => {
-        if (!cancelled) setSavedDecks(result.decks);
+      .then((result: { canManage?: boolean; decks: Deck[] }) => {
+        if (!cancelled) { setSavedDecks(result.decks); setCanManage(Boolean(result.canManage)); }
       });
     return () => { cancelled = true; };
-  }, [defenseKey]);
+  }, [defenseKey, deckReloadKey]);
 
   async function loadMetaDefenses() {
     const response = await fetch("/api/meta-defenses", { cache: "no-store" });
@@ -71,7 +75,7 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
     return () => { cancelled = true; };
   }, []);
 
-  const allDecks = useMemo(() => [...savedDecks, ...mockDecks], [savedDecks]);
+  const allDecks = useMemo(() => savedDecks, [savedDecks]);
   const authors = useMemo(() => Array.from(new Set(allDecks.map((deck) => deck.author))), [allDecks]);
   const defense = defenseIds.map(getMonster);
   const results = searchDecks(allDecks, defenseIds, { sort, officialOnly, author });
@@ -223,7 +227,7 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
           <div><span className="status-dot success" /><div><h2 id="exact-title">정확히 일치하는 공덱</h2><p>선택한 방어덱 3마리와 완전히 같은 결과입니다.</p></div></div>
           <strong>{exact.length}개</strong>
         </header>
-        {exact.length ? <div className="deck-list">{exact.map((deck) => <DeckCard deck={deck} key={deck.id} />)}</div> : <EmptyResult filtersActive={filtersActive} onRegister={openRegistration} onReset={resetFilters} />}
+        {exact.length ? <div className="deck-list">{exact.map((deck) => <DeckCard canManage={canManage && Boolean(deck.persisted)} deck={deck} key={deck.id} onManage={setManageDeck} />)}</div> : <EmptyResult filtersActive={filtersActive} onRegister={openRegistration} onReset={resetFilters} />}
       </section>
 
       <section className="result-section partial" aria-labelledby="partial-title">
@@ -231,7 +235,7 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
           <div><span className="status-dot partial" /><div><h2 id="partial-title">2마리 이상 부분 일치</h2><p>정확한 결과가 부족할 때 참고할 수 있는 유사 방어덱입니다.</p></div></div>
           <strong>{partial.length}개</strong>
         </header>
-        {partial.length ? <div className="deck-list">{partial.map((deck) => <DeckCard deck={deck} key={deck.id} />)}</div> : <EmptyResult filtersActive={filtersActive} onRegister={openRegistration} onReset={resetFilters} />}
+        {partial.length ? <div className="deck-list">{partial.map((deck) => <DeckCard canManage={canManage && Boolean(deck.persisted)} deck={deck} key={deck.id} onManage={setManageDeck} />)}</div> : <EmptyResult filtersActive={filtersActive} onRegister={openRegistration} onReset={resetFilters} />}
       </section>
 
       <button className="mobile-fab" onClick={openRegistration} type="button" aria-label="새 공덱 등록">
@@ -245,8 +249,53 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
         open={pickerOpen}
         replaceSlot={replaceSlot}
       />
+      {manageDeck ? <OffenseManageDialog deck={manageDeck} onChanged={() => setDeckReloadKey((value) => value + 1)} onClose={() => setManageDeck(null)} /> : null}
     </AppShell>
   );
+}
+
+function OffenseManageDialog({ deck, onChanged, onClose }: { deck: Deck; onChanged: () => void; onClose: () => void }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [defenseIds, setDefenseIds] = useState<string[]>(deck.defenseIds);
+  const [offenseIds, setOffenseIds] = useState<string[]>(deck.offenseIds);
+  const [leaderSlot, setLeaderSlot] = useState(deck.leaderSlot >= 0 ? deck.leaderSlot : 0);
+  const [pickerTarget, setPickerTarget] = useState<"defense" | "offense">("offense");
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => { if (dialogRef.current && !dialogRef.current.open) dialogRef.current.showModal(); }, []);
+  function close() { dialogRef.current?.close(); }
+  function openPicker(target: "defense" | "offense") { setPickerTarget(target); setPickerOpen(true); }
+  function confirmTeam(ids: string[]) { if (pickerTarget === "defense") setDefenseIds(ids); else { setOffenseIds(ids); if (leaderSlot >= ids.length) setLeaderSlot(0); } }
+
+  async function save(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (defenseIds.length !== 3 || offenseIds.length !== 3) return setError("방덱과 공덱 몬스터를 각각 3마리 선택해 주세요.");
+    const form = new FormData(event.currentTarget);
+    setSaving(true); setError("");
+    const response = await fetch(`/api/decks/${deck.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ defenseIds, offenseIds, leaderSlot, title: form.get("title"), strategy: form.get("strategy"), minimumRequirements: form.get("minimumRequirements"), caution: form.get("caution"), status: "published" }) });
+    const result = await response.json().catch(() => ({})) as { error?: string };
+    setSaving(false);
+    if (!response.ok) return setError(result.error ?? "공덱을 수정하지 못했습니다.");
+    onChanged(); close();
+  }
+
+  async function remove() {
+    if (!window.confirm(`'${deck.title}' 공덱을 삭제할까요?`)) return;
+    setSaving(true); setError("");
+    const response = await fetch(`/api/decks/${deck.id}`, { method: "DELETE" });
+    const result = await response.json().catch(() => ({})) as { error?: string };
+    setSaving(false);
+    if (!response.ok) return setError(result.error ?? "공덱을 삭제하지 못했습니다.");
+    onChanged(); close();
+  }
+
+  return <><dialog aria-labelledby="offense-manage-title" className="monster-dialog defense-detail-dialog" onCancel={(event) => { event.preventDefault(); close(); }} onClose={onClose} ref={dialogRef}><form className="defense-detail-shell" onSubmit={save}><header className="dialog-header"><div><p className="eyebrow">운영진 게시물 관리</p><h2 id="offense-manage-title">공덱 수정</h2></div><button aria-label="공덱 관리 닫기" className="icon-button" onClick={close} type="button"><Icon name="x" /></button></header><div className="defense-detail-body"><div className="simple-fields guide-fields"><label className="span-full"><span>공덱 제목</span><input defaultValue={deck.title} maxLength={60} minLength={2} name="title" required /></label><label className="span-full"><span>운용법</span><textarea defaultValue={deck.strategy ?? deck.summary} maxLength={2000} minLength={10} name="strategy" required /></label><label><span>최소 스펙·조건</span><textarea defaultValue={deck.minimumRequirements} maxLength={1000} name="minimumRequirements" /></label><label><span>주의사항</span><textarea defaultValue={deck.caution} maxLength={1000} name="caution" /></label></div><EditableDeckTeam ids={defenseIds} label="상대 방덱" onEdit={() => openPicker("defense")} /><EditableDeckTeam ids={offenseIds} label="공격덱" leaderSlot={leaderSlot} onEdit={() => openPicker("offense")} /><fieldset className="leader-selector"><legend>공격덱 리더</legend>{offenseIds.map((id, index) => <label className={leaderSlot === index ? "selected" : ""} key={id}><input checked={leaderSlot === index} name="managedLeader" onChange={() => setLeaderSlot(index as 0 | 1 | 2)} type="radio" /><span>{getMonster(id).displayName}</span></label>)}</fieldset>{error ? <p className="form-error">{error}</p> : null}</div><footer className="dialog-footer"><button className="button secondary danger" disabled={saving} onClick={() => void remove()} type="button"><Icon name="trash" size={17} /> 삭제</button><button className="button secondary" onClick={close} type="button">취소</button><button className="button primary" disabled={saving} type="submit"><Icon name="edit" size={17} /> {saving ? "저장 중" : "공덱 수정"}</button></footer></form></dialog><MonsterPicker initialSelection={pickerTarget === "defense" ? defenseIds : offenseIds} onClose={() => setPickerOpen(false)} onConfirm={confirmTeam} open={pickerOpen} selectionKind={pickerTarget} /></>;
+}
+
+function EditableDeckTeam({ ids, label, leaderSlot, onEdit }: { ids: string[]; label: string; leaderSlot?: number; onEdit: () => void }) {
+  return <section className="managed-deck-team"><header><div><strong>{label}</strong><span>몬스터 3마리</span></div><button className="button secondary" onClick={onEdit} type="button"><Icon name="edit" size={16} /> 변경</button></header><div>{ids.map((id, index) => <MonsterPortrait key={id} leader={leaderSlot === index} monster={getMonster(id)} selected />)}</div></section>;
 }
 
 function EmptyResult({ filtersActive, onRegister, onReset }: { filtersActive: boolean; onRegister: () => void; onReset: () => void }) {

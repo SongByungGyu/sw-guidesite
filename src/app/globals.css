@@ -2126,6 +2126,12 @@ h3 {
 .schedule-delete-button { width: 36px; height: 36px; display: grid; place-items: center; color: var(--text-secondary); border: 1px solid transparent; border-radius: 9px; background: transparent; cursor: pointer; }
 .schedule-delete-button:hover { color: var(--danger); border-color: rgb(240 100 106 / 35%); background: rgb(240 100 106 / 7%); }
 .schedule-delete-button:disabled { cursor: not-allowed; opacity: 0.4; }
+.content-admin-actions { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; }
+.content-admin-actions > button { min-width: 34px; min-height: 34px; padding: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; color: var(--text-secondary); font-size: 0.7rem; border: 1px solid var(--border); border-radius: 8px; background: var(--background-base); cursor: pointer; }
+.content-admin-actions > button:hover { color: var(--accent-blue); border-color: color-mix(in srgb, var(--accent-blue) 45%, var(--border)); }
+.content-admin-actions > button:last-child:hover { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, var(--border)); }
+.content-admin-actions > button:disabled { cursor: not-allowed; opacity: 0.45; }
+.content-admin-actions.labeled { margin-top: 8px; justify-content: flex-end; }
 .home-empty { min-height: 110px; padding: 24px; display: grid; place-items: center; align-content: center; gap: 7px; color: var(--text-secondary); text-align: center; }
 
 .home-homework { grid-column: 1 / -1; }
@@ -2250,6 +2256,14 @@ em.change-request-status { padding-right: 8px; }
 .defense-detail-builds > header p { color: var(--text-secondary); font-size: 0.72rem; }
 .defense-detail-builds > header > span { color: var(--accent-gold); font-size: 0.72rem; font-weight: 700; }
 .defense-detail-shell > .dialog-footer { display: flex; justify-content: flex-end; gap: 8px; }
+.defense-edit-form { margin: 4px 0 0; }
+.content-manage-button { min-height: 38px; padding: 8px 11px; }
+.managed-deck-team { padding: 14px 16px; display: grid; gap: 12px; border: 1px solid var(--border); border-radius: 11px; background: var(--background-base); }
+.managed-deck-team > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.managed-deck-team > header > div { display: grid; }
+.managed-deck-team > header span { color: var(--text-secondary); font-size: 0.7rem; }
+.managed-deck-team > div { display: flex; justify-content: center; gap: 18px; }
+.managed-deck-team .monster-card { max-width: 92px; }
 
 .dungeon-search { width: min(100%, 520px); min-height: 46px; margin-bottom: 12px; padding: 0 14px; display: flex; align-items: center; gap: 10px; color: var(--text-secondary); border: 1px solid var(--border); border-radius: 12px; background: var(--background-elevated); }
 .dungeon-search:focus-within { border-color: var(--accent-gold); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-gold) 15%, transparent); }

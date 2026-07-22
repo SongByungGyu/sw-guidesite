@@ -14,6 +14,10 @@ export type Deck = {
   updatedAt: string;
   author: string;
   isOfficial: boolean;
+  persisted?: boolean;
+  strategy?: string;
+  minimumRequirements?: string;
+  caution?: string;
 };
 
 export const decks: Deck[] = [

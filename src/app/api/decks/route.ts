@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createCombinationKey, createOffenseDeckSchema } from "@/lib/deck-api";
+import { canManageGuildContent } from "@/lib/content-api";
 import { db } from "@/lib/db";
 import { getRequestMember } from "@/lib/member-session";
 import { getMonster } from "@/lib/monster-data";
@@ -38,10 +39,14 @@ export async function GET(request: NextRequest) {
   ));
 
   return NextResponse.json({
+    canManage: canManageGuildContent(member.role),
     decks: matchingDefenses.flatMap((defense) => defense.offenseRecommendations.map((deck) => ({
       id: deck.id,
       title: deck.title,
       summary: deck.strategy.length > 120 ? `${deck.strategy.slice(0, 117)}…` : deck.strategy,
+      strategy: deck.strategy,
+      minimumRequirements: deck.minimumRequirements,
+      caution: deck.caution,
       defenseIds: defense.monsters.map((monster) => monster.monsterId),
       offenseIds: deck.monsters.map((monster) => monster.monsterId),
       leaderSlot: deck.monsters.findIndex((monster) => monster.isLeader),
@@ -51,6 +56,7 @@ export async function GET(request: NextRequest) {
       updatedAt: deck.updatedAt.toISOString(),
       author: deck.author.nickname,
       isOfficial: deck.isOfficial,
+      persisted: true,
     }))),
   });
 }

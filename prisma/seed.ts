@@ -26,16 +26,8 @@ async function main() {
     create: { guildId: guild.id, nickname: "길드 관리자", role: "OWNER" },
   });
 
-  await prisma.announcement.upsert({
-    where: { id: "seed-announcement-siege" },
-    update: { title: "점령전 공격 전 방덱 확인 필수", content: "공격 전에 공덱 검색에서 상대 방덱을 선택하고, 사용 후에는 전투 결과를 남겨주세요.", pinned: true },
-    create: { id: "seed-announcement-siege", guildId: guild.id, authorId: owner.id, title: "점령전 공격 전 방덱 확인 필수", content: "공격 전에 공덱 검색에서 상대 방덱을 선택하고, 사용 후에는 전투 결과를 남겨주세요.", pinned: true },
-  });
-  await prisma.announcement.upsert({
-    where: { id: "seed-announcement-guide" },
-    update: { title: "던전 공략 등록 안내", content: "안정적으로 사용하는 던전 덱이 있다면 몬스터별 핵심 스탯과 함께 공략을 등록해 주세요." },
-    create: { id: "seed-announcement-guide", guildId: guild.id, authorId: owner.id, title: "던전 공략 등록 안내", content: "안정적으로 사용하는 던전 덱이 있다면 몬스터별 핵심 스탯과 함께 공략을 등록해 주세요." },
-  });
+  await seedAnnouncementUnlessDeleted({ id: "seed-announcement-siege", guildId: guild.id, authorId: owner.id, title: "점령전 공격 전 방덱 확인 필수", content: "공격 전에 공덱 검색에서 상대 방덱을 선택하고, 사용 후에는 전투 결과를 남겨주세요.", pinned: true });
+  await seedAnnouncementUnlessDeleted({ id: "seed-announcement-guide", guildId: guild.id, authorId: owner.id, title: "던전 공략 등록 안내", content: "안정적으로 사용하는 던전 덱이 있다면 몬스터별 핵심 스탯과 함께 공략을 등록해 주세요.", pinned: false });
 
   const nextSiege = nextWeekday(3, 12);
   const nextLab = nextWeekday(6, 21);
@@ -99,6 +91,29 @@ async function seedScheduleUnlessDeleted(input: {
       category: input.category,
       startsAt: input.startsAt,
     },
+    create: input,
+  });
+}
+
+async function seedAnnouncementUnlessDeleted(input: {
+  id: string;
+  guildId: string;
+  authorId: string;
+  title: string;
+  content: string;
+  pinned: boolean;
+}) {
+  const deletion = await prisma.auditLog.findFirst({
+    where: { guildId: input.guildId, action: "ANNOUNCEMENT_DELETED", entityType: "Announcement", entityId: input.id },
+    select: { id: true },
+  });
+  if (deletion) {
+    await prisma.announcement.deleteMany({ where: { id: input.id } });
+    return;
+  }
+  await prisma.announcement.upsert({
+    where: { id: input.id },
+    update: { title: input.title, content: input.content, pinned: input.pinned },
     create: input,
   });
 }
