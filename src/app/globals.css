@@ -1834,7 +1834,7 @@ h3 {
 .defense-card > header > span { padding: 3px 7px; color: var(--accent-blue); font-size: 0.68rem; border-radius: 999px; background: rgb(78 139 255 / 10%); }
 .defense-card-open { display: flex; align-items: center; gap: 6px; }
 .defense-card-open strong { color: var(--accent-blue); }
-.defense-detail-dialog { width: min(860px, calc(100% - 32px)); }
+.defense-detail-dialog { position: fixed; inset: 0; width: min(860px, calc(100% - 32px)); margin: auto; }
 .defense-detail-shell { max-height: calc(100dvh - 34px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
 .defense-detail-body { padding: 20px 22px 24px; overflow-y: auto; display: grid; gap: 16px; }
 .defense-detail-overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--border); border-radius: 10px; }
