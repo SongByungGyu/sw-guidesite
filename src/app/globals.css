@@ -1826,10 +1826,30 @@ h3 {
 
 .content-list-section { padding-bottom: 18px; }
 .defense-card-grid { padding: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.defense-card { padding: 17px; display: grid; gap: 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--background-base); }
+.defense-card { min-width: 0; padding: 17px; display: grid; gap: 16px; color: inherit; text-align: left; border: 1px solid var(--border); border-radius: 12px; outline: 0; background: var(--background-base); cursor: pointer; transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease; }
+.defense-card:hover { border-color: color-mix(in srgb, var(--accent-blue) 55%, var(--border)); background: color-mix(in srgb, var(--accent-blue) 4%, var(--background-base)); transform: translateY(-2px); }
+.defense-card:focus-visible { border-color: var(--accent-blue); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-blue) 18%, transparent); }
 .defense-card > header, .defense-card > footer { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .defense-card > header p, .defense-card > footer { color: var(--text-secondary); font-size: 0.72rem; }
 .defense-card > header > span { padding: 3px 7px; color: var(--accent-blue); font-size: 0.68rem; border-radius: 999px; background: rgb(78 139 255 / 10%); }
+.defense-card-open { display: flex; align-items: center; gap: 6px; }
+.defense-card-open strong { color: var(--accent-blue); }
+.defense-detail-dialog { width: min(860px, calc(100% - 32px)); }
+.defense-detail-shell { max-height: calc(100dvh - 34px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.defense-detail-body { padding: 20px 22px 24px; overflow-y: auto; display: grid; gap: 16px; }
+.defense-detail-overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--border); border-radius: 10px; }
+.defense-detail-overview > div { padding: 12px 14px; display: grid; gap: 3px; border-right: 1px solid var(--border); background: var(--background-base); }
+.defense-detail-overview > div:last-child { border-right: 0; }
+.defense-detail-overview span, .defense-detail-note > span { color: var(--text-secondary); font-size: 0.68rem; }
+.defense-detail-overview strong:last-child { color: var(--text-primary); }
+.defense-detail-overview > div:last-child strong { color: var(--accent-blue); }
+.defense-detail-note { padding: 14px 16px; display: grid; gap: 5px; border-left: 3px solid var(--accent-gold); border-radius: 0 9px 9px 0; background: var(--background-base); }
+.defense-detail-note p { color: var(--text-secondary); white-space: pre-wrap; }
+.defense-detail-builds { display: grid; gap: 11px; }
+.defense-detail-builds > header { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.defense-detail-builds > header p { color: var(--text-secondary); font-size: 0.72rem; }
+.defense-detail-builds > header > span { color: var(--accent-gold); font-size: 0.72rem; font-weight: 700; }
+.defense-detail-shell > .dialog-footer { display: flex; justify-content: flex-end; gap: 8px; }
 
 .dungeon-search { width: min(100%, 520px); min-height: 46px; margin-bottom: 12px; padding: 0 14px; display: flex; align-items: center; gap: 10px; color: var(--text-secondary); border: 1px solid var(--border); border-radius: 12px; background: var(--background-elevated); }
 .dungeon-search:focus-within { border-color: var(--accent-gold); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-gold) 15%, transparent); }
@@ -2409,6 +2429,12 @@ h3 {
 
 @media (max-width: 767px) {
   .artifact-field-grid { grid-template-columns: 1fr; }
+  .defense-detail-shell { height: 100dvh; max-height: 100dvh; }
+  .defense-detail-body { padding: 16px 14px 18px; }
+  .defense-detail-overview { grid-template-columns: 1fr; }
+  .defense-detail-overview > div { border-right: 0; border-bottom: 1px solid var(--border); }
+  .defense-detail-overview > div:last-child { border-bottom: 0; }
+  .defense-detail-shell > .dialog-footer { display: grid; grid-template-columns: 0.7fr 1.3fr; }
   .homework-progress > summary { align-items: flex-start; }
   .homework-progress-summary-copy small { display: none; }
   .homework-progress-count { align-items: flex-end; flex-direction: column; gap: 1px; }
