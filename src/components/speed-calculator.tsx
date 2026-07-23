@@ -36,36 +36,42 @@ type EffectDraft = {
   speedBuff: boolean;
 };
 
-const DEFAULT_TEAM = ["2330", "2319", "5309"];
+const EMPTY_TEAM = ["", "", ""];
 const WATER_PUMPKIN_ID = "2330";
 
 export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDataset }) {
-  const [teamIds, setTeamIds] = useState(DEFAULT_TEAM);
+  const [teamIds, setTeamIds] = useState(EMPTY_TEAM);
   const [editingSlot, setEditingSlot] = useState<number | null>(null);
-  const [leaderSlot, setLeaderSlot] = useState(1);
+  const [leaderSlot, setLeaderSlot] = useState<number | null>(null);
   const [battleArea, setBattleArea] = useState<"guild" | "arena">("guild");
   const [manualLeaderPct, setManualLeaderPct] = useState("");
   const [towerPct, setTowerPct] = useState(String(speedData.towerSpeedPct));
-  const [runeSpeeds, setRuneSpeeds] = useState(["180", "", ""]);
+  const [runeSpeeds, setRuneSpeeds] = useState(["", "", ""]);
   const [artifactPcts, setArtifactPcts] = useState(["0", "0", "0"]);
   const [passiveBonuses, setPassiveBonuses] = useState(["0", "0", "0"]);
   const [pumpkinBuffCounts, setPumpkinBuffCounts] = useState(["2", "2", "2"]);
   const [effectOverrides, setEffectOverrides] = useState<Record<string, EffectDraft>>({});
 
-  const leaderMonster = getMonster(teamIds[leaderSlot]);
-  const leaderData = speedData.monsters[teamIds[leaderSlot]];
-  const automaticLeaderLabel = describeLeader(leaderData?.speedLeader, battleArea, leaderMonster.element);
+  const selectedCount = teamIds.filter(Boolean).length;
+  const leaderId = leaderSlot === null ? "" : teamIds[leaderSlot];
+  const leaderMonster = leaderId ? getMonster(leaderId) : null;
+  const leaderData = leaderId ? speedData.monsters[leaderId] : undefined;
+  const automaticLeaderLabel = leaderMonster
+    ? describeLeader(leaderData?.speedLeader ?? null, battleArea, leaderMonster.element)
+    : { amount: 0, label: selectedCount ? "선택한 조합에 공속 리더 없음" : "몬스터 선택 후 자동 적용" };
   const effectDrafts = teamIds.slice(0, 2).map((id, position) => getEffectDraft(
     speedData.monsters[id],
     effectOverrides[`${position}:${id}`],
     position,
   ));
 
-  const units = useMemo<SpeedChainUnit[]>(() => teamIds.map((id, position) => {
+  const units = useMemo<SpeedChainUnit[] | null>(() => {
+    if (!teamIds.every(Boolean)) return null;
+    return teamIds.map((id, position) => {
     const monster = getMonster(id);
     const data = speedData.monsters[id];
     const leaderPct = manualLeaderPct.trim() === ""
-      ? automaticLeaderForUnit(leaderData?.speedLeader, battleArea, leaderMonster.element, monster.element)
+      ? automaticLeaderForUnit(leaderData?.speedLeader ?? null, battleArea, leaderMonster?.element ?? "", monster.element)
       : numeric(manualLeaderPct);
     const passiveBonus = id === WATER_PUMPKIN_ID
       ? numeric(pumpkinBuffCounts[position]) * 19.5
@@ -81,10 +87,11 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
         ? resolveEffects(data?.skills ?? [], effectDrafts[position], position, teamIds.length)
         : [],
     };
-  }), [artifactPcts, battleArea, effectDrafts, leaderData?.speedLeader, leaderMonster.element, manualLeaderPct, passiveBonuses, pumpkinBuffCounts, runeSpeeds, speedData.monsters, teamIds, towerPct]);
+    });
+  }, [artifactPcts, battleArea, effectDrafts, leaderData?.speedLeader, leaderMonster?.element, manualLeaderPct, passiveBonuses, pumpkinBuffCounts, runeSpeeds, speedData.monsters, teamIds, towerPct]);
 
-  const result = useMemo(() => calculateSpeedTune(units), [units]);
-  const allActualEntered = result.actualOrder !== null;
+  const result = useMemo(() => units ? calculateSpeedTune(units) : null, [units]);
+  const allActualEntered = Boolean(result?.actualOrder);
 
   function updateList(setter: React.Dispatch<React.SetStateAction<string[]>>, position: number, value: string) {
     setter((current) => current.map((item, index) => index === position ? value : item));
@@ -92,6 +99,16 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
 
   function updateEffect(position: number, draft: EffectDraft) {
     setEffectOverrides((current) => ({ ...current, [`${position}:${teamIds[position]}`]: draft }));
+  }
+
+  function selectTeam(ids: string[]) {
+    setTeamIds(ids);
+    setManualLeaderPct("");
+    setLeaderSlot((current) => {
+      if (current !== null && speedData.monsters[ids[current]]?.speedLeader) return current;
+      const automaticSlot = ids.findIndex((id) => Boolean(speedData.monsters[id]?.speedLeader));
+      return automaticSlot >= 0 ? automaticSlot : null;
+    });
   }
 
   return (
@@ -116,30 +133,40 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
       <div className="speed-calculator-layout">
         <div className="speed-config-column">
           <section className="speed-panel">
-            <header className="speed-panel-heading"><div><span>1</span><div><h2>행동 순서와 리더</h2><p>1턴 → 2턴 → 3턴 순서입니다. 카드를 눌러 몬스터를 바꾸세요.</p></div></div></header>
+            <header className="speed-panel-heading"><div><span>1</span><div><h2>행동 순서와 리더</h2><p>빈 칸을 눌러 1턴 → 2턴 → 3턴 순서로 몬스터를 선택하세요.</p></div></div></header>
             <div className="speed-team-picker">
               {teamIds.map((id, position) => {
+                if (!id) return <article className="is-empty" key={`empty-${position}`}>
+                  <button aria-label={`${position + 1}턴 몬스터 선택`} onClick={() => setEditingSlot(position)} type="button">
+                    <span>{position + 1}턴</span>
+                    <span className="speed-empty-monster"><Icon name="plus" size={19} /></span>
+                    <div><strong>몬스터 선택</strong><small>눌러서 추가하세요</small></div>
+                    <Icon name="chevron" size={15} />
+                  </button>
+                  <div className="speed-no-leader">선택 대기</div>
+                </article>;
                 const monster = getMonster(id);
                 const data = speedData.monsters[id];
+                const speedLeader = data?.speedLeader;
                 return <article className={leaderSlot === position ? "is-leader" : ""} key={`${id}-${position}`}>
                   <button aria-label={`${position + 1}턴 ${monster.displayName} 변경`} onClick={() => setEditingSlot(position)} type="button">
                     <span>{position + 1}턴</span>
                     <MonsterPortrait compact monster={monster} selected />
-                    <div><strong>{monster.displayName}</strong><small>기본속 {data?.baseSpeed ?? "-"}</small></div>
+                    <div><strong>{monster.displayName}</strong><small>기본속 {data?.baseSpeed ?? "-"}{id === WATER_PUMPKIN_ID ? " · 물호박 자동 감지" : ""}</small></div>
                     <Icon name="edit" size={15} />
                   </button>
-                  <label><input checked={leaderSlot === position} name="speed-leader" onChange={() => { setLeaderSlot(position); setManualLeaderPct(""); }} type="radio" /> 리더</label>
+                  {speedLeader ? <label><input checked={leaderSlot === position} name="speed-leader" onChange={() => { setLeaderSlot(position); setManualLeaderPct(""); }} type="radio" /> 공속 리더 +{speedLeader.amount}%</label> : <div className="speed-no-leader">공속 리더 없음</div>}
                 </article>;
               })}
             </div>
-            <div className="speed-global-fields">
+            {selectedCount ? <div className="speed-global-fields">
               <label><span>전투 지역</span><select onChange={(event) => { setBattleArea(event.target.value as "guild" | "arena"); setManualLeaderPct(""); }} value={battleArea}><option value="guild">점령전·길드전</option><option value="arena">아레나</option></select></label>
               <label><span>속도 리더 보정</span><div className="speed-input-suffix"><input max="50" min="0" onChange={(event) => setManualLeaderPct(event.target.value)} placeholder={String(automaticLeaderLabel.amount)} type="number" value={manualLeaderPct} /><b>%</b></div><small>{manualLeaderPct === "" ? automaticLeaderLabel.label : "직접 입력값 적용"}</small></label>
               <label><span>공속 건물</span><div className="speed-input-suffix"><input max="15" min="0" onChange={(event) => setTowerPct(event.target.value)} type="number" value={towerPct} /><b>%</b></div><small>최대 레벨 기본 15%</small></label>
-            </div>
+            </div> : null}
           </section>
 
-          <section className="speed-panel">
+          {result && units ? <><section className="speed-panel">
             <header className="speed-panel-heading"><div><span>2</span><div><h2>몬스터별 공속</h2><p>룬 상세 화면의 초록색 추가 공속을 입력하세요. 빈 뒷속은 권장값만 계산합니다.</p></div></div></header>
             <div className="speed-stat-cards">
               {teamIds.map((id, position) => {
@@ -176,10 +203,10 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
                 </article>;
               })}
             </div>
-          </section>
+          </section></> : <section className="speed-awaiting-team"><Icon name="plus" size={22} /><div><strong>몬스터 {teamIds.length - selectedCount}마리를 더 선택해주세요.</strong><p>세 마리가 모두 선택되면 공속 리더와 물호박 패시브를 확인하고 권장 공속을 계산합니다.</p></div></section>}
         </div>
 
-        <aside className="speed-result-panel">
+        {result && units ? <aside className="speed-result-panel">
           <header><div><p className="eyebrow">CALCULATION</p><h2>공속 계산 결과</h2></div><span className={allActualEntered ? result.actualSafe ? "safe" : "danger" : "ready"}>{allActualEntered ? result.actualSafe ? "순서 안전" : "순서 재확인" : "권장 컷 계산"}</span></header>
           <div className="speed-result-summary"><div><span>첫 행동 틱</span><strong>{result.firstTurnTick}</strong></div><div><span>선턴 최종속</span><strong>{Math.ceil(result.leadCombatSpeed)}</strong></div><div><span>속도 리더</span><strong>{manualLeaderPct.trim() === "" ? automaticLeaderLabel.amount : numeric(manualLeaderPct)}%</strong></div></div>
           <ol className="speed-result-order">
@@ -192,10 +219,10 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
           </ol>
           {result.actualOrder ? <div className={`speed-order-check ${result.actualSafe ? "safe" : "danger"}`}><Icon name={result.actualSafe ? "check" : "x"} size={18} /><div><strong>입력 공속의 예상 순서</strong><p>{result.actualOrder.map((position) => getMonster(teamIds[position]).displayName).join(" → ")}</p></div></div> : <div className="speed-order-check ready"><Icon name="edit" size={18} /><div><strong>내 공속도 점검할 수 있어요</strong><p>2·3턴 룬 추가 공속을 입력하면 실제 예상 순서를 함께 표시합니다.</p></div></div>}
           <footer><Icon name="sparkles" size={16} /><p>게임 내 게이지 반올림과 특수 패시브에 따라 1~2 정도 차이가 날 수 있습니다. 룬 적용 전 연계 테스트를 권장합니다.</p></footer>
-        </aside>
+        </aside> : <aside className="speed-result-panel speed-result-empty"><Icon name="bolt" size={24} /><strong>조합 선택 후 계산 결과가 표시됩니다.</strong><p>먼저 왼쪽에서 행동 순서대로 몬스터 세 마리를 골라주세요.</p></aside>}
       </div>
 
-      <MonsterPicker initialSelection={teamIds} maxSelection={3} onClose={() => setEditingSlot(null)} onConfirm={setTeamIds} open={editingSlot !== null} replaceSlot={editingSlot} selectionKind="team" />
+      <MonsterPicker initialSelection={teamIds} maxSelection={3} onClose={() => setEditingSlot(null)} onConfirm={selectTeam} open={editingSlot !== null} replaceSlot={editingSlot} selectionKind="team" />
     </AppShell>
   );
 }

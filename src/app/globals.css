@@ -3117,6 +3117,10 @@ em.change-request-status { padding-right: 8px; }
 .speed-team-picker article > button small { color: var(--text-secondary); font-size: 0.65rem; }
 .speed-team-picker article > label { padding: 7px 11px; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--text-secondary); font-size: 0.7rem; font-weight: 750; border-top: 1px solid var(--border); cursor: pointer; }
 .speed-team-picker article.is-leader > label { color: var(--accent-gold); }
+.speed-team-picker article.is-empty { border-style: dashed; }
+.speed-team-picker article.is-empty > button { min-height: 78px; }
+.speed-empty-monster { width: 42px; height: 42px; display: grid; place-items: center; align-self: center !important; color: var(--accent-blue) !important; border: 1px dashed color-mix(in srgb, var(--accent-blue) 55%, var(--border)); border-radius: 10px; background: color-mix(in srgb, var(--accent-blue) 7%, transparent); }
+.speed-no-leader { min-height: 34px; padding: 7px 11px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 0.67rem; font-weight: 700; border-top: 1px solid var(--border); }
 .speed-global-fields { padding: 0 20px 18px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .speed-global-fields label, .speed-card-fields label, .speed-auto-effect label, .speed-custom-effect label { min-width: 0; display: grid; align-content: start; gap: 5px; }
 .speed-global-fields label > span, .speed-card-fields label > span, .speed-auto-effect label > span, .speed-custom-effect label > span { color: var(--text-secondary); font-size: 0.66rem; font-weight: 750; }
@@ -3136,11 +3140,15 @@ em.change-request-status { padding-right: 8px; }
 .speed-stat-cards > article > header span { color: var(--accent-blue); font-size: 0.62rem; font-weight: 800; }
 .speed-stat-cards > article > header strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .speed-stat-cards > article > header em { margin-left: auto; color: var(--text-secondary); font-size: 0.65rem; font-style: normal; white-space: nowrap; }
-.speed-card-fields { padding: 11px 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.speed-card-fields { padding: 11px 12px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 9px; }
 .speed-card-fields .span-full { grid-column: 1 / -1; }
 .speed-stat-cards > article > footer { padding: 9px 12px; display: grid; gap: 2px; border-top: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 60%, transparent); }
 .speed-stat-cards > article > footer span { color: var(--text-secondary); font-size: 0.6rem; }
-.speed-stat-cards > article > footer strong { color: var(--accent-gold); font-size: 0.74rem; }
+.speed-stat-cards > article > footer strong { color: var(--accent-gold); font-size: 0.74rem; overflow-wrap: anywhere; }
+.speed-awaiting-team { min-height: 132px; padding: 24px; display: flex; align-items: center; justify-content: center; gap: 12px; color: var(--text-secondary); text-align: left; border: 1px dashed var(--border); border-radius: var(--radius-card); background: color-mix(in srgb, var(--background-elevated) 75%, transparent); }
+.speed-awaiting-team svg { flex: 0 0 auto; color: var(--accent-blue); }
+.speed-awaiting-team strong { color: var(--text-primary); font-size: 0.86rem; }
+.speed-awaiting-team p { margin-top: 3px; font-size: 0.7rem; }
 .speed-effect-list { padding: 16px 20px 20px; display: grid; gap: 10px; }
 .speed-effect-list > article { overflow: hidden; border: 1px solid var(--border); border-radius: 11px; background: var(--background-base); }
 .speed-effect-list > article > header { padding: 11px 12px; display: flex; align-items: center; gap: 9px; border-bottom: 1px solid var(--border); }
@@ -3161,7 +3169,7 @@ em.change-request-status { padding-right: 8px; }
 .speed-result-panel { position: sticky; top: 18px; overflow: hidden; }
 .speed-result-panel > header { padding: 17px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border); }
 .speed-result-panel > header h2 { font-size: 1.05rem; }
-.speed-result-panel > header > span { padding: 5px 9px; flex: 0 0 auto; font-size: 0.64rem; font-weight: 850; border: 1px solid var(--border); border-radius: 999px; }
+.speed-result-panel > header > span { padding: 5px 9px; flex: 0 0 auto; font-size: 0.64rem; font-weight: 850; white-space: nowrap; border: 1px solid var(--border); border-radius: 999px; }
 .speed-result-panel > header > span.ready { color: var(--accent-blue); }
 .speed-result-panel > header > span.safe { color: var(--success); border-color: color-mix(in srgb, var(--success) 40%, var(--border)); }
 .speed-result-panel > header > span.danger { color: #ff7878; border-color: color-mix(in srgb, #ff7878 40%, var(--border)); }
@@ -3179,7 +3187,7 @@ em.change-request-status { padding-right: 8px; }
 .speed-result-order dl { grid-column: 2 / -1; margin: 1px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--border); border-radius: 8px; }
 .speed-result-order dl > div { padding: 7px 8px; display: grid; gap: 1px; border-right: 1px solid var(--border); }
 .speed-result-order dl > div:last-child { border-right: 0; }
-.speed-result-order dt { color: var(--text-secondary); font-size: 0.56rem; }
+.speed-result-order dt { color: var(--text-secondary); font-size: 0.56rem; white-space: nowrap; }
 .speed-result-order dd { margin: 0; font-size: 0.74rem; font-weight: 850; }
 .speed-result-order .actual-ok dd { color: var(--success); }
 .speed-result-order .actual-low dd { color: #ff7878; }
@@ -3195,6 +3203,10 @@ em.change-request-status { padding-right: 8px; }
 .speed-result-panel > footer { padding: 12px 14px; display: flex; align-items: flex-start; gap: 8px; color: var(--text-secondary); border-top: 1px solid var(--border); background: var(--background-base); }
 .speed-result-panel > footer svg { flex: 0 0 auto; color: var(--accent-gold); }
 .speed-result-panel > footer p { font-size: 0.64rem; }
+.speed-result-empty { min-height: 230px; padding: 28px 22px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 7px; color: var(--text-secondary); text-align: center; }
+.speed-result-empty svg { color: var(--accent-gold); }
+.speed-result-empty strong { color: var(--text-primary); font-size: 0.84rem; }
+.speed-result-empty p { max-width: 270px; font-size: 0.68rem; }
 
 @media (max-width: 1180px) {
   .speed-calculator-layout { grid-template-columns: minmax(0, 1fr); }
