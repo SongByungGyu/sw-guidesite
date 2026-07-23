@@ -4,7 +4,9 @@ import { useState } from "react";
 import { Icon } from "@/components/icon";
 import { MonsterPicker } from "@/components/monster-picker";
 import { MonsterPortrait } from "@/components/monster-portrait";
+import { MonsterStatPhotoAnalyzer } from "@/components/monster-stat-photo-analyzer";
 import { getMonster } from "@/lib/monster-data";
+import { monsterStatFields, type MonsterStatValues } from "@/lib/monster-stat-ocr";
 
 export type MonsterBuildDraft = {
   monsterId: string;
@@ -24,20 +26,10 @@ export type MonsterBuildDraft = {
   note: string;
 };
 
-const statFields: Array<{ key: keyof MonsterBuildDraft; label: string; placeholder: string }> = [
-  { key: "hp", label: "체력", placeholder: "25000" },
-  { key: "attack", label: "공격력", placeholder: "1800" },
-  { key: "defense", label: "방어력", placeholder: "1000" },
-  { key: "speed", label: "속도", placeholder: "220" },
-  { key: "critRate", label: "치확", placeholder: "85" },
-  { key: "critDamage", label: "치피", placeholder: "170" },
-  { key: "resistance", label: "저항", placeholder: "15" },
-  { key: "accuracy", label: "효적", placeholder: "55" },
-];
-
 export function TeamBuildEditor({ builds, onChange, teamSize, allowLeader = true, showArtifacts = false, requireRuneSets = false }: { builds: MonsterBuildDraft[]; onChange: (builds: MonsterBuildDraft[]) => void; teamSize: number; allowLeader?: boolean; showArtifacts?: boolean; requireRuneSets?: boolean }) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [replaceSlot, setReplaceSlot] = useState<number | null>(null);
+  const [photoSlot, setPhotoSlot] = useState<number | null>(null);
 
   function selectTeam(ids: string[]) {
     const next = ids.map((monsterId, position) => {
@@ -59,6 +51,17 @@ export function TeamBuildEditor({ builds, onChange, teamSize, allowLeader = true
     }));
   }
 
+  function applyPhotoStats(index: number, stats: MonsterStatValues, runeSets: string) {
+    onChange(builds.map((build, buildIndex) => {
+      if (buildIndex !== index) return build;
+      return {
+        ...build,
+        ...stats,
+        runeSets: runeSets || build.runeSets,
+      };
+    }));
+  }
+
   return (
     <div className="team-build-editor">
       <div className="team-build-toolbar">
@@ -77,9 +80,10 @@ export function TeamBuildEditor({ builds, onChange, teamSize, allowLeader = true
                 </button>
                 <div className="build-inputs">
                   {allowLeader ? <label className="leader-check"><input checked={build.isLeader} name="build-leader" onChange={() => updateBuild(index, "isLeader", true)} type="radio" /> 리더</label> : null}
+                  <button className="build-photo-analyze" onClick={() => setPhotoSlot(index)} type="button"><Icon name="sparkles" size={15} /> 사진으로 스펙 입력 <span>무료</span></button>
                   <label className="rune-field"><span>룬 세트{requireRuneSets ? " · 필수" : ""}</span><input required={requireRuneSets} value={build.runeSets} onChange={(event) => updateBuild(index, "runeSets", event.target.value)} placeholder="예: 폭주 + 의지" /></label>
                   <div className="compact-stat-grid">
-                    {statFields.map((field) => <label key={field.key}><span>{field.label}</span><input inputMode="numeric" min="0" type="number" value={(build[field.key] as number | null) ?? ""} onChange={(event) => updateBuild(index, field.key, event.target.value)} placeholder={field.placeholder} /></label>)}
+                    {monsterStatFields.map((field) => <label key={field.key}><span>{field.shortLabel}</span><input inputMode="numeric" min="0" type="number" value={build[field.key] ?? ""} onChange={(event) => updateBuild(index, field.key, event.target.value)} placeholder={field.placeholder} /></label>)}
                   </div>
                   {showArtifacts ? <div className="artifact-field-grid">
                     <label><span>좌측 아티팩트</span><input value={build.artifactLeft ?? ""} onChange={(event) => updateBuild(index, "artifactLeft", event.target.value)} placeholder="예: 속도 비례 피해 감소" /></label>
@@ -94,6 +98,13 @@ export function TeamBuildEditor({ builds, onChange, teamSize, allowLeader = true
       ) : (
         <button className="empty-team-selector" type="button" onClick={() => setPickerOpen(true)}><span><Icon name="plus" /></span><strong>사용할 몬스터를 선택하세요</strong><small>선택 후 몬스터별 룬과 핵심 스탯을 입력합니다.</small></button>
       )}
+      {photoSlot !== null && builds[photoSlot] ? <MonsterStatPhotoAnalyzer
+        build={builds[photoSlot]}
+        monsterName={getMonster(builds[photoSlot].monsterId).displayName}
+        onApply={(stats, runeSets) => applyPhotoStats(photoSlot, stats, runeSets)}
+        onClose={() => setPhotoSlot(null)}
+        open
+      /> : null}
       <MonsterPicker initialSelection={builds.map((build) => build.monsterId)} maxSelection={teamSize} onClose={() => { setPickerOpen(false); setReplaceSlot(null); }} onConfirm={selectTeam} open={pickerOpen} replaceSlot={replaceSlot} selectionKind="team" />
     </div>
   );
