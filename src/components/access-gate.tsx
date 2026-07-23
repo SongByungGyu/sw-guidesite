@@ -20,15 +20,37 @@ export function AccessGate({ children }: { children: ReactNode }) {
       const response = await fetch("/api/access/session", { cache: "no-store" });
       if (!response.ok) throw new Error();
       setSession(await response.json() as AccessSessionResponse);
+      setError("");
+      return true;
     } catch {
-      setSession(initialSession);
       setError("서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.");
+      return false;
     }
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => void refreshSession(), 0);
-    return () => window.clearTimeout(timer);
+    let retryTimer = 0;
+    let stopped = false;
+    const checkSession = async () => {
+      window.clearTimeout(retryTimer);
+      const connected = await refreshSession();
+      if (!connected && !stopped) retryTimer = window.setTimeout(() => void checkSession(), 3000);
+    };
+    const resumeSession = () => {
+      if (document.visibilityState === "visible") void checkSession();
+    };
+    const initialTimer = window.setTimeout(() => void checkSession(), 0);
+    window.addEventListener("pageshow", resumeSession);
+    window.addEventListener("online", resumeSession);
+    document.addEventListener("visibilitychange", resumeSession);
+    return () => {
+      stopped = true;
+      window.clearTimeout(initialTimer);
+      window.clearTimeout(retryTimer);
+      window.removeEventListener("pageshow", resumeSession);
+      window.removeEventListener("online", resumeSession);
+      document.removeEventListener("visibilitychange", resumeSession);
+    };
   }, [refreshSession]);
 
   useEffect(() => {
@@ -126,7 +148,9 @@ export function AccessGate({ children }: { children: ReactNode }) {
         {!session ? (
           <section className="access-card access-loading" aria-live="polite">
             <span className="loading-spinner" />
-            <h1>접근 권한을 확인하고 있습니다.</h1>
+            <h1>{error ? "연결을 다시 확인하고 있습니다." : "접근 권한을 확인하고 있습니다."}</h1>
+            <p>{error || "승인된 로그인 상태를 불러오는 중입니다."}</p>
+            {error ? <button className="button secondary" onClick={() => void refreshSession()} type="button">지금 다시 연결</button> : null}
           </section>
         ) : session.status === "approved" && !session.member?.credentialsReady ? (
           <section className="access-card" aria-labelledby="account-setup-title">

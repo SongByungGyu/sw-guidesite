@@ -1,5 +1,9 @@
+"use client";
+
+import { useEffect } from "react";
 import { Icon } from "@/components/icon";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -19,6 +23,41 @@ const navItems = [
 ] as const;
 
 export function AppShell({ children, activeSection = "offense" }: AppShellProps) {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const scrollKey = `guild_archive_scroll:${pathname}`;
+    let savedScroll = 0;
+    try { savedScroll = Number(window.sessionStorage.getItem(scrollKey) ?? 0); } catch { /* 저장소가 막힌 브라우저에서는 기본 위치를 사용합니다. */ }
+    const restoreFrame = window.requestAnimationFrame(() => {
+      window.scrollTo({ top: Number.isFinite(savedScroll) ? savedScroll : 0 });
+    });
+    const savePosition = () => {
+      try { window.sessionStorage.setItem(scrollKey, String(window.scrollY)); } catch { /* 스크롤 복원을 지원하지 않는 환경은 무시합니다. */ }
+    };
+    let ticking = false;
+    const saveScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        savePosition();
+        ticking = false;
+      });
+    };
+    const saveImmediately = () => savePosition();
+    try { window.sessionStorage.setItem("guild_archive_last_path", pathname); } catch { /* 마지막 경로 저장을 지원하지 않는 환경은 무시합니다. */ }
+    window.addEventListener("scroll", saveScroll, { passive: true });
+    window.addEventListener("pagehide", saveImmediately);
+    document.addEventListener("visibilitychange", saveImmediately);
+    return () => {
+      window.cancelAnimationFrame(restoreFrame);
+      saveImmediately();
+      window.removeEventListener("scroll", saveScroll);
+      window.removeEventListener("pagehide", saveImmediately);
+      document.removeEventListener("visibilitychange", saveImmediately);
+    };
+  }, [pathname]);
+
   return (
     <div className="app-shell">
       <aside className="sidebar">

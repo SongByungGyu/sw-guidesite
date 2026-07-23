@@ -1420,7 +1420,14 @@ h3 {
   display: grid;
   place-items: center;
   align-content: center;
+  gap: 10px;
   text-align: center;
+}
+
+.access-loading p {
+  max-width: 360px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
 }
 
 .loading-spinner {
@@ -3137,6 +3144,7 @@ em.change-request-status { padding-right: 8px; }
 /* Speed calculator */
 .speed-heading { align-items: flex-end; }
 .speed-heading .button { flex: 0 0 auto; }
+.speed-heading-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
 .speed-formula-note { margin-bottom: 18px; padding: 14px 16px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 11px; color: var(--text-secondary); border: 1px solid color-mix(in srgb, var(--accent-gold) 28%, var(--border)); border-radius: 12px; background: color-mix(in srgb, var(--accent-gold) 6%, var(--background-elevated)); }
 .speed-formula-note > svg { color: var(--accent-gold); }
 .speed-formula-note strong { color: var(--text-primary); }
@@ -3266,6 +3274,7 @@ em.change-request-status { padding-right: 8px; }
 
 @media (max-width: 767px) {
   .speed-heading { align-items: flex-start; flex-direction: column; }
+  .speed-heading-actions { width: 100%; display: grid; grid-template-columns: 1fr; }
   .speed-heading .button { width: 100%; }
   .speed-formula-note { grid-template-columns: auto minmax(0, 1fr); }
   .speed-formula-note > span { grid-column: 2; justify-self: start; }

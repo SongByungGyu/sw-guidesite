@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { Icon } from "@/components/icon";
 import { MonsterPicker } from "@/components/monster-picker";
@@ -36,8 +36,22 @@ type EffectDraft = {
   speedBuff: boolean;
 };
 
+type SavedSpeedCalculatorDraft = {
+  teamIds: string[];
+  leaderSlot: number | null;
+  battleArea: "guild" | "arena";
+  manualLeaderPct: string;
+  towerPct: string;
+  runeSpeeds: string[];
+  artifactPcts: string[];
+  passiveBonuses: string[];
+  pumpkinBuffCounts: string[];
+  effectOverrides: Record<string, EffectDraft>;
+};
+
 const EMPTY_TEAM = ["", "", ""];
 const WATER_PUMPKIN_ID = "2330";
+const SPEED_DRAFT_KEY = "guild_archive_speed_calculator:v1";
 
 export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDataset }) {
   const [teamIds, setTeamIds] = useState(EMPTY_TEAM);
@@ -51,6 +65,58 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
   const [passiveBonuses, setPassiveBonuses] = useState(["0", "0", "0"]);
   const [pumpkinBuffCounts, setPumpkinBuffCounts] = useState(["2", "2", "2"]);
   const [effectOverrides, setEffectOverrides] = useState<Record<string, EffectDraft>>({});
+  const [draftReady, setDraftReady] = useState(false);
+
+  useEffect(() => {
+    const restoreFrame = window.requestAnimationFrame(() => {
+      try {
+        const rawDraft = window.localStorage.getItem(SPEED_DRAFT_KEY);
+        if (rawDraft) {
+          const draft = JSON.parse(rawDraft) as Partial<SavedSpeedCalculatorDraft>;
+          const restoredTeam = savedStringList(draft.teamIds, EMPTY_TEAM)
+            .map((id) => id && speedData.monsters[id] ? id : "");
+          const restoredLeader = typeof draft.leaderSlot === "number"
+            && draft.leaderSlot >= 0
+            && draft.leaderSlot < restoredTeam.length
+            && Boolean(speedData.monsters[restoredTeam[draft.leaderSlot]]?.speedLeader)
+            ? draft.leaderSlot
+            : restoredTeam.findIndex((id) => Boolean(speedData.monsters[id]?.speedLeader));
+          setTeamIds(restoredTeam);
+          setLeaderSlot(restoredLeader >= 0 ? restoredLeader : null);
+          if (draft.battleArea === "guild" || draft.battleArea === "arena") setBattleArea(draft.battleArea);
+          if (typeof draft.manualLeaderPct === "string") setManualLeaderPct(draft.manualLeaderPct);
+          if (typeof draft.towerPct === "string") setTowerPct(draft.towerPct);
+          setRuneSpeeds(savedStringList(draft.runeSpeeds, ["", "", ""]));
+          setArtifactPcts(savedStringList(draft.artifactPcts, ["0", "0", "0"]));
+          setPassiveBonuses(savedStringList(draft.passiveBonuses, ["0", "0", "0"]));
+          setPumpkinBuffCounts(savedStringList(draft.pumpkinBuffCounts, ["2", "2", "2"]));
+          if (isRecord(draft.effectOverrides)) setEffectOverrides(draft.effectOverrides as Record<string, EffectDraft>);
+        }
+      } catch {
+        try { window.localStorage.removeItem(SPEED_DRAFT_KEY); } catch { /* 저장소를 사용할 수 없는 환경은 메모리 상태만 유지합니다. */ }
+      } finally {
+        setDraftReady(true);
+      }
+    });
+    return () => window.cancelAnimationFrame(restoreFrame);
+  }, [speedData.monsters]);
+
+  useEffect(() => {
+    if (!draftReady) return;
+    const draft: SavedSpeedCalculatorDraft = {
+      teamIds,
+      leaderSlot,
+      battleArea,
+      manualLeaderPct,
+      towerPct,
+      runeSpeeds,
+      artifactPcts,
+      passiveBonuses,
+      pumpkinBuffCounts,
+      effectOverrides,
+    };
+    try { window.localStorage.setItem(SPEED_DRAFT_KEY, JSON.stringify(draft)); } catch { /* 저장소를 사용할 수 없는 환경은 메모리 상태만 유지합니다. */ }
+  }, [artifactPcts, battleArea, draftReady, effectOverrides, leaderSlot, manualLeaderPct, passiveBonuses, pumpkinBuffCounts, runeSpeeds, teamIds, towerPct]);
 
   const selectedCount = teamIds.filter(Boolean).length;
   const leaderId = leaderSlot === null ? "" : teamIds[leaderSlot];
@@ -111,6 +177,21 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
     });
   }
 
+  function resetCalculator() {
+    if (selectedCount && !window.confirm("저장된 몬스터 조합과 공속 입력값을 모두 초기화할까요?")) return;
+    try { window.localStorage.removeItem(SPEED_DRAFT_KEY); } catch { /* 저장소를 사용할 수 없는 환경은 메모리 상태만 초기화합니다. */ }
+    setTeamIds(EMPTY_TEAM);
+    setLeaderSlot(null);
+    setBattleArea("guild");
+    setManualLeaderPct("");
+    setTowerPct(String(speedData.towerSpeedPct));
+    setRuneSpeeds(["", "", ""]);
+    setArtifactPcts(["0", "0", "0"]);
+    setPassiveBonuses(["0", "0", "0"]);
+    setPumpkinBuffCounts(["2", "2", "2"]);
+    setEffectOverrides({});
+  }
+
   return (
     <AppShell activeSection="speed">
       <div className="page-heading speed-heading">
@@ -119,14 +200,17 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
           <h1>공속 순서 계산기</h1>
           <p>세 마리를 행동 순서대로 고르면 물호박 패시브, 게이지 증가, 공속 버프와 아티 효과까지 반영해 안전한 뒷속을 계산합니다.</p>
         </div>
-        <a className="button secondary" href={speedData.sourceUrl} rel="noreferrer" target="_blank">
-          계산 기준 보기 <Icon name="chevron" size={16} />
-        </a>
+        <div className="speed-heading-actions">
+          <button className="button secondary" onClick={resetCalculator} type="button"><Icon name="x" size={16} /> 입력 초기화</button>
+          <a className="button secondary" href={speedData.sourceUrl} rel="noreferrer" target="_blank">
+            계산 기준 보기 <Icon name="chevron" size={16} />
+          </a>
+        </div>
       </div>
 
       <section className="speed-formula-note">
         <Icon name="bolt" size={19} />
-        <div><strong>점령전 기본값 적용</strong><p>공속 건물 15%와 7% 게이지 틱을 기준으로 계산합니다. 리더 스킬은 선택한 리더와 전투 지역에 맞춰 자동 적용됩니다.</p></div>
+        <div><strong>점령전 기본값 · 자동 임시 저장</strong><p>공속 건물 15%와 7% 게이지 틱을 기준으로 계산합니다. 입력 내용은 이 기기에 자동 저장되어 다시 들어와도 복원됩니다.</p></div>
         <span>자동 스킬 {speedData.automaticSkillMonsterCount}마리</span>
       </section>
 
@@ -301,4 +385,13 @@ function effectTargetLabel(target: string) {
 function numeric(value: string | number | undefined) {
   const parsed = Number(value ?? 0);
   return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+}
+
+function savedStringList(value: unknown, fallback: string[]) {
+  if (!Array.isArray(value) || value.length !== fallback.length || !value.every((item) => typeof item === "string")) return fallback;
+  return [...value];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
