@@ -177,6 +177,20 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
     });
   }
 
+  function moveTeamMember(position: number, direction: -1 | 1) {
+    const target = position + direction;
+    if (target < 0 || target >= teamIds.length || !teamIds[position] || !teamIds[target]) return;
+
+    const nextTeamIds = swapSlots(teamIds, position, target);
+    setTeamIds(nextTeamIds);
+    setRuneSpeeds((current) => swapSlots(current, position, target));
+    setArtifactPcts((current) => swapSlots(current, position, target));
+    setPassiveBonuses((current) => swapSlots(current, position, target));
+    setPumpkinBuffCounts((current) => swapSlots(current, position, target));
+    setLeaderSlot((current) => current === position ? target : current === target ? position : current);
+    setEffectOverrides((current) => remapEffectOverrides(current, teamIds, nextTeamIds));
+  }
+
   function resetCalculator() {
     if (selectedCount && !window.confirm("저장된 몬스터 조합과 공속 입력값을 모두 초기화할까요?")) return;
     try { window.localStorage.removeItem(SPEED_DRAFT_KEY); } catch { /* 저장소를 사용할 수 없는 환경은 메모리 상태만 초기화합니다. */ }
@@ -239,6 +253,10 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
                     <div><strong>{monster.displayName}</strong><small>기본속 {data?.baseSpeed ?? "-"}{id === WATER_PUMPKIN_ID ? " · 물호박 자동 감지" : ""}</small></div>
                     <Icon name="edit" size={15} />
                   </button>
+                  <div className="speed-order-controls" aria-label={`${monster.displayName} 행동 순서 변경`}>
+                    <button aria-label={`${monster.displayName}을 앞 순서로 이동`} disabled={position === 0 || !teamIds[position - 1]} onClick={() => moveTeamMember(position, -1)} type="button"><Icon name="chevron" size={14} /> 앞으로</button>
+                    <button aria-label={`${monster.displayName}을 뒤 순서로 이동`} disabled={position === teamIds.length - 1 || !teamIds[position + 1]} onClick={() => moveTeamMember(position, 1)} type="button">뒤로 <Icon name="chevron" size={14} /></button>
+                  </div>
                   {speedLeader ? <label><input checked={leaderSlot === position} name="speed-leader" onChange={() => { setLeaderSlot(position); setManualLeaderPct(""); }} type="radio" /> 공속 리더 +{speedLeader.amount}%</label> : <div className="speed-no-leader">공속 리더 없음</div>}
                 </article>;
               })}
@@ -390,6 +408,34 @@ function numeric(value: string | number | undefined) {
 function savedStringList(value: unknown, fallback: string[]) {
   if (!Array.isArray(value) || value.length !== fallback.length || !value.every((item) => typeof item === "string")) return fallback;
   return [...value];
+}
+
+function swapSlots<T>(items: T[], first: number, second: number) {
+  const next = [...items];
+  [next[first], next[second]] = [next[second], next[first]];
+  return next;
+}
+
+function remapEffectOverrides(current: Record<string, EffectDraft>, previousTeam: string[], nextTeam: string[]) {
+  const next: Record<string, EffectDraft> = {};
+  nextTeam.forEach((monsterId, newPosition) => {
+    const previousPosition = previousTeam.indexOf(monsterId);
+    const draft = current[`${previousPosition}:${monsterId}`];
+    if (!draft) return;
+    if (draft.target === "all") {
+      next[`${newPosition}:${monsterId}`] = draft;
+      return;
+    }
+
+    const previousTargetId = previousTeam[Number(draft.target)];
+    const newTargetPosition = nextTeam.indexOf(previousTargetId);
+    const fallbackTarget = newPosition < nextTeam.length - 1 ? String(newPosition + 1) : "all";
+    next[`${newPosition}:${monsterId}`] = {
+      ...draft,
+      target: newTargetPosition > newPosition ? String(newTargetPosition) : fallbackTarget,
+    };
+  });
+  return next;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
