@@ -29,7 +29,7 @@ const aliases: Record<MonsterStatKey, string[]> = {
   accuracy: ["효과적중", "효적", "accuracy", "acc"],
 };
 
-const additiveStats = new Set<MonsterStatKey>(["hp", "attack", "defense", "speed"]);
+const bonusSeparatedStats = new Set<MonsterStatKey>(["hp", "attack", "defense", "speed"]);
 
 const runeNames = [
   "활력", "수호", "신속", "칼날", "격노", "집중", "인내", "맹공", "절망",
@@ -38,10 +38,10 @@ const runeNames = [
 ];
 
 const plausibleRanges: Record<MonsterStatKey, [number, number]> = {
-  hp: [1000, 100000],
-  attack: [50, 10000],
-  defense: [50, 10000],
-  speed: [50, 500],
+  hp: [0, 100000],
+  attack: [0, 10000],
+  defense: [0, 10000],
+  speed: [0, 400],
   critRate: [0, 100],
   critDamage: [0, 400],
   resistance: [15, 100],
@@ -111,8 +111,8 @@ function findStatValue(lines: string[], key: MonsterStatKey) {
     }
 
     if (numbers.length === 0) continue;
-    if (remainder.includes("+") && numbers.length >= 2) return Math.round(numbers[0] + numbers[1]);
-    if (additiveStats.has(key) && numbers.length >= 2) return Math.round(numbers[0] + numbers[1]);
+    if (remainder.includes("+") && numbers.length >= 2) return Math.round(numbers[1]);
+    if (bonusSeparatedStats.has(key) && numbers.length >= 2) return Math.round(numbers[1]);
     return Math.round(numbers[0]);
   }
 

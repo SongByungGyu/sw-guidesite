@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getMonsterStatQuality, parseMonsterScreenshotText } from "@/lib/monster-stat-ocr";
 
 describe("monster screenshot OCR parser", () => {
-  it("adds base and bonus stats from a Korean monster detail screenshot", () => {
+  it("keeps only the plus bonus from a Korean monster detail screenshot", () => {
     const parsed = parseMonsterScreenshotText(`
       체력 10215 +25966
       공격력 659 +207
@@ -16,10 +16,10 @@ describe("monster screenshot OCR parser", () => {
     `);
 
     expect(parsed.stats).toEqual({
-      hp: 36181,
-      attack: 866,
-      defense: 2844,
-      speed: 199,
+      hp: 25966,
+      attack: 207,
+      defense: 2043,
+      speed: 103,
       critRate: 21,
       critDamage: 50,
       resistance: 100,
@@ -42,13 +42,13 @@ describe("monster screenshot OCR parser", () => {
       ACC 60%
     `);
 
-    expect(parsed.stats.hp).toBe(33364);
-    expect(parsed.stats.speed).toBe(294);
+    expect(parsed.stats.hp).toBe(23479);
+    expect(parsed.stats.speed).toBe(192);
     expect(parsed.stats.accuracy).toBe(60);
   });
 
   it("flags impossible OCR values for manual review", () => {
-    expect(getMonsterStatQuality("speed", 294)).toBe("ok");
+    expect(getMonsterStatQuality("speed", 192)).toBe("ok");
     expect(getMonsterStatQuality("speed", 2940)).toBe("warning");
     expect(getMonsterStatQuality("accuracy", null)).toBe("missing");
   });

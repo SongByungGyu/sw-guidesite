@@ -165,7 +165,7 @@ export function MonsterStatPhotoAnalyzer({ build, monsterName, onApply, onClose,
               <Icon name="sparkles" size={18} />
               <div>
                 <strong>몬스터 상세 스탯이 크게 보이게</strong>
-                <p>사진 1장에 몬스터 1마리만, 체력부터 효과 적중까지 보이게 올려주세요.</p>
+                <p>사진 1장에 몬스터 1마리만 올려주세요. 기본 수치는 제외하고 +뒤 룬 추가 수치만 입력합니다.</p>
               </div>
             </div>
             <button className={`photo-upload-area${previewUrl ? " has-image" : ""}`} disabled={phase === "analyzing"} onClick={() => fileInputRef.current?.click()} type="button">
@@ -196,7 +196,7 @@ export function MonsterStatPhotoAnalyzer({ build, monsterName, onApply, onClose,
             <header>
               <div>
                 <strong>분석 결과 확인</strong>
-                <p>잘못 읽은 숫자는 직접 고친 뒤 적용하세요.</p>
+                <p>체력·공격·방어·속도는 +뒤 숫자만 채웁니다.</p>
               </div>
               {phase === "complete" ? <span className={reviewCount ? "needs-review" : "all-clear"}>{reviewCount ? `${reviewCount}개 확인 필요` : "8개 확인 완료"}</span> : null}
             </header>
@@ -209,7 +209,7 @@ export function MonsterStatPhotoAnalyzer({ build, monsterName, onApply, onClose,
                 const quality = getMonsterStatQuality(field.key, stats[field.key]);
                 const detected = detectedKeys.includes(field.key);
                 return <label className={`quality-${quality}${detected ? " is-detected" : ""}`} key={field.key}>
-                  <span>{field.label}{detected ? <em>인식됨</em> : null}</span>
+                  <span>{field.label}{["hp", "attack", "defense", "speed"].includes(field.key) ? " (+)" : ""}{detected ? <em>인식됨</em> : null}</span>
                   <input
                     inputMode="numeric"
                     min="0"
