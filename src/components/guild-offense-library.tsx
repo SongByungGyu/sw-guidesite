@@ -55,7 +55,7 @@ export function GuildOffenseLibrary() {
 
       <section className="guild-offense-library" aria-labelledby="guild-offense-library-title">
         <header className="guild-offense-section-heading">
-          <div><span>HOMEWORK SYNC</span><h2>숙제 연동 공덱</h2><p>운영진이 숙제를 게시하면 이곳에 자동으로 생성되고, 수정·삭제도 함께 반영됩니다.</p></div>
+          <div><span>HOMEWORK SYNC</span><h2>숙제 연동 공덱</h2><p>숙제를 게시하면 자동 생성되며, 숙제가 종료되거나 삭제되어도 공덱 보관본은 유지됩니다.</p></div>
           <strong>{homeworkGuides.length}개</strong>
         </header>
         {loadingHomeworks ? <div className="guild-offense-sync-state"><span className="loading-spinner" /><p>숙제 공덱을 불러오는 중입니다.</p></div>

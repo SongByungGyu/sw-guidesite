@@ -63,16 +63,19 @@ export function createHomeworkOffenseGuide(homework: HomeworkOffense): GuildOffe
   const dueLabel = homework.dueAt
     ? `${new Intl.DateTimeFormat("ko-KR", { month: "short", day: "numeric" }).format(new Date(homework.dueAt))} 마감`
     : "기한 없음";
+  const archived = homework.status === "ARCHIVED";
 
   return {
     id: `homework-${homework.id}`,
     title: homework.title,
     summary: `추천 대상 · ${homework.target}`,
-    badge: "숙제 연동",
+    badge: archived ? "숙제 보관" : "숙제 연동",
     source: "homework",
     monsters: monsters as GuildOffenseGuide["monsters"],
     strategy: strategy.length ? strategy : ["숙제에 등록된 운용 지시를 확인해 주세요."],
-    note: `작성 ${homework.author} · ${dueLabel} · 숙제를 수정하면 이 공덱도 자동으로 갱신됩니다.`,
+    note: archived
+      ? `작성 ${homework.author} · ${dueLabel} · 종료된 숙제에서 보관된 공덱으로, 숙제 목록에서 삭제해도 유지됩니다.`
+      : `작성 ${homework.author} · ${dueLabel} · 숙제를 수정하면 이 공덱도 자동으로 갱신되며, 종료 후에도 보관됩니다.`,
   };
 }
 

@@ -34,4 +34,11 @@ describe("homework offense guide", () => {
   it("requires exactly three homework monsters", () => {
     expect(() => createHomeworkOffenseGuide({ ...homework, monsters: homework.monsters.slice(0, 2) })).toThrow("몬스터 3마리");
   });
+
+  it("keeps an archived homework as a saved guild offense", () => {
+    const guide = createHomeworkOffenseGuide({ ...homework, status: "ARCHIVED" });
+
+    expect(guide.badge).toBe("숙제 보관");
+    expect(guide.note).toContain("숙제 목록에서 삭제해도 유지");
+  });
 });

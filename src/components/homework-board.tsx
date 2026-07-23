@@ -67,7 +67,7 @@ export function HomeworkBoard() {
     setSavingCompletion(null);
   }
   async function deleteHomework(homework: Homework) {
-    if (!window.confirm(`'${homework.title}' 숙제를 삭제할까요? 삭제하면 길드원 화면에서 즉시 사라집니다.`)) return;
+    if (!window.confirm(`'${homework.title}' 숙제를 종료하고 목록에서 삭제할까요? 길드 공덱에 생성된 보관본은 계속 유지됩니다.`)) return;
     setDeletingId(homework.id);
     setError("");
     const response = await fetch(`/api/homeworks/${homework.id}`, { method: "DELETE" });
