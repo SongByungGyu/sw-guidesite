@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { DeckCard } from "@/components/deck-card";
+import { GuildOffenseLibrary } from "@/components/guild-offense-library";
 import { Icon } from "@/components/icon";
 import { MetaDefenseBoard, type MetaDefenseItem } from "@/components/meta-defense-board";
 import { MonsterPicker } from "@/components/monster-picker";
@@ -153,6 +154,8 @@ export function OffenseSearch({ initialDefenseIds }: { initialDefenseIds: string
           <Icon name="plus" size={18} /> 공덱 등록
         </button>
       </div>
+
+      <GuildOffenseLibrary />
 
       <MetaDefenseBoard
         canRecordFourStar={canRecordFourStar}
