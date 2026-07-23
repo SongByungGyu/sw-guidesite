@@ -69,7 +69,7 @@ export function TeamBuildEditor({ builds, onChange, teamSize, allowLeader = true
         <button className="button secondary" type="button" onClick={() => { setReplaceSlot(null); setPickerOpen(true); }}><Icon name="search" size={17} /> 몬스터 선택</button>
       </div>
       {builds.length ? (
-        <div className={`build-editor-grid${teamSize > 6 ? " is-large" : ""}`}>
+        <div className={`build-editor-grid${teamSize > 3 ? " is-large" : ""}`}>
           {builds.map((build, index) => {
             const monster = getMonster(build.monsterId);
             return (
