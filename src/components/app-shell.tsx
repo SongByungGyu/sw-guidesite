@@ -3,13 +3,14 @@ import Link from "next/link";
 
 type AppShellProps = {
   children: React.ReactNode;
-  activeSection?: "home" | "offense" | "defenses" | "dungeons" | "homeworks" | "monsters";
+  activeSection?: "home" | "offense" | "defenses" | "reto" | "dungeons" | "homeworks" | "monsters";
 };
 
 const navItems = [
   { label: "길드 홈", mobileLabel: "홈", icon: "home" as const, href: "/home", section: "home" },
   { label: "공덱 검색", mobileLabel: "공덱", icon: "swords" as const, href: "/", section: "offense" },
   { label: "방덱 관리", mobileLabel: "방덱", icon: "shield" as const, href: "/defenses", section: "defenses" },
+  { label: "레토 21R 방덱 통계", mobileLabel: "21R", icon: "sparkles" as const, href: "/reto-21r", section: "reto" },
   { label: "던전 공략", mobileLabel: "던전", icon: "book" as const, href: "/dungeons", section: "dungeons" },
   { label: "길드 숙제", mobileLabel: "숙제", icon: "check" as const, href: "/homeworks", section: "homeworks" },
   { label: "몬스터 도감", icon: "book" as const, href: "/monsters", section: "monsters" },
@@ -55,7 +56,7 @@ export function AppShell({ children, activeSection = "offense" }: AppShellProps)
         </header>
         <main className="main-content">{children}</main>
         <nav className="mobile-tabs" aria-label="모바일 주 메뉴">
-          {navItems.slice(0, 5).map((item) => (
+          {navItems.slice(0, 6).map((item) => (
             <Link className={item.section === activeSection ? "active" : ""} href={item.href} key={item.label}>
               <Icon name={item.icon} size={19} />
               <span>{"mobileLabel" in item ? item.mobileLabel : item.label}</span>

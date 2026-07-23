@@ -2466,7 +2466,7 @@ em.change-request-status { padding-right: 8px; }
     min-height: 66px;
     padding: 7px max(8px, env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     border-top: 1px solid var(--border);
     background: rgb(19 26 43 / 96%);
     backdrop-filter: blur(14px);
@@ -2994,4 +2994,93 @@ em.change-request-status { padding-right: 8px; }
   .monster-option:active {
     transform: translateY(1px);
   }
+}
+
+/* RETO Season 21 defense statistics */
+.reto-heading { align-items: flex-end; }
+.reto-heading .button { flex: 0 0 auto; }
+.reto-kpis { margin-bottom: 18px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--background-elevated); }
+.reto-kpis > div { min-width: 0; padding: 18px 20px; display: grid; gap: 2px; border-right: 1px solid var(--border); }
+.reto-kpis > div:last-child { border-right: 0; }
+.reto-kpis span, .reto-kpis small { color: var(--text-secondary); font-size: 0.72rem; }
+.reto-kpis strong { color: var(--accent-gold); font-size: clamp(1.35rem, 2.2vw, 1.8rem); line-height: 1.2; }
+.reto-toolbar { margin-bottom: 18px; padding: 16px; display: grid; gap: 13px; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--background-elevated); }
+.reto-primary-controls, .reto-filter-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.reto-search { width: min(100%, 340px); min-height: 42px; padding: 0 12px; display: flex; align-items: center; gap: 8px; color: var(--text-secondary); border: 1px solid var(--border); border-radius: 9px; background: var(--background-base); }
+.reto-search:focus-within { border-color: var(--accent-blue); }
+.reto-search input { width: 100%; min-width: 0; padding: 9px 0; color: var(--text-primary); border: 0; outline: 0; background: transparent; }
+.reto-search input::placeholder { color: color-mix(in srgb, var(--text-secondary) 72%, transparent); }
+.reto-filter-row { justify-content: flex-start; flex-wrap: wrap; padding-top: 13px; border-top: 1px solid var(--border); }
+.reto-filter-row label { min-width: 150px; display: grid; gap: 5px; }
+.reto-filter-row label > span { color: var(--text-secondary); font-size: 0.68rem; font-weight: 700; }
+.reto-filter-row select { min-height: 39px; padding: 7px 32px 7px 10px; color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.reto-results { overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--background-elevated); }
+.reto-result-heading { padding: 17px 20px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--border); }
+.reto-result-heading p { color: var(--text-secondary); font-size: 0.78rem; }
+.reto-sample-note { flex: 0 0 auto; padding: 5px 9px; color: var(--accent-blue); font-size: 0.68rem; font-weight: 700; border: 1px solid color-mix(in srgb, var(--accent-blue) 30%, var(--border)); border-radius: 999px; background: color-mix(in srgb, var(--accent-blue) 8%, transparent); }
+.reto-ranking-list { margin: 0; padding: 0; list-style: none; }
+.reto-ranking-list > li { min-height: 126px; padding: 14px 20px; display: grid; grid-template-columns: 32px 204px minmax(190px, 1fr) minmax(315px, auto); align-items: center; gap: 16px; border-bottom: 1px solid var(--border); }
+.reto-ranking-list > li:last-child { border-bottom: 0; }
+.reto-ranking-list > li:hover { background: color-mix(in srgb, var(--surface-hover) 42%, transparent); }
+.reto-rank { align-self: start; padding-top: 22px; color: var(--accent-gold); font-size: 1.02rem; font-weight: 850; text-align: center; }
+.reto-team { display: flex; align-items: flex-start; gap: 7px; }
+.reto-portrait { position: relative; width: 62px; min-width: 0; display: grid; justify-items: center; gap: 2px; }
+.reto-portrait-image { width: 56px; height: 56px; display: grid; place-items: center; overflow: hidden; border: 2px solid var(--border); border-radius: 11px; background: var(--surface); }
+.reto-portrait-image img { width: 100%; height: 100%; object-fit: cover; }
+.reto-portrait-image b { font-size: 0.72rem; }
+.reto-portrait > i { position: absolute; top: -4px; right: -1px; width: 20px; height: 20px; display: grid; place-items: center; color: #3b2903; border-radius: 50%; background: var(--accent-gold); }
+.reto-portrait > small { width: 100%; overflow: hidden; color: var(--text-primary); font-size: 0.65rem; font-weight: 700; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.reto-portrait > em { color: var(--accent-gold); font-size: 0.56rem; font-style: normal; letter-spacing: -0.09em; }
+.reto-team-copy { min-width: 0; display: grid; gap: 5px; }
+.reto-team-copy > div:first-child { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+.reto-team-copy strong { overflow-wrap: anywhere; }
+.reto-team-copy > small { color: var(--text-secondary); }
+.reto-grade { padding: 3px 7px; font-size: 0.61rem; font-weight: 800; border: 1px solid var(--border); border-radius: 999px; }
+.reto-grade.grade-5 { color: var(--accent-gold); border-color: color-mix(in srgb, var(--accent-gold) 36%, var(--border)); background: color-mix(in srgb, var(--accent-gold) 8%, transparent); }
+.reto-grade.grade-4 { color: var(--accent-blue); border-color: color-mix(in srgb, var(--accent-blue) 34%, var(--border)); background: color-mix(in srgb, var(--accent-blue) 8%, transparent); }
+.reto-usage-bar { width: min(100%, 260px); height: 5px; overflow: hidden; border-radius: 999px; background: var(--surface); }
+.reto-usage-bar span { display: block; height: 100%; min-width: 2px; border-radius: inherit; background: linear-gradient(90deg, var(--accent-blue), var(--accent-gold)); }
+.reto-metrics { min-width: 315px; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(92px, 1fr)); overflow: hidden; border: 1px solid var(--border); border-radius: 10px; background: var(--background-base); }
+.reto-metrics > div { min-width: 0; padding: 10px 12px; display: grid; gap: 3px; border-right: 1px solid var(--border); }
+.reto-metrics > div:last-child { border-right: 0; }
+.reto-metrics dt { color: var(--text-secondary); font-size: 0.63rem; }
+.reto-metrics dd { margin: 0; font-size: 0.82rem; font-weight: 800; white-space: nowrap; }
+.reto-metrics dd small { margin-left: 4px; color: var(--text-secondary); font-size: 0.59rem; font-weight: 500; }
+.reto-metrics .primary dd { color: var(--success); font-size: 1rem; }
+.reto-load-more { margin: 18px auto; display: flex; }
+.reto-source-note { margin-top: 14px; padding: 13px 15px; display: flex; align-items: flex-start; gap: 9px; color: var(--text-secondary); border: 1px solid var(--border); border-radius: 10px; background: color-mix(in srgb, var(--surface) 45%, transparent); }
+.reto-source-note svg { flex: 0 0 auto; margin-top: 2px; color: var(--accent-gold); }
+.reto-source-note p { font-size: 0.72rem; }
+.reto-source-note strong { color: var(--text-primary); }
+
+@media (max-width: 1099px) {
+  .reto-ranking-list > li { grid-template-columns: 28px 204px minmax(180px, 1fr); }
+  .reto-metrics { grid-column: 2 / -1; width: 100%; }
+}
+
+@media (max-width: 899px) {
+  .mobile-tabs a { font-size: 0.64rem; }
+  .reto-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .reto-kpis > div:nth-child(2) { border-right: 0; }
+  .reto-kpis > div:nth-child(-n + 2) { border-bottom: 1px solid var(--border); }
+  .reto-primary-controls { align-items: stretch; flex-direction: column; }
+  .reto-search { width: 100%; max-width: none; }
+}
+
+@media (max-width: 767px) {
+  .reto-heading { align-items: flex-start; flex-direction: column; }
+  .reto-heading .button { width: 100%; }
+  .reto-kpis > div { padding: 14px; }
+  .reto-filter-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .reto-filter-row label { min-width: 0; }
+  .reto-result-heading { align-items: flex-start; flex-direction: column; }
+  .reto-ranking-list > li { padding: 14px; grid-template-columns: 25px minmax(0, 1fr); align-items: start; gap: 10px; }
+  .reto-rank { padding-top: 18px; }
+  .reto-team { grid-column: 2; width: 100%; justify-content: flex-start; }
+  .reto-team-copy { grid-column: 2; }
+  .reto-metrics { grid-column: 1 / -1; min-width: 0; }
+  .reto-metrics > div { padding: 9px 8px; }
+  .reto-metrics dd { font-size: 0.72rem; }
+  .reto-metrics .primary dd { font-size: 0.86rem; }
+  .reto-metrics dd small { display: block; margin-left: 0; }
 }
