@@ -68,5 +68,6 @@ export type AdminGuildMember = {
   role: "OWNER" | "OFFICER" | "MEMBER";
   active: boolean;
   createdAt: string;
+  updatedAt: string;
   lastSeenAt?: string;
 };

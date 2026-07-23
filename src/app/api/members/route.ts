@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
       role: member.role,
       active: member.active,
       createdAt: member.createdAt.toISOString(),
+      updatedAt: member.updatedAt.toISOString(),
       lastSeenAt: member.deviceSessions[0]?.lastSeenAt.toISOString(),
     })),
   });

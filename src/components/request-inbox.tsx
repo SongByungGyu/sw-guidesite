@@ -15,6 +15,7 @@ export function RequestInbox() {
   const [error, setError] = useState("");
   const [processingId, setProcessingId] = useState("");
   const [roleChangingId, setRoleChangingId] = useState("");
+  const [withdrawingId, setWithdrawingId] = useState("");
 
   const loadAdminData = useCallback(async () => {
     const [requestResponse, memberResponse] = await Promise.all([
@@ -106,6 +107,21 @@ export function RequestInbox() {
     await loadAdminData();
   }
 
+  async function withdrawMember(member: AdminGuildMember) {
+    if (!window.confirm(`${member.nickname} 님을 탈퇴 처리할까요?\n\n즉시 로그아웃되며 등록된 모든 기기에서 다시 접속할 수 없습니다. 작성한 게시물과 활동 기록은 보존됩니다.`)) return;
+
+    setWithdrawingId(member.id);
+    setError("");
+    const response = await fetch(`/api/members/${member.id}`, { method: "DELETE" });
+    const result = await response.json() as { error?: string };
+    setWithdrawingId("");
+    if (!response.ok) {
+      setError(result.error ?? "길드원을 탈퇴 처리하지 못했습니다.");
+      return;
+    }
+    await loadAdminData();
+  }
+
   async function signOut() {
     await fetch("/api/admin/session", { method: "DELETE" });
     setRequests([]);
@@ -143,6 +159,8 @@ export function RequestInbox() {
 
   const pending = requests.filter((request) => request.status === "pending");
   const reviewed = requests.filter((request) => request.status !== "pending");
+  const activeMembers = members.filter((member) => member.active);
+  const withdrawnMembers = members.filter((member) => !member.active);
 
   return (
     <main className="request-admin-page">
@@ -161,7 +179,7 @@ export function RequestInbox() {
         <section className="admin-overview">
           <div><span>승인 대기</span><strong>{pending.length}</strong></div>
           <div><span>처리 완료</span><strong>{reviewed.length}</strong></div>
-          <div><span>길드원 · 운영진</span><strong>{members.length} · {members.filter((member) => member.role === "OFFICER").length}</strong></div>
+          <div><span>활동 · 탈퇴</span><strong>{activeMembers.length} · {withdrawnMembers.length}</strong></div>
           <p><Icon name="sparkles" size={16} /> 모든 승인·반려 기록은 서버 감사 로그에 남습니다.</p>
         </section>
 
@@ -205,13 +223,13 @@ export function RequestInbox() {
 
         <section className="request-list-section" aria-labelledby="member-admin-title">
           <div className="request-list-heading">
-            <div><p className="eyebrow">권한 관리</p><h2 id="member-admin-title">길드원 및 운영진</h2></div>
-            <span className="member-count">총 {members.length}명</span>
+            <div><p className="eyebrow">권한·재적 관리</p><h2 id="member-admin-title">활동 길드원 및 운영진</h2></div>
+            <span className="member-count">활동 {activeMembers.length}명 · 운영진 {activeMembers.filter((member) => member.role === "OFFICER").length}명</span>
           </div>
-          <p className="section-description">승인된 길드원을 운영진으로 지정하거나 일반 길드원으로 되돌릴 수 있습니다.</p>
-          {members.length ? (
+          <p className="section-description">권한을 변경하거나 길드를 떠난 회원을 탈퇴 처리할 수 있습니다. 탈퇴 처리 시 로그인과 모든 기기 세션이 즉시 차단됩니다.</p>
+          {activeMembers.length ? (
             <div className="member-admin-list">
-              {members.map((member) => (
+              {activeMembers.map((member) => (
                 <article className="member-admin-row" key={member.id}>
                   <div className="member-admin-avatar">{member.nickname.slice(0, 1)}</div>
                   <div className="member-admin-copy">
@@ -227,16 +245,21 @@ export function RequestInbox() {
                   {member.role === "OWNER" ? (
                     <span className="owner-lock"><Icon name="shield" size={16} /> 길드장 고정</span>
                   ) : (
-                    <button
-                      className={`button ${member.role === "OFFICER" ? "secondary" : "primary"}`}
-                      type="button"
-                      disabled={roleChangingId === member.id}
-                      onClick={() => void changeRole(member)}
-                      aria-label={`${member.nickname} 님을 ${member.role === "OFFICER" ? "일반 길드원으로 변경" : "운영진으로 지정"}`}
-                    >
-                      <Icon name={member.role === "OFFICER" ? "users" : "shield"} size={17} />
-                      {roleChangingId === member.id ? "변경 중…" : member.role === "OFFICER" ? "길드원으로 변경" : "운영진 지정"}
-                    </button>
+                    <div className="member-admin-actions">
+                      <button
+                        className={`button ${member.role === "OFFICER" ? "secondary" : "primary"}`}
+                        type="button"
+                        disabled={roleChangingId === member.id || withdrawingId === member.id}
+                        onClick={() => void changeRole(member)}
+                        aria-label={`${member.nickname} 님을 ${member.role === "OFFICER" ? "일반 길드원으로 변경" : "운영진으로 지정"}`}
+                      >
+                        <Icon name={member.role === "OFFICER" ? "users" : "shield"} size={17} />
+                        {roleChangingId === member.id ? "변경 중…" : member.role === "OFFICER" ? "길드원으로 변경" : "운영진 지정"}
+                      </button>
+                      <button className="button secondary danger" disabled={roleChangingId === member.id || withdrawingId === member.id} onClick={() => void withdrawMember(member)} type="button">
+                        <Icon name="x" size={17} /> {withdrawingId === member.id ? "처리 중…" : "탈퇴 처리"}
+                      </button>
+                    </div>
                   )}
                 </article>
               ))}
@@ -245,6 +268,28 @@ export function RequestInbox() {
             <div className="request-empty"><Icon name="users" /><strong>승인된 길드원이 없습니다.</strong><p>접근 요청을 승인하면 자동으로 목록에 추가됩니다.</p></div>
           )}
         </section>
+
+        {withdrawnMembers.length ? (
+          <section className="request-list-section member-withdrawn-section" aria-labelledby="withdrawn-members-title">
+            <div className="request-list-heading">
+              <div><p className="eyebrow">처리 기록</p><h2 id="withdrawn-members-title">탈퇴 길드원</h2></div>
+              <span className="member-count">총 {withdrawnMembers.length}명</span>
+            </div>
+            <p className="section-description">계정과 작성 기록은 보존되지만 로그인 및 길드 콘텐츠 접근은 차단된 상태입니다.</p>
+            <div className="member-admin-list">
+              {withdrawnMembers.map((member) => (
+                <article className="member-admin-row is-withdrawn" key={member.id}>
+                  <div className="member-admin-avatar">{member.nickname.slice(0, 1)}</div>
+                  <div className="member-admin-copy">
+                    <div><strong>{member.nickname}</strong><span className="member-role-badge withdrawn">탈퇴</span></div>
+                    <p>{member.loginId ? `ID ${member.loginId} · ` : "계정 미설정 · "}탈퇴 처리 {formatDate(member.updatedAt)}</p>
+                  </div>
+                  <span className="member-withdrawn-status"><Icon name="x" size={15} /> 접근 차단 완료</span>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         {reviewed.length ? (
           <section className="request-list-section reviewed" aria-labelledby="reviewed-requests-title">

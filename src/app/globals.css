@@ -1729,6 +1729,12 @@ h3 {
   gap: 8px;
 }
 
+.member-admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .member-role-badge {
   padding: 3px 8px;
   font-size: 0.68rem;
@@ -1751,6 +1757,37 @@ h3 {
 
 .member-role-badge.member {
   color: var(--text-secondary);
+}
+
+.member-role-badge.withdrawn {
+  color: var(--danger);
+  border-color: rgb(240 100 106 / 30%);
+  background: rgb(240 100 106 / 8%);
+}
+
+.member-admin-row.is-withdrawn {
+  opacity: 0.78;
+  background: color-mix(in srgb, var(--background-base) 76%, transparent);
+}
+
+.member-admin-row.is-withdrawn .member-admin-avatar {
+  color: var(--text-secondary);
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.member-withdrawn-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.member-withdrawn-section {
+  border-color: color-mix(in srgb, var(--danger) 18%, var(--border));
 }
 
 .owner-lock {
@@ -2908,12 +2945,20 @@ em.change-request-status { padding-right: 8px; }
   }
 
   .member-admin-row > .button,
+  .member-admin-row > .member-admin-actions,
+  .member-admin-row > .member-withdrawn-status,
   .member-admin-row > .owner-lock {
     grid-column: 1 / -1;
   }
 
-  .member-admin-row > .button {
+  .member-admin-row > .button,
+  .member-admin-actions .button {
     width: 100%;
+  }
+
+  .member-admin-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .home-welcome { align-items: flex-start; flex-direction: column; }
