@@ -1,9 +1,11 @@
+import type { Route } from "next";
+
 export type SharedHomeContentKind = "announcement" | "schedule" | "homework";
 
-export function createSharedContentPath(kind: SharedHomeContentKind, id: string) {
+export function createSharedContentPath(kind: SharedHomeContentKind, id: string): Route {
   const encodedId = encodeURIComponent(id);
-  if (kind === "homework") return `/homeworks?homework=${encodedId}`;
-  return `/home?detail=${kind}&id=${encodedId}`;
+  if (kind === "homework") return `/homeworks?homework=${encodedId}` as Route;
+  return `/home?detail=${kind}&id=${encodedId}` as Route;
 }
 
 export function readSharedHomeDetail(search: string) {
