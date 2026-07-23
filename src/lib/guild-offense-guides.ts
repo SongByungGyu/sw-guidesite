@@ -24,6 +24,8 @@ export type GuildOffenseGuide = {
   id: string;
   title: string;
   summary: string;
+  badge?: string;
+  source?: "curated" | "homework";
   monsters: [GuildOffenseMonsterGuide, GuildOffenseMonsterGuide, GuildOffenseMonsterGuide];
   strategy: string[];
   note?: string;

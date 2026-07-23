@@ -90,10 +90,10 @@ export function HomeworkBoard() {
 
 function HomeworkProgressPanel({ progress }: { progress: HomeworkProgress }) {
   const completionRate = progress.total ? Math.round((progress.completed.length / progress.total) * 100) : 0;
-  return <details className="homework-progress">
+  return <details className="homework-progress" open>
     <summary>
-      <span className="homework-progress-summary-copy"><span><Icon name="users" size={17} /><strong>길드원 완료 현황</strong><em>운영진 전용</em></span><small>완료·미완료 길드원을 확인할 수 있습니다.</small></span>
-      <span className="homework-progress-count"><strong>{progress.completed.length}/{progress.total}명 완료</strong><span>{completionRate}%</span><Icon name="chevron" size={17} /></span>
+      <span className="homework-progress-summary-copy"><span><Icon name="users" size={17} /><strong>숙제 참여 현황</strong><em>운영진 확인</em></span><small>완료한 길드원과 아직 진행하지 않은 길드원을 구분합니다.</small></span>
+      <span className="homework-progress-count"><span className="homework-progress-split"><b>{progress.completed.length}명 완료</b><b>{progress.incomplete.length}명 미진행</b></span><span>{completionRate}%</span><Icon name="chevron" size={17} /></span>
     </summary>
     <div className="homework-progress-body">
       <div aria-label={`숙제 완료율 ${completionRate}%`} className="homework-progress-bar" role="progressbar" aria-valuemax={100} aria-valuemin={0} aria-valuenow={completionRate}><span style={{ width: `${completionRate}%` }} /></div>
@@ -108,8 +108,8 @@ function HomeworkProgressPanel({ progress }: { progress: HomeworkProgress }) {
 function HomeworkMemberGroup({ members, status }: { members: ProgressMember[]; status: "complete" | "incomplete" }) {
   const complete = status === "complete";
   return <section className="homework-status-group">
-    <header><span className="homework-status-title"><i className={`status-dot-${status}`} /><strong>{complete ? "완료" : "미완료"}</strong></span><b>{members.length}명</b></header>
-    {members.length ? <ul className="homework-member-list">{members.map((member) => <li key={member.id}><span className="homework-member-identity"><strong>{member.nickname}</strong><em>{roleLabel(member.role)}</em></span><span className={complete ? "member-completion-time" : "member-incomplete-label"}>{complete && member.completedAt ? formatCompletionTime(member.completedAt) : "확인 필요"}</span></li>)}</ul> : <p className="homework-member-empty">해당 길드원이 없습니다.</p>}
+    <header><span className="homework-status-title"><i className={`status-dot-${status}`} /><strong>{complete ? "진행 완료" : "미진행"}</strong></span><b>{members.length}명</b></header>
+    {members.length ? <ul className="homework-member-list">{members.map((member) => <li key={member.id}><span className="homework-member-identity"><strong>{member.nickname}</strong><em>{roleLabel(member.role)}</em></span><span className={complete ? "member-completion-time" : "member-incomplete-label"}>{complete && member.completedAt ? formatCompletionTime(member.completedAt) : "아직 미완료"}</span></li>)}</ul> : <p className="homework-member-empty">해당 길드원이 없습니다.</p>}
   </section>;
 }
 

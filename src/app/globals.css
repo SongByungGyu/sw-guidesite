@@ -2460,8 +2460,10 @@ em.change-request-status { padding-right: 8px; }
 .homework-progress-summary-copy small { color: var(--text-secondary); }
 .homework-progress-summary-copy em { padding: 2px 6px; color: var(--accent-blue); font-size: 0.62rem; font-style: normal; border: 1px solid color-mix(in srgb, var(--accent-blue) 30%, var(--border)); border-radius: 999px; background: color-mix(in srgb, var(--accent-blue) 8%, transparent); }
 .homework-progress-count { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-.homework-progress-count strong { color: var(--success); font-size: 1.02rem; }
 .homework-progress-count > span { color: var(--text-secondary); font-size: 0.68rem; }
+.homework-progress-split { display: flex; align-items: center; gap: 6px; }
+.homework-progress-split b { padding: 4px 7px; color: var(--success); font-size: 0.68rem; border: 1px solid color-mix(in srgb, var(--success) 30%, var(--border)); border-radius: 999px; background: color-mix(in srgb, var(--success) 8%, transparent); }
+.homework-progress-split b:last-child { color: var(--accent-gold); border-color: color-mix(in srgb, var(--accent-gold) 30%, var(--border)); background: color-mix(in srgb, var(--accent-gold) 8%, transparent); }
 .homework-progress-count svg { color: var(--text-secondary); transition: transform 160ms ease; }
 .homework-progress[open] > summary { border-bottom: 1px solid var(--border); }
 .homework-progress[open] .homework-progress-count svg { transform: rotate(90deg); }
@@ -3079,9 +3081,10 @@ em.change-request-status { padding-right: 8px; }
   .defense-detail-overview > div { border-right: 0; border-bottom: 1px solid var(--border); }
   .defense-detail-overview > div:last-child { border-bottom: 0; }
   .defense-detail-shell > .dialog-footer { display: grid; grid-template-columns: 0.7fr 1.3fr; }
-  .homework-progress > summary { align-items: flex-start; }
+  .homework-progress > summary { align-items: flex-start; flex-direction: column; }
   .homework-progress-summary-copy small { display: none; }
-  .homework-progress-count { align-items: flex-end; flex-direction: column; gap: 1px; }
+  .homework-progress-count { width: 100%; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+  .homework-progress-split { flex-wrap: wrap; }
   .homework-progress-count svg { display: none; }
   .homework-status-columns { grid-template-columns: 1fr; }
   .homework-spec-heading > span { display: inline; }
@@ -3398,6 +3401,69 @@ em.change-request-status { padding-right: 8px; }
   background: rgb(231 184 92 / 8%);
 }
 
+.guild-offense-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.guild-offense-section-heading > div {
+  display: grid;
+  gap: 3px;
+}
+
+.guild-offense-section-heading span {
+  color: var(--accent-gold);
+  font-size: 0.64rem;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+}
+
+.guild-offense-section-heading h2 {
+  font-size: 1.15rem;
+}
+
+.guild-offense-section-heading p {
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+}
+
+.guild-offense-section-heading > strong {
+  padding: 4px 8px;
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--background-base);
+}
+
+.guild-offense-section-divider {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--border);
+}
+
+.guild-offense-sync-state {
+  min-height: 92px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: var(--text-secondary);
+  font-size: 0.76rem;
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--background-base);
+}
+
+.guild-offense-sync-state.is-error {
+  color: var(--danger);
+}
+
 .guild-offense-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3422,6 +3488,13 @@ em.change-request-status { padding-right: 8px; }
   transform: translateY(-2px);
   border-color: rgb(231 184 92 / 55%);
   background: color-mix(in srgb, var(--surface) 60%, var(--background-base));
+}
+
+.guild-offense-card.is-homework {
+  border-color: color-mix(in srgb, var(--accent-blue) 42%, var(--border));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent-blue) 9%, transparent), transparent 42%),
+    var(--background-base);
 }
 
 .guild-offense-card:focus-visible {
@@ -3717,6 +3790,14 @@ em.change-request-status { padding-right: 8px; }
 
   .guild-offense-library-heading > span {
     margin-top: 2px;
+  }
+
+  .guild-offense-section-heading {
+    align-items: flex-start;
+  }
+
+  .guild-offense-section-heading p {
+    max-width: 28rem;
   }
 
   .guild-offense-grid {
