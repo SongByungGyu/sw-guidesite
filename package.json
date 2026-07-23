@@ -20,6 +20,7 @@
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "data:monsters": "node scripts/import-ryhlab-monsters.mjs",
+    "data:speed": "node scripts/import-ryhlab-speed-calculator.mjs",
     "data:reto21r": "node scripts/import-reto-21r-stats.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

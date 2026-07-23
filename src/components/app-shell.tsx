@@ -3,12 +3,13 @@ import Link from "next/link";
 
 type AppShellProps = {
   children: React.ReactNode;
-  activeSection?: "home" | "offense" | "defenses" | "reto" | "dungeons" | "homeworks" | "monsters";
+  activeSection?: "home" | "offense" | "speed" | "defenses" | "reto" | "dungeons" | "homeworks" | "monsters";
 };
 
 const navItems = [
   { label: "길드 홈", mobileLabel: "홈", icon: "home" as const, href: "/home", section: "home" },
   { label: "공덱 검색", mobileLabel: "공덱", icon: "swords" as const, href: "/", section: "offense" },
+  { label: "공속 계산기", mobileLabel: "공속", icon: "bolt" as const, href: "/speed-calculator", section: "speed" },
   { label: "방덱 관리", mobileLabel: "방덱", icon: "shield" as const, href: "/defenses", section: "defenses" },
   { label: "레토 21R 방덱 통계", mobileLabel: "21R", icon: "sparkles" as const, href: "/reto-21r", section: "reto" },
   { label: "던전 공략", mobileLabel: "던전", icon: "book" as const, href: "/dungeons", section: "dungeons" },

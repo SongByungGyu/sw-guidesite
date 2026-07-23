@@ -3084,3 +3084,132 @@ em.change-request-status { padding-right: 8px; }
   .reto-metrics .primary dd { font-size: 0.86rem; }
   .reto-metrics dd small { display: block; margin-left: 0; }
 }
+
+/* Speed calculator */
+.speed-heading { align-items: flex-end; }
+.speed-heading .button { flex: 0 0 auto; }
+.speed-formula-note { margin-bottom: 18px; padding: 14px 16px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 11px; color: var(--text-secondary); border: 1px solid color-mix(in srgb, var(--accent-gold) 28%, var(--border)); border-radius: 12px; background: color-mix(in srgb, var(--accent-gold) 6%, var(--background-elevated)); }
+.speed-formula-note > svg { color: var(--accent-gold); }
+.speed-formula-note strong { color: var(--text-primary); }
+.speed-formula-note p { margin-top: 2px; font-size: 0.73rem; }
+.speed-formula-note > span { padding: 5px 9px; color: var(--accent-gold); font-size: 0.66rem; font-weight: 800; border: 1px solid color-mix(in srgb, var(--accent-gold) 30%, var(--border)); border-radius: 999px; }
+.speed-calculator-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; align-items: start; gap: 18px; }
+.speed-config-column { min-width: 0; display: grid; gap: 18px; }
+.speed-panel, .speed-result-panel { border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--background-elevated); }
+.speed-panel { overflow: hidden; }
+.speed-panel-heading { padding: 17px 20px; border-bottom: 1px solid var(--border); }
+.speed-panel-heading > div { display: flex; align-items: center; gap: 11px; }
+.speed-panel-heading > div > span { width: 28px; height: 28px; display: grid; place-items: center; flex: 0 0 auto; color: #2b2009; font-size: 0.76rem; font-weight: 900; border-radius: 50%; background: var(--accent-gold); }
+.speed-panel-heading h2 { font-size: 1rem; }
+.speed-panel-heading p { margin-top: 2px; color: var(--text-secondary); font-size: 0.72rem; }
+.speed-team-picker { padding: 16px 20px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.speed-team-picker article { min-width: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 11px; background: var(--background-base); }
+.speed-team-picker article.is-leader { border-color: color-mix(in srgb, var(--accent-gold) 58%, var(--border)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent-gold) 18%, transparent); }
+.speed-team-picker article > button { width: 100%; min-width: 0; padding: 11px; display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; align-items: center; gap: 8px; color: inherit; border: 0; background: transparent; cursor: pointer; text-align: left; }
+.speed-team-picker article > button:hover { background: var(--surface-hover); }
+.speed-team-picker article > button > span { align-self: start; color: var(--accent-blue); font-size: 0.65rem; font-weight: 850; }
+.speed-team-picker article > button > div:not(.monster-portrait) { min-width: 0; display: grid; gap: 2px; }
+.speed-team-picker article > button strong, .speed-team-picker article > button small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.speed-team-picker article > button small { color: var(--text-secondary); font-size: 0.65rem; }
+.speed-team-picker article > label { padding: 7px 11px; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--text-secondary); font-size: 0.7rem; font-weight: 750; border-top: 1px solid var(--border); cursor: pointer; }
+.speed-team-picker article.is-leader > label { color: var(--accent-gold); }
+.speed-global-fields { padding: 0 20px 18px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.speed-global-fields label, .speed-card-fields label, .speed-auto-effect label, .speed-custom-effect label { min-width: 0; display: grid; align-content: start; gap: 5px; }
+.speed-global-fields label > span, .speed-card-fields label > span, .speed-auto-effect label > span, .speed-custom-effect label > span { color: var(--text-secondary); font-size: 0.66rem; font-weight: 750; }
+.speed-global-fields input, .speed-global-fields select, .speed-card-fields input, .speed-card-fields select, .speed-auto-effect select, .speed-custom-effect input, .speed-custom-effect select { width: 100%; min-height: 39px; padding: 7px 10px; color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px; outline: 0; background: var(--surface); }
+.speed-global-fields input:focus, .speed-global-fields select:focus, .speed-card-fields input:focus, .speed-card-fields select:focus, .speed-auto-effect select:focus, .speed-custom-effect input:focus, .speed-custom-effect select:focus { border-color: var(--accent-blue); }
+.speed-global-fields label > small { min-height: 1em; color: var(--text-secondary); font-size: 0.6rem; }
+.speed-input-suffix, .speed-input-prefix { position: relative; }
+.speed-input-suffix input { padding-right: 30px; }
+.speed-input-prefix input { padding-left: 27px; }
+.speed-input-suffix > b, .speed-input-prefix > b { position: absolute; top: 50%; color: var(--text-secondary); font-size: 0.72rem; transform: translateY(-50%); pointer-events: none; }
+.speed-input-suffix > b { right: 10px; }
+.speed-input-prefix > b { left: 10px; }
+.speed-stat-cards { padding: 16px 20px 20px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.speed-stat-cards > article { min-width: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 11px; background: var(--background-base); }
+.speed-stat-cards > article > header { padding: 11px 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+.speed-stat-cards > article > header > div:not(.monster-portrait) { min-width: 0; display: grid; }
+.speed-stat-cards > article > header span { color: var(--accent-blue); font-size: 0.62rem; font-weight: 800; }
+.speed-stat-cards > article > header strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.speed-stat-cards > article > header em { margin-left: auto; color: var(--text-secondary); font-size: 0.65rem; font-style: normal; white-space: nowrap; }
+.speed-card-fields { padding: 11px 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.speed-card-fields .span-full { grid-column: 1 / -1; }
+.speed-stat-cards > article > footer { padding: 9px 12px; display: grid; gap: 2px; border-top: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 60%, transparent); }
+.speed-stat-cards > article > footer span { color: var(--text-secondary); font-size: 0.6rem; }
+.speed-stat-cards > article > footer strong { color: var(--accent-gold); font-size: 0.74rem; }
+.speed-effect-list { padding: 16px 20px 20px; display: grid; gap: 10px; }
+.speed-effect-list > article { overflow: hidden; border: 1px solid var(--border); border-radius: 11px; background: var(--background-base); }
+.speed-effect-list > article > header { padding: 11px 12px; display: flex; align-items: center; gap: 9px; border-bottom: 1px solid var(--border); }
+.speed-effect-list > article > header > div:not(.monster-portrait) { min-width: 0; display: grid; }
+.speed-effect-list > article > header span { color: var(--text-secondary); font-size: 0.61rem; }
+.speed-effect-list > article > header strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.speed-effect-list > article > header select { margin-left: auto; min-height: 35px; padding: 6px 28px 6px 9px; color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.speed-auto-effect, .speed-custom-effect { padding: 12px; display: grid; grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr); align-items: end; gap: 10px; }
+.speed-effect-chips { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+.speed-effect-chips span { padding: 4px 8px; font-size: 0.64rem; font-weight: 750; border: 1px solid var(--border); border-radius: 999px; }
+.speed-effect-chips .buff { color: var(--accent-blue); border-color: color-mix(in srgb, var(--accent-blue) 35%, var(--border)); background: color-mix(in srgb, var(--accent-blue) 8%, transparent); }
+.speed-effect-chips .gauge { color: var(--success); border-color: color-mix(in srgb, var(--success) 35%, var(--border)); background: color-mix(in srgb, var(--success) 8%, transparent); }
+.speed-check { min-height: 61px; padding: 9px 11px; grid-template-columns: auto 1fr; align-items: center; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
+.speed-check input { width: auto; min-height: 0; }
+.speed-check > span { display: grid; color: var(--text-primary) !important; }
+.speed-check small { color: var(--text-secondary); font-size: 0.6rem; font-weight: 500; }
+.speed-no-effect { padding: 15px 12px; color: var(--text-secondary); font-size: 0.7rem; }
+.speed-result-panel { position: sticky; top: 18px; overflow: hidden; }
+.speed-result-panel > header { padding: 17px 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border); }
+.speed-result-panel > header h2 { font-size: 1.05rem; }
+.speed-result-panel > header > span { padding: 5px 9px; flex: 0 0 auto; font-size: 0.64rem; font-weight: 850; border: 1px solid var(--border); border-radius: 999px; }
+.speed-result-panel > header > span.ready { color: var(--accent-blue); }
+.speed-result-panel > header > span.safe { color: var(--success); border-color: color-mix(in srgb, var(--success) 40%, var(--border)); }
+.speed-result-panel > header > span.danger { color: #ff7878; border-color: color-mix(in srgb, #ff7878 40%, var(--border)); }
+.speed-result-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--surface) 58%, transparent); }
+.speed-result-summary > div { padding: 12px 8px; display: grid; gap: 2px; text-align: center; border-right: 1px solid var(--border); }
+.speed-result-summary > div:last-child { border-right: 0; }
+.speed-result-summary span { color: var(--text-secondary); font-size: 0.58rem; }
+.speed-result-summary strong { color: var(--accent-gold); }
+.speed-result-order { margin: 0; padding: 0; list-style: none; }
+.speed-result-order > li { padding: 13px 14px; display: grid; grid-template-columns: 23px auto minmax(0, 1fr); align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+.speed-result-order > li > span { color: var(--accent-gold); font-weight: 900; text-align: center; }
+.speed-result-order > li > div:not(.monster-portrait) { min-width: 0; display: grid; }
+.speed-result-order > li > div > strong, .speed-result-order > li > div > small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.speed-result-order > li > div > small { color: var(--text-secondary); font-size: 0.6rem; }
+.speed-result-order dl { grid-column: 2 / -1; margin: 1px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--border); border-radius: 8px; }
+.speed-result-order dl > div { padding: 7px 8px; display: grid; gap: 1px; border-right: 1px solid var(--border); }
+.speed-result-order dl > div:last-child { border-right: 0; }
+.speed-result-order dt { color: var(--text-secondary); font-size: 0.56rem; }
+.speed-result-order dd { margin: 0; font-size: 0.74rem; font-weight: 850; }
+.speed-result-order .actual-ok dd { color: var(--success); }
+.speed-result-order .actual-low dd { color: #ff7878; }
+.speed-order-check { margin: 14px; padding: 11px 12px; display: flex; align-items: flex-start; gap: 9px; border: 1px solid var(--border); border-radius: 9px; }
+.speed-order-check svg { flex: 0 0 auto; margin-top: 1px; }
+.speed-order-check strong { font-size: 0.74rem; }
+.speed-order-check p { margin-top: 2px; color: var(--text-secondary); font-size: 0.65rem; }
+.speed-order-check.ready svg { color: var(--accent-blue); }
+.speed-order-check.safe { border-color: color-mix(in srgb, var(--success) 35%, var(--border)); background: color-mix(in srgb, var(--success) 5%, transparent); }
+.speed-order-check.safe svg { color: var(--success); }
+.speed-order-check.danger { border-color: color-mix(in srgb, #ff7878 35%, var(--border)); background: color-mix(in srgb, #ff7878 5%, transparent); }
+.speed-order-check.danger svg { color: #ff7878; }
+.speed-result-panel > footer { padding: 12px 14px; display: flex; align-items: flex-start; gap: 8px; color: var(--text-secondary); border-top: 1px solid var(--border); background: var(--background-base); }
+.speed-result-panel > footer svg { flex: 0 0 auto; color: var(--accent-gold); }
+.speed-result-panel > footer p { font-size: 0.64rem; }
+
+@media (max-width: 1180px) {
+  .speed-calculator-layout { grid-template-columns: minmax(0, 1fr); }
+  .speed-result-panel { position: static; }
+}
+
+@media (max-width: 899px) {
+  .speed-team-picker, .speed-stat-cards { grid-template-columns: 1fr; }
+  .speed-team-picker article > button { grid-template-columns: 35px auto minmax(0, 1fr) auto; }
+  .speed-global-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 767px) {
+  .speed-heading { align-items: flex-start; flex-direction: column; }
+  .speed-heading .button { width: 100%; }
+  .speed-formula-note { grid-template-columns: auto minmax(0, 1fr); }
+  .speed-formula-note > span { grid-column: 2; justify-self: start; }
+  .speed-panel-heading, .speed-team-picker, .speed-stat-cards, .speed-effect-list { padding-left: 14px; padding-right: 14px; }
+  .speed-global-fields { padding-left: 14px; padding-right: 14px; grid-template-columns: 1fr; }
+  .speed-auto-effect, .speed-custom-effect { grid-template-columns: 1fr; }
+  .speed-effect-chips { grid-column: 1; }
+}
