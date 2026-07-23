@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import { useEffect } from "react";
 import { Icon } from "@/components/icon";
 import Link from "next/link";
@@ -7,12 +8,13 @@ import { usePathname } from "next/navigation";
 
 type AppShellProps = {
   children: React.ReactNode;
-  activeSection?: "home" | "offense" | "speed" | "defenses" | "reto" | "dungeons" | "homeworks" | "monsters";
+  activeSection?: "home" | "offense" | "guild-offenses" | "speed" | "defenses" | "reto" | "dungeons" | "homeworks" | "monsters";
 };
 
 const navItems = [
   { label: "길드 홈", mobileLabel: "홈", icon: "home" as const, href: "/home", section: "home" },
   { label: "공덱 검색", mobileLabel: "공덱", icon: "swords" as const, href: "/", section: "offense" },
+  { label: "길드 공덱", mobileLabel: "길드덱", icon: "sparkles" as const, href: "/guild-offenses", section: "guild-offenses" },
   { label: "공속 계산기", mobileLabel: "공속", icon: "bolt" as const, href: "/speed-calculator", section: "speed" },
   { label: "방덱 관리", mobileLabel: "방덱", icon: "shield" as const, href: "/defenses", section: "defenses" },
   { label: "레토 21R 방덱 통계", mobileLabel: "21R", icon: "sparkles" as const, href: "/reto-21r", section: "reto" },
@@ -67,7 +69,7 @@ export function AppShell({ children, activeSection = "offense" }: AppShellProps)
         </div>
         <nav aria-label="주 메뉴" className="sidebar-nav">
           {navItems.map((item) => (
-            <Link className={item.section === activeSection ? "active" : ""} href={item.href} key={item.label}>
+            <Link className={item.section === activeSection ? "active" : ""} href={item.href as Route} key={item.label}>
               <Icon name={item.icon} />
               {item.label}
             </Link>
@@ -97,7 +99,7 @@ export function AppShell({ children, activeSection = "offense" }: AppShellProps)
         <main className="main-content">{children}</main>
         <nav className="mobile-tabs" aria-label="모바일 주 메뉴">
           {navItems.slice(0, 6).map((item) => (
-            <Link className={item.section === activeSection ? "active" : ""} href={item.href} key={item.label}>
+            <Link className={item.section === activeSection ? "active" : ""} href={item.href as Route} key={item.label}>
               <Icon name={item.icon} size={19} />
               <span>{"mobileLabel" in item ? item.mobileLabel : item.label}</span>
             </Link>

@@ -3354,7 +3354,6 @@ em.change-request-status { padding-right: 8px; }
 
 /* Curated guild offense library */
 .guild-offense-library {
-  margin-top: 22px;
   padding: 20px;
   display: grid;
   gap: 16px;
@@ -3366,6 +3365,7 @@ em.change-request-status { padding-right: 8px; }
 }
 
 .guild-offense-library-heading {
+  margin-bottom: 22px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -3377,8 +3377,9 @@ em.change-request-status { padding-right: 8px; }
   gap: 3px;
 }
 
-.guild-offense-library-heading h2 {
-  font-size: 1.22rem;
+.guild-offense-library-heading h1 {
+  font-size: clamp(2rem, 5vw, 2.65rem);
+  letter-spacing: -0.04em;
 }
 
 .guild-offense-library-heading p:last-child {
@@ -3706,11 +3707,11 @@ em.change-request-status { padding-right: 8px; }
 
 @media (max-width: 767px) {
   .guild-offense-library {
-    margin-top: 16px;
     padding: 14px;
   }
 
   .guild-offense-library-heading {
+    margin-bottom: 16px;
     align-items: flex-start;
   }
 

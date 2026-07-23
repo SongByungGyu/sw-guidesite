@@ -16,37 +16,39 @@ export function GuildOffenseLibrary() {
   const [selected, setSelected] = useState<GuildOffenseGuide | null>(null);
 
   return (
-    <section className="guild-offense-library" aria-labelledby="guild-offense-library-title">
+    <>
       <header className="guild-offense-library-heading">
         <div>
           <p className="eyebrow">GUILD OFFENSE</p>
-          <h2 id="guild-offense-library-title">길드 공덱</h2>
-          <p>스프레드시트에서 옮긴 공식 조합입니다. 카드를 누르면 룬·최소 스펙·운영법을 확인할 수 있습니다.</p>
+          <h1 id="guild-offense-library-title">길드 공덱</h1>
+          <p>길드가 정리한 범용 공격 조합입니다. 카드를 누르면 룬·최소 스펙·운영법을 확인할 수 있습니다.</p>
         </div>
         <span>{guildOffenseGuides.length}개 조합</span>
       </header>
 
-      <div className="guild-offense-grid">
-        {guildOffenseGuides.map((guide) => (
-          <button className="guild-offense-card" key={guide.id} onClick={() => setSelected(guide)} type="button">
-            <header>
-              <div><strong>{guide.title}</strong><span>길드 공식</span></div>
-              <Icon name="chevron" size={17} />
-            </header>
-            <p>{guide.summary}</p>
-            <TeamComposition
-              compact
-              label={`${guide.title} 길드 공덱`}
-              leaderSlot={guide.monsters.findIndex((monster) => monster.isLeader)}
-              monsters={guide.monsters.map((monster) => getMonster(monster.monsterId))}
-            />
-            <small>상세 스펙 및 운영법 보기</small>
-          </button>
-        ))}
-      </div>
+      <section className="guild-offense-library" aria-labelledby="guild-offense-library-title">
+        <div className="guild-offense-grid">
+          {guildOffenseGuides.map((guide) => (
+            <button className="guild-offense-card" key={guide.id} onClick={() => setSelected(guide)} type="button">
+              <header>
+                <div><strong>{guide.title}</strong><span>길드 공식</span></div>
+                <Icon name="chevron" size={17} />
+              </header>
+              <p>{guide.summary}</p>
+              <TeamComposition
+                compact
+                label={`${guide.title} 길드 공덱`}
+                leaderSlot={guide.monsters.findIndex((monster) => monster.isLeader)}
+                monsters={guide.monsters.map((monster) => getMonster(monster.monsterId))}
+              />
+              <small>상세 스펙 및 운영법 보기</small>
+            </button>
+          ))}
+        </div>
+      </section>
 
       {selected ? <GuildOffenseDetailDialog guide={selected} onClose={() => setSelected(null)} /> : null}
-    </section>
+    </>
   );
 }
 
