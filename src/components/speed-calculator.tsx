@@ -42,6 +42,7 @@ type SavedSpeedCalculatorDraft = {
   battleArea: "guild" | "arena";
   manualLeaderPct: string;
   towerPct: string;
+  guildLevelPct: string;
   runeSpeeds: string[];
   artifactPcts: string[];
   passiveBonuses: string[];
@@ -52,6 +53,7 @@ type SavedSpeedCalculatorDraft = {
 const EMPTY_TEAM = ["", "", ""];
 const WATER_PUMPKIN_ID = "2330";
 const SPEED_DRAFT_KEY = "guild_archive_speed_calculator:v1";
+const DEFAULT_GUILD_LEVEL_SPEED_PCT = 5;
 
 export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDataset }) {
   const [teamIds, setTeamIds] = useState(EMPTY_TEAM);
@@ -60,6 +62,7 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
   const [battleArea, setBattleArea] = useState<"guild" | "arena">("guild");
   const [manualLeaderPct, setManualLeaderPct] = useState("");
   const [towerPct, setTowerPct] = useState(String(speedData.towerSpeedPct));
+  const [guildLevelPct, setGuildLevelPct] = useState(String(DEFAULT_GUILD_LEVEL_SPEED_PCT));
   const [runeSpeeds, setRuneSpeeds] = useState(["", "", ""]);
   const [artifactPcts, setArtifactPcts] = useState(["0", "0", "0"]);
   const [passiveBonuses, setPassiveBonuses] = useState(["0", "0", "0"]);
@@ -86,6 +89,7 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
           if (draft.battleArea === "guild" || draft.battleArea === "arena") setBattleArea(draft.battleArea);
           if (typeof draft.manualLeaderPct === "string") setManualLeaderPct(draft.manualLeaderPct);
           if (typeof draft.towerPct === "string") setTowerPct(draft.towerPct);
+          if (typeof draft.guildLevelPct === "string") setGuildLevelPct(draft.guildLevelPct);
           setRuneSpeeds(savedStringList(draft.runeSpeeds, ["", "", ""]));
           setArtifactPcts(savedStringList(draft.artifactPcts, ["0", "0", "0"]));
           setPassiveBonuses(savedStringList(draft.passiveBonuses, ["0", "0", "0"]));
@@ -109,6 +113,7 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
       battleArea,
       manualLeaderPct,
       towerPct,
+      guildLevelPct,
       runeSpeeds,
       artifactPcts,
       passiveBonuses,
@@ -116,7 +121,7 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
       effectOverrides,
     };
     try { window.localStorage.setItem(SPEED_DRAFT_KEY, JSON.stringify(draft)); } catch { /* 저장소를 사용할 수 없는 환경은 메모리 상태만 유지합니다. */ }
-  }, [artifactPcts, battleArea, draftReady, effectOverrides, leaderSlot, manualLeaderPct, passiveBonuses, pumpkinBuffCounts, runeSpeeds, teamIds, towerPct]);
+  }, [artifactPcts, battleArea, draftReady, effectOverrides, guildLevelPct, leaderSlot, manualLeaderPct, passiveBonuses, pumpkinBuffCounts, runeSpeeds, teamIds, towerPct]);
 
   const selectedCount = teamIds.filter(Boolean).length;
   const leaderId = leaderSlot === null ? "" : teamIds[leaderSlot];
@@ -147,6 +152,7 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
       runeSpeed: runeSpeeds[position].trim() === "" ? null : numeric(runeSpeeds[position]),
       leaderPct,
       towerPct: numeric(towerPct),
+      guildLevelPct: battleArea === "guild" ? numeric(guildLevelPct) : 0,
       passiveBonus,
       speedArtifactPct: numeric(artifactPcts[position]),
       effects: position < 2
@@ -154,7 +160,7 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
         : [],
     };
     });
-  }, [artifactPcts, battleArea, effectDrafts, leaderData?.speedLeader, leaderMonster?.element, manualLeaderPct, passiveBonuses, pumpkinBuffCounts, runeSpeeds, speedData.monsters, teamIds, towerPct]);
+  }, [artifactPcts, battleArea, effectDrafts, guildLevelPct, leaderData?.speedLeader, leaderMonster?.element, manualLeaderPct, passiveBonuses, pumpkinBuffCounts, runeSpeeds, speedData.monsters, teamIds, towerPct]);
 
   const result = useMemo(() => units ? calculateSpeedTune(units) : null, [units]);
   const allActualEntered = Boolean(result?.actualOrder);
@@ -199,6 +205,7 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
     setBattleArea("guild");
     setManualLeaderPct("");
     setTowerPct(String(speedData.towerSpeedPct));
+    setGuildLevelPct(String(DEFAULT_GUILD_LEVEL_SPEED_PCT));
     setRuneSpeeds(["", "", ""]);
     setArtifactPcts(["0", "0", "0"]);
     setPassiveBonuses(["0", "0", "0"]);
@@ -224,7 +231,7 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
 
       <section className="speed-formula-note">
         <Icon name="bolt" size={19} />
-        <div><strong>점령전 기본값 · 자동 임시 저장</strong><p>공속 건물 15%와 7% 게이지 틱을 기준으로 계산합니다. 입력 내용은 이 기기에 자동 저장되어 다시 들어와도 복원됩니다.</p></div>
+        <div><strong>점령전 기본값 · 자동 임시 저장</strong><p>공속 건물 15%와 길드 레벨 보너스 5%를 기본속에 각각 합산하고, 7% 게이지 틱을 기준으로 계산합니다.</p></div>
         <span>자동 스킬 {speedData.automaticSkillMonsterCount}마리</span>
       </section>
 
@@ -265,6 +272,7 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
               <label><span>전투 지역</span><select onChange={(event) => { setBattleArea(event.target.value as "guild" | "arena"); setManualLeaderPct(""); }} value={battleArea}><option value="guild">점령전·길드전</option><option value="arena">아레나</option></select></label>
               <label><span>속도 리더 보정</span><div className="speed-input-suffix"><input max="50" min="0" onChange={(event) => setManualLeaderPct(event.target.value)} placeholder={String(automaticLeaderLabel.amount)} type="number" value={manualLeaderPct} /><b>%</b></div><small>{manualLeaderPct === "" ? automaticLeaderLabel.label : "직접 입력값 적용"}</small></label>
               <label><span>공속 건물</span><div className="speed-input-suffix"><input max="15" min="0" onChange={(event) => setTowerPct(event.target.value)} type="number" value={towerPct} /><b>%</b></div><small>최대 레벨 기본 15%</small></label>
+              <label><span>길드 레벨 공속</span><div className="speed-input-suffix"><input disabled={battleArea !== "guild"} max="5" min="0" onChange={(event) => setGuildLevelPct(event.target.value)} type="number" value={battleArea === "guild" ? guildLevelPct : "0"} /><b>%</b></div><small>{battleArea === "guild" ? "질투 길드 기본 5% · 레벨에 맞게 수정" : "아레나에서는 적용되지 않음"}</small></label>
             </div> : null}
           </section>
 
@@ -282,7 +290,7 @@ export function SpeedCalculator({ speedData }: { speedData: SpeedCalculatorDatas
                     <label><span>공속 증가 아티</span><div className="speed-input-suffix"><input max="30" min="0" onChange={(event) => updateList(setArtifactPcts, position, event.target.value)} type="number" value={artifactPcts[position]} /><b>%</b></div></label>
                     {id === WATER_PUMPKIN_ID ? <label className="span-full"><span>물호박 시작 버프</span><select onChange={(event) => updateList(setPumpkinBuffCounts, position, event.target.value)} value={pumpkinBuffCounts[position]}><option value="0">없음 · 추가속 0</option><option value="1">1개 · 추가속 19.5</option><option value="2">2개 · 추가속 39</option></select></label> : <label className="span-full"><span>패시브 추가 고정속</span><input min="0" onChange={(event) => updateList(setPassiveBonuses, position, event.target.value)} type="number" value={passiveBonuses[position]} /></label>}
                   </div>
-                  <footer><span>리더 +{leaderApplied}% · 건물 +{numeric(towerPct)}%</span><strong>{position === 0 ? `기준 최종 ${Math.ceil(positionResult.minimumCombatSpeed)}` : `권장 룬속 +${positionResult.minimumRuneSpeed}`}</strong></footer>
+                  <footer><span>리더 +{leaderApplied}% · 건물 +{numeric(towerPct)}% · 길드 +{units[position].guildLevelPct}%</span><strong>{position === 0 ? `기준 최종 ${Math.ceil(positionResult.minimumCombatSpeed)}` : `권장 룬속 +${positionResult.minimumRuneSpeed}`}</strong></footer>
                 </article>;
               })}
             </div>

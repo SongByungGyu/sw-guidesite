@@ -3242,7 +3242,7 @@ em.change-request-status { padding-right: 8px; }
 .speed-team-picker article.is-empty > button { min-height: 78px; }
 .speed-empty-monster { width: 42px; height: 42px; display: grid; place-items: center; align-self: center !important; color: var(--accent-blue) !important; border: 1px dashed color-mix(in srgb, var(--accent-blue) 55%, var(--border)); border-radius: 10px; background: color-mix(in srgb, var(--accent-blue) 7%, transparent); }
 .speed-no-leader { min-height: 34px; padding: 7px 11px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-size: 0.67rem; font-weight: 700; border-top: 1px solid var(--border); }
-.speed-global-fields { padding: 0 20px 18px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.speed-global-fields { padding: 0 20px 18px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .speed-global-fields label, .speed-card-fields label, .speed-auto-effect label, .speed-custom-effect label { min-width: 0; display: grid; align-content: start; gap: 5px; }
 .speed-global-fields label > span, .speed-card-fields label > span, .speed-auto-effect label > span, .speed-custom-effect label > span { color: var(--text-secondary); font-size: 0.66rem; font-weight: 750; }
 .speed-global-fields input, .speed-global-fields select, .speed-card-fields input, .speed-card-fields select, .speed-auto-effect select, .speed-custom-effect input, .speed-custom-effect select { width: 100%; min-height: 39px; padding: 7px 10px; color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px; outline: 0; background: var(--surface); }

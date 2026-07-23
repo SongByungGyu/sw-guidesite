@@ -7,6 +7,7 @@ function unit(overrides: Partial<SpeedChainUnit> = {}): SpeedChainUnit {
     runeSpeed: null,
     leaderPct: 0,
     towerPct: 15,
+    guildLevelPct: 0,
     passiveBonus: 0,
     speedArtifactPct: 0,
     effects: [],
@@ -15,9 +16,27 @@ function unit(overrides: Partial<SpeedChainUnit> = {}): SpeedChainUnit {
 }
 
 describe("speed tune calculator", () => {
-  it("applies leader, tower, rune and passive speed separately", () => {
-    expect(calculateCombatSpeed(unit({ baseSpeed: 101, runeSpeed: 180, leaderPct: 28, passiveBonus: 39 })))
-      .toBeCloseTo(363.43, 5);
+  it("applies leader, tower, guild level, rune and passive speed separately", () => {
+    expect(calculateCombatSpeed(unit({
+      baseSpeed: 101,
+      runeSpeed: 180,
+      leaderPct: 28,
+      guildLevelPct: 5,
+      passiveBonus: 39,
+    }))).toBeCloseTo(368.48, 5);
+  });
+
+  it("adds the guild level bonus to base speed only", () => {
+    const withoutGuildBonus = calculateCombatSpeed(unit({ baseSpeed: 100, runeSpeed: 200, leaderPct: 24 }));
+    const withGuildBonus = calculateCombatSpeed(unit({
+      baseSpeed: 100,
+      runeSpeed: 200,
+      leaderPct: 24,
+      guildLevelPct: 5,
+    }));
+
+    expect(withoutGuildBonus).toBe(339);
+    expect(withGuildBonus).toBe(344);
   });
 
   it("matches the ryhlab water pumpkin example", () => {

@@ -11,6 +11,7 @@ export type SpeedChainUnit = {
   runeSpeed: number | null;
   leaderPct: number;
   towerPct: number;
+  guildLevelPct: number;
   passiveBonus: number;
   speedArtifactPct: number;
   effects: AppliedSpeedEffect[];
@@ -45,7 +46,7 @@ const GAUGE_PER_SPEED = 0.07;
 const SPEED_BUFF_PCT = 30;
 
 export function calculateCombatSpeed(unit: SpeedChainUnit, runeSpeed = unit.runeSpeed ?? 0) {
-  return unit.baseSpeed * (1 + (unit.leaderPct + unit.towerPct) / 100)
+  return unit.baseSpeed * (1 + (unit.leaderPct + unit.towerPct + unit.guildLevelPct) / 100)
     + runeSpeed
     + unit.passiveBonus;
 }
