@@ -1057,10 +1057,14 @@ h3 {
 }
 
 .monster-dialog {
+  position: fixed;
+  inset: 0;
   width: min(920px, calc(100% - 32px));
   max-width: none;
   max-height: calc(100dvh - 32px);
+  margin: auto;
   padding: 0;
+  overflow: hidden;
   color: var(--text-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-modal);
