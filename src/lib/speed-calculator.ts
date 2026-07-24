@@ -46,9 +46,12 @@ const GAUGE_PER_SPEED = 0.07;
 const SPEED_BUFF_PCT = 30;
 
 export function calculateCombatSpeed(unit: SpeedChainUnit, runeSpeed = unit.runeSpeed ?? 0) {
-  return unit.baseSpeed * (1 + (unit.leaderPct + unit.towerPct + unit.guildLevelPct) / 100)
-    + runeSpeed
-    + unit.passiveBonus;
+  // 게임은 리더·건물·길드·고정 공속을 합산한 전투 공속을 올림한 뒤 ATB 틱에 사용합니다.
+  return Math.ceil(
+    unit.baseSpeed * (1 + (unit.leaderPct + unit.towerPct + unit.guildLevelPct) / 100)
+      + runeSpeed
+      + unit.passiveBonus,
+  );
 }
 
 export function calculateSpeedTune(units: SpeedChainUnit[]): SpeedTuneResult {
