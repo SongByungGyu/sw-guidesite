@@ -23,7 +23,8 @@ type AnalysisPhase = "idle" | "analyzing" | "complete" | "error";
 
 export function MonsterStatPhotoAnalyzer({ build, monsterName, onApply, onClose, open }: AnalyzerProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState("");
   const [phase, setPhase] = useState<AnalysisPhase>("idle");
@@ -34,6 +35,7 @@ export function MonsterStatPhotoAnalyzer({ build, monsterName, onApply, onClose,
   const [detectedKeys, setDetectedKeys] = useState<MonsterStatKey[]>([]);
   const [rawText, setRawText] = useState("");
   const [error, setError] = useState("");
+  const [sourceChoiceOpen, setSourceChoiceOpen] = useState(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -72,6 +74,7 @@ export function MonsterStatPhotoAnalyzer({ build, monsterName, onApply, onClose,
     setError("");
     setProgress(0);
     setProgressLabel("분석 준비가 완료되었습니다.");
+    setSourceChoiceOpen(false);
   }
 
   async function analyze() {
@@ -125,6 +128,7 @@ export function MonsterStatPhotoAnalyzer({ build, monsterName, onApply, onClose,
 
   function close() {
     if (phase === "analyzing") return;
+    setSourceChoiceOpen(false);
     onClose();
   }
 
@@ -168,19 +172,42 @@ export function MonsterStatPhotoAnalyzer({ build, monsterName, onApply, onClose,
                 <p>사진 1장에 몬스터 1마리만 올려주세요. 기본 수치는 제외하고 +뒤 룬 추가 수치만 입력합니다.</p>
               </div>
             </div>
-            <button className={`photo-upload-area${previewUrl ? " has-image" : ""}`} disabled={phase === "analyzing"} onClick={() => fileInputRef.current?.click()} type="button">
+            <button className={`photo-upload-area${previewUrl ? " has-image" : ""}`} disabled={phase === "analyzing"} onClick={() => setSourceChoiceOpen(true)} type="button">
               {/* blob 미리보기는 Next Image 최적화 대상이 아닙니다. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              {previewUrl ? <img alt="분석할 몬스터 스펙 캡처 미리보기" src={previewUrl} /> : <><span><Icon name="plus" /></span><strong>카메라 또는 사진 선택</strong><small>PNG·JPG · 최대 20MB</small></>}
+              {previewUrl ? <img alt="분석할 몬스터 스펙 캡처 미리보기" src={previewUrl} /> : <><span><Icon name="plus" /></span><strong>사진 입력 방법 선택</strong><small>사진첩 또는 카메라 · 최대 20MB</small></>}
             </button>
             <input
-              accept="image/png,image/jpeg,image/webp"
-              capture="environment"
+              accept="image/*"
               className="sr-only"
-              onChange={(event) => selectFile(event.target.files?.[0])}
-              ref={fileInputRef}
+              onChange={(event) => {
+                selectFile(event.target.files?.[0]);
+                event.currentTarget.value = "";
+              }}
+              ref={galleryInputRef}
               type="file"
             />
+            <input
+              accept="image/*"
+              capture="environment"
+              className="sr-only"
+              onChange={(event) => {
+                selectFile(event.target.files?.[0]);
+                event.currentTarget.value = "";
+              }}
+              ref={cameraInputRef}
+              type="file"
+            />
+            {sourceChoiceOpen ? <div className="photo-source-choice" onClick={(event) => { if (event.target === event.currentTarget) setSourceChoiceOpen(false); }} role="presentation">
+              <section aria-labelledby="photo-source-choice-title" className="photo-source-choice-card" role="dialog">
+                <header>
+                  <div><strong id="photo-source-choice-title">사진 입력 방법</strong><p>이미 저장된 캡처를 선택하거나 지금 촬영하세요.</p></div>
+                  <button aria-label="사진 입력 방법 닫기" className="icon-button" onClick={() => setSourceChoiceOpen(false)} type="button"><Icon name="x" size={18} /></button>
+                </header>
+                <button className="photo-source-option" onClick={() => galleryInputRef.current?.click()} type="button"><span><Icon name="image" /></span><div><strong>사진첩에서 선택</strong><small>휴대폰에 저장된 스크린샷 사용</small></div><Icon name="chevron" size={17} /></button>
+                <button className="photo-source-option" onClick={() => cameraInputRef.current?.click()} type="button"><span><Icon name="camera" /></span><div><strong>카메라로 촬영</strong><small>후면 카메라를 열어 바로 촬영</small></div><Icon name="chevron" size={17} /></button>
+              </section>
+            </div> : null}
             <button className="button primary photo-analyze-button" disabled={!file || phase === "analyzing"} onClick={() => void analyze()} type="button">
               <Icon name="sparkles" size={17} />
               {phase === "analyzing" ? "사진 분석 중…" : phase === "complete" ? "다시 분석" : "무료 AI로 분석"}

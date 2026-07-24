@@ -17,6 +17,8 @@ type IconName =
   | "x"
   | "menu"
   | "share"
+  | "image"
+  | "camera"
   | "bolt"
   | "sparkles";
 
@@ -42,6 +44,8 @@ const paths: Record<IconName, ReactNode> = {
   x: <><path d="m6 6 12 12" /><path d="M18 6 6 18" /></>,
   menu: <><path d="M4 6h16" /><path d="M4 12h16" /><path d="M4 18h16" /></>,
   share: <><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="m8.6 10.5 6.8-4" /><path d="m8.6 13.5 6.8 4" /></>,
+  image: <><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="8.5" cy="9" r="1.5" /><path d="m21 15-5-5L5 20" /></>,
+  camera: <><path d="M14.5 5 13 3h-2L9.5 5H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Z" /><circle cx="12" cy="12.5" r="4" /></>,
   bolt: <path d="m13 2-9 12h7l-1 8 9-12h-7Z" />,
   sparkles: <><path d="m12 3-1 3-3 1 3 1 1 3 1-3 3-1-3-1Z" /><path d="m5 14-1 2-2 1 2 1 1 2 1-2 2-1-2-1Z" /><path d="m19 13-1 2-2 1 2 1 1 2 1-2 2-1-2-1Z" /></>,
 };
